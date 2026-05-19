@@ -1,33 +1,85 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { DS } from '@/constants/theme';
+
+type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
+
+function tabIcon(name: IoniconsName, focused: boolean) {
+  return (
+    <Ionicons
+      name={focused ? name.replace('-outline', '') as IoniconsName : name}
+      size={22}
+      color={focused ? DS.accent : DS.textMuted}
+    />
+  );
+}
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const insets = useSafeAreaInsets();
 
   return (
     <Tabs
+      initialRouteName='index'
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
         tabBarButton: HapticTab,
+        tabBarActiveTintColor: DS.accent,
+        tabBarInactiveTintColor: DS.textMuted,
+        tabBarStyle: {
+          backgroundColor: DS.surface,
+          borderTopColor: DS.border,
+          borderTopWidth: 1,
+          height: 52 + insets.bottom,
+          paddingBottom: insets.bottom || 8,
+          paddingTop: 8,
+        },
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: '500',
+        },
       }}>
+
+      <Tabs.Screen
+        name="trackfood"
+        options={{
+          title: 'Food',
+          tabBarIcon: ({ focused }) => tabIcon('restaurant-outline', focused),
+        }}
+      />
+
+      <Tabs.Screen
+        name="scan"
+        options={{
+          title: 'Scan',
+          tabBarIcon: ({ focused }) => tabIcon('scan-outline', focused),
+        }}
+      />
+
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          title: 'Insights',
+          tabBarIcon: ({ focused }) => tabIcon('bar-chart-outline', focused),
         }}
       />
+
       <Tabs.Screen
-        name="explore"
+        name="trackworkouts"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: 'Workouts',
+          tabBarIcon: ({ focused }) => tabIcon('barbell-outline', focused),
+        }}
+      />
+
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Profile',
+          tabBarIcon: ({ focused }) => tabIcon('person-outline', focused),
         }}
       />
     </Tabs>

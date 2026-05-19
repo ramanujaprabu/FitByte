@@ -1,0 +1,66 @@
+/**
+ * BackButton — Floating top-left back navigation button.
+ * Use on all secondary/sub-pages. NOT on primary tab roots.
+ */
+import React from 'react';
+import { Pressable, StyleSheet } from 'react-native';
+import { useRouter } from 'expo-router';
+import * as Haptics from 'expo-haptics';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { DS } from '@/constants/theme';
+
+interface BackButtonProps {
+  /** Override top position (defaults to insets.top + 12) */
+  top?: number;
+  /** Override left position (defaults to 16) */
+  left?: number;
+  /** Custom handler instead of router.back() */
+  onPress?: () => void;
+}
+
+export function BackButton({ top, left = 16, onPress }: BackButtonProps) {
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+
+  const handlePress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (onPress) {
+      onPress();
+    } else {
+      router.back();
+    }
+  };
+
+  return (
+    <Pressable
+      onPress={handlePress}
+      style={({ pressed }) => [
+        styles.btn,
+        { top: top ?? insets.top + 12, left },
+        pressed && styles.pressed,
+      ]}
+      hitSlop={8}>
+      <Ionicons name="arrow-back" size={18} color={DS.textPrimary} />
+    </Pressable>
+  );
+}
+
+const styles = StyleSheet.create({
+  btn: {
+    position: 'absolute',
+    zIndex: 100,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: DS.surface,
+    borderWidth: 1,
+    borderColor: DS.border,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  pressed: {
+    opacity: 0.6,
+    transform: [{ scale: 0.95 }],
+  },
+});
