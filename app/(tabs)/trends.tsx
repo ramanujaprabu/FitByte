@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import React, { useCallback, useMemo, useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
@@ -140,6 +140,12 @@ export default function TrendsTabScreen() {
           </ThemedText>
         </View>
 
+        {loading && !summary && !workoutStats ? (
+          <View style={styles.initialSpinner}>
+            <ActivityIndicator color={DS.accent} />
+          </View>
+        ) : (
+        <>
         {/* Empty State Banner if no logged data */}
         {!hasLoggedData && (
           <View style={styles.emptyStateBanner}>
@@ -326,6 +332,8 @@ export default function TrendsTabScreen() {
             </>
           )}
         </View>
+        </>
+        )}
 
       </ScrollView>
 
@@ -402,6 +410,10 @@ function makeStyles(DS: ReturnType<typeof useDS>) {
       fontSize: 14,
       color: DS.textSecond,
       marginTop: 4,
+    },
+    initialSpinner: {
+      paddingVertical: Spacing.xxl,
+      alignItems: 'center',
     },
     bentoCard: {
       backgroundColor: DS.surface,

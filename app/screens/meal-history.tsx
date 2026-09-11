@@ -4,12 +4,12 @@ import { Card } from '@/components/shared/Card';
 import { MonoText } from '@/components/shared/MonoText';
 import { ScreenHeader } from '@/components/shared/ScreenHeader';
 import { ThemedText } from '@/components/themed-text';
-import { DS } from '@/constants/theme';
+import { useDS } from '@/contexts/ThemeContext';
 import { nutritionService } from '@/services/api/nutrition';
 import type { FoodEntry } from '@/types';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -25,6 +25,8 @@ function dayLabel(daysAgo: number, date: Date): string {
 export default function MealHistoryScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const DS = useDS();
+  const styles = useMemo(() => makeStyles(DS), [DS]);
   const [activeFilter, setActiveFilter] = useState('All');
   const [groups, setGroups] = useState<{ date: string; entries: FoodEntry[] }[]>([]);
   const [loading, setLoading] = useState(true);
@@ -126,27 +128,29 @@ export default function MealHistoryScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: DS.bg },
-  scroll: { paddingHorizontal: 20 },
-  filters: { gap: 8, paddingBottom: 16 },
-  filterChip: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 999, backgroundColor: DS.surface, borderWidth: 1, borderColor: DS.border },
-  filterActive: { backgroundColor: DS.accent, borderColor: DS.accent },
-  filterText: { fontSize: 13, fontWeight: '500', color: DS.textSecond },
-  filterTextActive: { color: '#fff', fontWeight: '600' },
-  groupHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
-  groupDate: { fontSize: 13, fontWeight: '600', color: DS.textSecond },
-  groupCalBadge: { flexDirection: 'row', alignItems: 'baseline' },
-  groupCal: { fontSize: 14 },
-  groupCalUnit: { fontSize: 11, color: DS.textMuted },
-  foodRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12 },
-  foodDivider: { borderBottomWidth: 1, borderBottomColor: DS.border },
-  foodImg: { width: 52, height: 52, borderRadius: 10, marginRight: 12, backgroundColor: DS.card },
-  foodInfo: { flex: 1 },
-  foodName: { fontWeight: '600', fontSize: 14, color: DS.textPrimary },
-  foodMacros: { marginTop: 3, fontSize: 11, color: DS.textMuted },
-  foodRight: { alignItems: 'flex-end', gap: 2 },
-  foodCal: { fontSize: 17 },
-  foodCalLabel: { fontSize: 10, color: DS.textMuted },
-  foodTime: { fontSize: 10, color: DS.textMuted },
-});
+function makeStyles(DS: ReturnType<typeof useDS>) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: DS.bg },
+    scroll: { paddingHorizontal: 20 },
+    filters: { gap: 8, paddingBottom: 16 },
+    filterChip: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 999, backgroundColor: DS.raised },
+    filterActive: { backgroundColor: DS.accent },
+    filterText: { fontSize: 13, fontWeight: '500', color: DS.textSecond },
+    filterTextActive: { color: DS.accentText, fontWeight: '600' },
+    groupHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
+    groupDate: { fontSize: 13, fontWeight: '600', color: DS.textSecond },
+    groupCalBadge: { flexDirection: 'row', alignItems: 'baseline' },
+    groupCal: { fontSize: 14 },
+    groupCalUnit: { fontSize: 11, color: DS.textMuted },
+    foodRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12 },
+    foodDivider: { borderBottomWidth: 1, borderBottomColor: DS.border },
+    foodImg: { width: 52, height: 52, borderRadius: 10, marginRight: 12, backgroundColor: DS.raised },
+    foodInfo: { flex: 1 },
+    foodName: { fontWeight: '600', fontSize: 14, color: DS.textPrimary },
+    foodMacros: { marginTop: 3, fontSize: 11, color: DS.textMuted },
+    foodRight: { alignItems: 'flex-end', gap: 2 },
+    foodCal: { fontSize: 17 },
+    foodCalLabel: { fontSize: 10, color: DS.textMuted },
+    foodTime: { fontSize: 10, color: DS.textMuted },
+  });
+}

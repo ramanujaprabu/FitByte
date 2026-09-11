@@ -10,7 +10,8 @@ import { MonoText } from '@/components/shared/MonoText';
 import { ProgressBar } from '@/components/shared/ProgressBar';
 import { TextField } from '@/components/shared/TextField';
 import { ThemedText } from '@/components/themed-text';
-import { DS, Radius, Spacing } from '@/constants/theme';
+import { useDS } from '@/contexts/ThemeContext';
+import { Radius, Spacing } from '@/constants/theme';
 import { useAuth } from '@/contexts/AuthContext';
 import { calculateOnboardingPlan, userService } from '@/services/api/user';
 import { triggerHaptic } from '@/utils/haptics';
@@ -30,10 +31,12 @@ const ACTIVITY_OPTIONS: { value: ActivityLevel; icon: keyof typeof Ionicons.glyp
 function OptionCard({
   icon, label, sub, active, onPress,
 }: { icon: keyof typeof Ionicons.glyphMap; label: string; sub?: string; active?: boolean; onPress: () => void }) {
+  const DS = useDS();
+  const styles = useMemo(() => makeStyles(DS), [DS]);
   return (
     <Pressable onPress={onPress} style={[styles.optionCard, active && styles.optionCardActive]}>
       <View style={[styles.optionIconWrap, active && styles.optionIconWrapActive]}>
-        <Ionicons name={icon} size={22} color={active ? '#FFFFFF' : DS.textSecond} />
+        <Ionicons name={icon} size={22} color={active ? DS.accentText : DS.textSecond} />
       </View>
       <View style={{ flex: 1 }}>
         <ThemedText style={styles.optionLabel}>{label}</ThemedText>
@@ -45,6 +48,8 @@ function OptionCard({
 }
 
 function StepHeading({ title, subtitle }: { title: string; subtitle?: string }) {
+  const DS = useDS();
+  const styles = useMemo(() => makeStyles(DS), [DS]);
   return (
     <View style={styles.heading}>
       <ThemedText style={styles.title}>{title}</ThemedText>
@@ -56,6 +61,8 @@ function StepHeading({ title, subtitle }: { title: string; subtitle?: string }) 
 export default function OnboardingScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const DS = useDS();
+  const styles = useMemo(() => makeStyles(DS), [DS]);
   const { logout, refreshUser } = useAuth();
 
   const [stepIndex, setStepIndex] = useState(0);
@@ -294,48 +301,50 @@ export default function OnboardingScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: DS.bg },
-  topBar: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: Spacing.sm, paddingTop: Spacing.xs },
-  iconBtn: { width: 56, height: 40, alignItems: 'center', justifyContent: 'center' },
-  progressWrap: { flex: 1, paddingHorizontal: Spacing.sm },
-  exitText: { fontSize: 13, color: DS.textMuted },
+function makeStyles(DS: ReturnType<typeof useDS>) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: DS.bg },
+    topBar: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: Spacing.sm, paddingTop: Spacing.xs },
+    iconBtn: { width: 56, height: 40, alignItems: 'center', justifyContent: 'center' },
+    progressWrap: { flex: 1, paddingHorizontal: Spacing.sm },
+    exitText: { fontSize: 13, color: DS.textMuted },
 
-  scroll: { paddingHorizontal: 20, paddingTop: Spacing.xl, flexGrow: 1 },
-  heading: { marginBottom: Spacing.lg },
-  title: { fontSize: 24, fontWeight: '700', color: DS.textPrimary, letterSpacing: -0.5 },
-  subtitle: { fontSize: 14, color: DS.textSecond, marginTop: Spacing.xs, lineHeight: 20 },
+    scroll: { paddingHorizontal: 20, paddingTop: Spacing.xl, flexGrow: 1 },
+    heading: { marginBottom: Spacing.lg },
+    title: { fontSize: 24, fontWeight: '700', color: DS.textPrimary, letterSpacing: -0.5 },
+    subtitle: { fontSize: 14, color: DS.textSecond, marginTop: Spacing.xs, lineHeight: 20 },
 
-  bigInput: { fontSize: 20, textAlign: 'center' },
+    bigInput: { fontSize: 20, textAlign: 'center' },
 
-  optionCard: {
-    flexDirection: 'row', alignItems: 'center', gap: 14,
-    backgroundColor: DS.surface, borderWidth: 1, borderColor: DS.border,
-    borderRadius: Radius.md, padding: Spacing.md, marginBottom: Spacing.sm,
-  },
-  optionCardActive: { borderColor: DS.accent, backgroundColor: DS.accentDim },
-  optionIconWrap: {
-    width: 40, height: 40, borderRadius: 20, backgroundColor: DS.raised,
-    borderWidth: 1, borderColor: DS.border, alignItems: 'center', justifyContent: 'center',
-  },
-  optionIconWrapActive: { backgroundColor: DS.accent, borderColor: DS.accent },
-  optionLabel: { fontSize: 15, fontWeight: '600', color: DS.textPrimary },
-  optionSub: { fontSize: 12, color: DS.textMuted, marginTop: 2 },
+    optionCard: {
+      flexDirection: 'row', alignItems: 'center', gap: 14,
+      backgroundColor: DS.surface,
+      borderRadius: Radius.lg, padding: Spacing.md, marginBottom: Spacing.sm,
+    },
+    optionCardActive: { backgroundColor: DS.accentDim },
+    optionIconWrap: {
+      width: 40, height: 40, borderRadius: 20, backgroundColor: DS.raised,
+      alignItems: 'center', justifyContent: 'center',
+    },
+    optionIconWrapActive: { backgroundColor: DS.accent },
+    optionLabel: { fontSize: 15, fontWeight: '600', color: DS.textPrimary },
+    optionSub: { fontSize: 12, color: DS.textMuted, marginTop: 2 },
 
-  skipBtn: { alignItems: 'center', marginTop: Spacing.md, padding: Spacing.sm },
-  skipText: { fontSize: 13, color: DS.textMuted, fontWeight: '500' },
+    skipBtn: { alignItems: 'center', marginTop: Spacing.md, padding: Spacing.sm },
+    skipText: { fontSize: 13, color: DS.textMuted, fontWeight: '500' },
 
-  previewCard: { borderColor: DS.accent },
-  previewHero: { flexDirection: 'row', alignItems: 'baseline', gap: 6, marginBottom: Spacing.md },
-  previewCal: { fontSize: 36 },
-  previewCalUnit: { fontSize: 14, color: DS.textSecond },
-  previewMacroRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: Spacing.sm },
-  previewMacro: { alignItems: 'center', gap: 2 },
-  previewMacroVal: { fontSize: 17 },
-  previewMacroLabel: { fontSize: 11, color: DS.textMuted },
-  divider: { height: 1, backgroundColor: DS.border, marginVertical: Spacing.sm },
-  mealSplitRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 6 },
-  mealSplitName: { fontSize: 13, color: DS.textSecond },
-  mealSplitVal: { fontSize: 13, color: DS.textPrimary },
-  errorText: { color: DS.statusBad, fontSize: 13, textAlign: 'center', marginTop: Spacing.sm },
-});
+    previewCard: { backgroundColor: DS.accentDim },
+    previewHero: { flexDirection: 'row', alignItems: 'baseline', gap: 6, marginBottom: Spacing.md },
+    previewCal: { fontSize: 36 },
+    previewCalUnit: { fontSize: 14, color: DS.textSecond },
+    previewMacroRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: Spacing.sm },
+    previewMacro: { alignItems: 'center', gap: 2 },
+    previewMacroVal: { fontSize: 17 },
+    previewMacroLabel: { fontSize: 11, color: DS.textMuted },
+    divider: { height: 1, backgroundColor: DS.border, marginVertical: Spacing.sm },
+    mealSplitRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 6 },
+    mealSplitName: { fontSize: 13, color: DS.textSecond },
+    mealSplitVal: { fontSize: 13, color: DS.textPrimary },
+    errorText: { color: DS.statusBad, fontSize: 13, textAlign: 'center', marginTop: Spacing.sm },
+  });
+}

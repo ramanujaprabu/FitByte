@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -6,11 +6,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/components/shared/Button';
 import { TextField } from '@/components/shared/TextField';
 import { ThemedText } from '@/components/themed-text';
-import { DS, Radius, Spacing, Typography } from '@/constants/theme';
+import { useDS } from '@/contexts/ThemeContext';
+import { Spacing, Typography } from '@/constants/theme';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function LoginScreen() {
   const router = useRouter();
+  const DS = useDS();
+  const styles = useMemo(() => makeStyles(DS), [DS]);
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -96,71 +99,71 @@ export default function LoginScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F9F9F9' },
-  flex: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  innerContainer: {
-    width: '100%',
-    maxWidth: 400,
-    paddingHorizontal: Spacing.lg,
-    alignSelf: 'center',
-  },
-  content: {
-    width: '100%',
-  },
-  brandHeader: {
-    alignItems: 'center',
-    marginBottom: Spacing.xl,
-  },
-  brandTitle: {
-    fontSize: 40,
-    lineHeight: 48,
-    fontWeight: '700',
-    color: '#000000',
-    letterSpacing: -1,
-  },
-  header: {
-    alignItems: 'center',
-    marginBottom: Spacing.lg,
-  },
-  title: {
-    fontSize: 22,
-    lineHeight: 28,
-    fontWeight: '600',
-    color: '#000000',
-    letterSpacing: -0.5,
-  },
-  passwordHeader: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    marginBottom: -Spacing.xs,
-  },
-  forgotText: {
-    fontSize: 13,
-    color: DS.textSecond,
-  },
-  error: {
-    ...Typography.bodySm,
-    color: DS.statusBad,
-    marginBottom: Spacing.sm,
-    textAlign: 'center',
-  },
-  submitBtn: {
-    marginTop: Spacing.sm,
-    backgroundColor: '#000000',
-    borderRadius: Radius.md,
-    height: 48,
-  },
-  linkRow: {
-    marginTop: Spacing.xl,
-    alignItems: 'center',
-  },
-  linkText: {
-    fontSize: 14,
-    color: DS.textSecond,
-  },
-  linkAccent: {
-    color: '#000000',
-    fontWeight: '600',
-  },
-});
+function makeStyles(DS: ReturnType<typeof useDS>) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: DS.bg },
+    flex: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+    innerContainer: {
+      width: '100%',
+      maxWidth: 400,
+      paddingHorizontal: Spacing.lg,
+      alignSelf: 'center',
+    },
+    content: {
+      width: '100%',
+    },
+    brandHeader: {
+      alignItems: 'center',
+      marginBottom: Spacing.xl,
+    },
+    brandTitle: {
+      fontSize: 40,
+      lineHeight: 48,
+      fontWeight: '700',
+      color: DS.textPrimary,
+      letterSpacing: -1,
+    },
+    header: {
+      alignItems: 'center',
+      marginBottom: Spacing.lg,
+    },
+    title: {
+      fontSize: 22,
+      lineHeight: 28,
+      fontWeight: '600',
+      color: DS.textPrimary,
+      letterSpacing: -0.5,
+    },
+    passwordHeader: {
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+      marginBottom: -Spacing.xs,
+    },
+    forgotText: {
+      fontSize: 13,
+      color: DS.textSecond,
+    },
+    error: {
+      ...Typography.bodySm,
+      color: DS.statusBad,
+      marginBottom: Spacing.sm,
+      textAlign: 'center',
+    },
+    submitBtn: {
+      marginTop: Spacing.sm,
+      height: 48,
+    },
+    linkRow: {
+      marginTop: Spacing.xl,
+      alignItems: 'center',
+    },
+    linkText: {
+      fontSize: 14,
+      color: DS.textSecond,
+    },
+    linkAccent: {
+      color: DS.textPrimary,
+      fontWeight: '600',
+    },
+  });
+}

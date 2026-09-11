@@ -1,17 +1,20 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Linking, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/shared/Button';
 import { ThemedText } from '@/components/themed-text';
-import { DS, Radius, Spacing, Typography } from '@/constants/theme';
+import { useDS } from '@/contexts/ThemeContext';
+import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useAuth } from '@/contexts/AuthContext';
 import { triggerHaptic } from '@/utils/haptics';
 
 export default function VerifyEmailScreen() {
   const router = useRouter();
+  const DS = useDS();
+  const styles = useMemo(() => makeStyles(DS), [DS]);
   const { email } = useLocalSearchParams<{ email?: string }>();
   const { resendVerificationEmail } = useAuth();
 
@@ -58,7 +61,7 @@ export default function VerifyEmailScreen() {
       <View style={styles.centerContainer}>
         <View style={styles.card}>
           <View style={styles.iconCircle}>
-            <Ionicons name="mail-unread-outline" size={32} color="#000000" />
+            <Ionicons name="mail-unread-outline" size={32} color={DS.textPrimary} />
           </View>
 
           <ThemedText style={styles.brandTitle}>FitByte</ThemedText>
@@ -111,111 +114,107 @@ export default function VerifyEmailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F9F9F9',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  centerContainer: {
-    width: '100%',
-    maxWidth: 440,
-    paddingHorizontal: Spacing.md,
-    alignSelf: 'center',
-  },
-  card: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: DS.border,
-    borderRadius: Radius.lg,
-    padding: Spacing.lg + 4,
-    alignItems: 'center',
-  },
-  iconCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: '#F3F3F3',
-    borderWidth: 1,
-    borderColor: DS.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: Spacing.md,
-  },
-  brandTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#000000',
-    letterSpacing: -0.5,
-    marginBottom: 4,
-  },
-  title: {
-    fontSize: 24,
-    lineHeight: 30,
-    fontWeight: '700',
-    color: '#000000',
-    letterSpacing: -0.5,
-    marginBottom: Spacing.xs,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: DS.textSecond,
-    textAlign: 'center',
-    marginBottom: Spacing.xs,
-  },
-  emailBadge: {
-    backgroundColor: '#F3F3F3',
-    borderWidth: 1,
-    borderColor: DS.border,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: 6,
-    borderRadius: Radius.full,
-    marginBottom: Spacing.md,
-  },
-  emailText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#000000',
-  },
-  bodyText: {
-    fontSize: 13,
-    color: DS.textMuted,
-    textAlign: 'center',
-    lineHeight: 18,
-    marginBottom: Spacing.lg,
-  },
-  feedbackText: {
-    ...Typography.bodySm,
-    color: DS.statusGood,
-    textAlign: 'center',
-    marginBottom: Spacing.sm,
-  },
-  errorText: {
-    ...Typography.bodySm,
-    color: DS.statusBad,
-    textAlign: 'center',
-    marginBottom: Spacing.sm,
-  },
-  primaryBtn: {
-    width: '100%',
-    height: 48,
-    marginBottom: Spacing.sm,
-  },
-  secondaryBtn: {
-    width: '100%',
-    height: 48,
-    marginBottom: Spacing.lg,
-  },
-  changeEmailRow: {
-    alignItems: 'center',
-  },
-  changeEmailText: {
-    fontSize: 14,
-    color: DS.textSecond,
-  },
-  linkAccent: {
-    color: '#000000',
-    fontWeight: '600',
-  },
-});
+function makeStyles(DS: ReturnType<typeof useDS>) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: DS.bg,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    centerContainer: {
+      width: '100%',
+      maxWidth: 440,
+      paddingHorizontal: Spacing.md,
+      alignSelf: 'center',
+    },
+    card: {
+      backgroundColor: DS.surface,
+      borderRadius: Radius.xl,
+      padding: Spacing.lg + 4,
+      alignItems: 'center',
+    },
+    iconCircle: {
+      width: 64,
+      height: 64,
+      borderRadius: 32,
+      backgroundColor: DS.raised,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: Spacing.md,
+    },
+    brandTitle: {
+      fontSize: 20,
+      fontWeight: '700',
+      color: DS.textPrimary,
+      letterSpacing: -0.5,
+      marginBottom: 4,
+    },
+    title: {
+      fontSize: 24,
+      lineHeight: 30,
+      fontWeight: '700',
+      color: DS.textPrimary,
+      letterSpacing: -0.5,
+      marginBottom: Spacing.xs,
+    },
+    subtitle: {
+      fontSize: 14,
+      color: DS.textSecond,
+      textAlign: 'center',
+      marginBottom: Spacing.xs,
+    },
+    emailBadge: {
+      backgroundColor: DS.raised,
+      paddingHorizontal: Spacing.md,
+      paddingVertical: 6,
+      borderRadius: Radius.full,
+      marginBottom: Spacing.md,
+    },
+    emailText: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: DS.textPrimary,
+    },
+    bodyText: {
+      fontSize: 13,
+      color: DS.textMuted,
+      textAlign: 'center',
+      lineHeight: 18,
+      marginBottom: Spacing.lg,
+    },
+    feedbackText: {
+      ...Typography.bodySm,
+      color: DS.statusGood,
+      textAlign: 'center',
+      marginBottom: Spacing.sm,
+    },
+    errorText: {
+      ...Typography.bodySm,
+      color: DS.statusBad,
+      textAlign: 'center',
+      marginBottom: Spacing.sm,
+    },
+    primaryBtn: {
+      width: '100%',
+      height: 48,
+      marginBottom: Spacing.sm,
+    },
+    secondaryBtn: {
+      width: '100%',
+      height: 48,
+      marginBottom: Spacing.lg,
+    },
+    changeEmailRow: {
+      alignItems: 'center',
+    },
+    changeEmailText: {
+      fontSize: 14,
+      color: DS.textSecond,
+    },
+    linkAccent: {
+      color: DS.textPrimary,
+      fontWeight: '600',
+    },
+  });
+}

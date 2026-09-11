@@ -1,13 +1,14 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Linking from 'expo-linking';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/shared/Button';
 import { ThemedText } from '@/components/themed-text';
-import { DS, Radius, Spacing, Typography } from '@/constants/theme';
+import { useDS } from '@/contexts/ThemeContext';
+import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useAuth } from '@/contexts/AuthContext';
 import { authService } from '@/services/api/auth';
 import { parseAuthParamsFromUrl, supabase } from '@/lib/supabase';
@@ -15,6 +16,8 @@ import { triggerHaptic } from '@/utils/haptics';
 
 export default function AuthCallbackScreen() {
   const router = useRouter();
+  const DS = useDS();
+  const styles = useMemo(() => makeStyles(DS), [DS]);
   const rawParams = useLocalSearchParams();
   const { setIsRecoverySession, refreshUser } = useAuth();
 
@@ -73,6 +76,7 @@ export default function AuthCallbackScreen() {
     };
 
     processCallback();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (loading) {
@@ -80,7 +84,7 @@ export default function AuthCallbackScreen() {
       <SafeAreaView style={styles.container}>
         <View style={styles.centerContainer}>
           <View style={styles.card}>
-            <ActivityIndicator size="large" color="#000000" style={{ marginBottom: Spacing.md }} />
+            <ActivityIndicator size="large" color={DS.accent} style={{ marginBottom: Spacing.md }} />
             <ThemedText style={styles.title}>Verifying authentication...</ThemedText>
             <ThemedText style={styles.subtitle}>Please wait while we confirm your session.</ThemedText>
           </View>
@@ -127,69 +131,67 @@ export default function AuthCallbackScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F9F9F9',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  centerContainer: {
-    width: '100%',
-    maxWidth: 440,
-    paddingHorizontal: Spacing.md,
-    alignSelf: 'center',
-  },
-  card: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: DS.border,
-    borderRadius: Radius.lg,
-    padding: Spacing.lg + 4,
-    alignItems: 'center',
-  },
-  iconCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: DS.statusBadDim,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: Spacing.md,
-  },
-  title: {
-    fontSize: 22,
-    lineHeight: 28,
-    fontWeight: '700',
-    color: '#000000',
-    letterSpacing: -0.5,
-    marginBottom: Spacing.xs,
-    textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: 14,
-    color: DS.textSecond,
-    textAlign: 'center',
-    lineHeight: 20,
-    marginBottom: Spacing.md,
-  },
-  errorBox: {
-    backgroundColor: '#FFF0F0',
-    borderWidth: 1,
-    borderColor: DS.statusBad,
-    borderRadius: Radius.sm,
-    padding: Spacing.sm,
-    marginBottom: Spacing.md,
-    width: '100%',
-  },
-  errorText: {
-    ...Typography.bodySm,
-    color: DS.statusBad,
-    textAlign: 'center',
-  },
-  primaryBtn: {
-    width: '100%',
-    height: 48,
-    marginBottom: Spacing.xs,
-  },
-});
+function makeStyles(DS: ReturnType<typeof useDS>) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: DS.bg,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    centerContainer: {
+      width: '100%',
+      maxWidth: 440,
+      paddingHorizontal: Spacing.md,
+      alignSelf: 'center',
+    },
+    card: {
+      backgroundColor: DS.surface,
+      borderRadius: Radius.xl,
+      padding: Spacing.lg + 4,
+      alignItems: 'center',
+    },
+    iconCircle: {
+      width: 64,
+      height: 64,
+      borderRadius: 32,
+      backgroundColor: DS.statusBadDim,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: Spacing.md,
+    },
+    title: {
+      fontSize: 22,
+      lineHeight: 28,
+      fontWeight: '700',
+      color: DS.textPrimary,
+      letterSpacing: -0.5,
+      marginBottom: Spacing.xs,
+      textAlign: 'center',
+    },
+    subtitle: {
+      fontSize: 14,
+      color: DS.textSecond,
+      textAlign: 'center',
+      lineHeight: 20,
+      marginBottom: Spacing.md,
+    },
+    errorBox: {
+      backgroundColor: DS.statusBadDim,
+      borderRadius: Radius.sm,
+      padding: Spacing.sm,
+      marginBottom: Spacing.md,
+      width: '100%',
+    },
+    errorText: {
+      ...Typography.bodySm,
+      color: DS.statusBad,
+      textAlign: 'center',
+    },
+    primaryBtn: {
+      width: '100%',
+      height: 48,
+      marginBottom: Spacing.xs,
+    },
+  });
+}

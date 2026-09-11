@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import React, { useCallback, useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
@@ -34,6 +34,11 @@ export default function WorkoutTrackerScreen() {
 
   useFocusEffect(load);
 
+  // Only block on a spinner before the very first paint of real data — on
+  // every later refocus/refresh, keep showing what's already on screen
+  // rather than flashing "No workouts yet" while the refetch is in flight.
+  const showInitialSpinner = loading && routines.length === 0 && recentSessions.length === 0;
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Top Bar */}
@@ -57,6 +62,12 @@ export default function WorkoutTrackerScreen() {
           </Pressable>
         </View>
 
+        {showInitialSpinner ? (
+          <View style={styles.initialSpinner}>
+            <ActivityIndicator color={DS.accent} />
+          </View>
+        ) : (
+        <>
         {/* Saved Routines Section */}
         <View style={styles.section}>
           <ThemedText style={styles.sectionTitle}>Saved Routines</ThemedText>
@@ -139,6 +150,8 @@ export default function WorkoutTrackerScreen() {
             </View>
           )}
         </View>
+        </>
+        )}
 
       </ScrollView>
     </SafeAreaView>
@@ -175,6 +188,10 @@ function makeStyles(DS: ReturnType<typeof useDS>) {
     headlineRow: {
       marginBottom: Spacing.xl,
       gap: Spacing.md,
+    },
+    initialSpinner: {
+      paddingVertical: Spacing.xxl,
+      alignItems: 'center',
     },
     pageTitle: {
       fontSize: 28,

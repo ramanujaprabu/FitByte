@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ProgressBar } from '@/components/shared/ProgressBar';
@@ -147,6 +147,12 @@ export default function LogHomeScreen() {
           </Pressable>
         </View>
 
+        {loading && !today ? (
+          <View style={styles.initialSpinner}>
+            <ActivityIndicator color={DS.accent} />
+          </View>
+        ) : (
+        <>
         {/* Calorie Banner */}
         <Pressable
           style={({ pressed }) => [styles.calorieBanner, pressed && styles.pressedFade]}
@@ -319,6 +325,8 @@ export default function LogHomeScreen() {
             </Pressable>
           ))}
         </View>
+        </>
+        )}
 
       </ScrollView>
     </SafeAreaView>
@@ -369,6 +377,10 @@ function makeStyles(DS: ReturnType<typeof useDS>) {
     },
     dateNavBtnDisabled: {
       opacity: 0.4,
+    },
+    initialSpinner: {
+      paddingVertical: Spacing.xxl,
+      alignItems: 'center',
     },
     dateTitle: {
       fontSize: 20,

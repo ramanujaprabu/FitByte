@@ -1,12 +1,13 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
-import { DS, Fonts, Radius, Spacing } from '@/constants/theme';
+import { useDS } from '@/contexts/ThemeContext';
+import { Fonts, Radius, Spacing } from '@/constants/theme';
 import { nutritionService } from '@/services/api/nutrition';
 import { userService } from '@/services/api/user';
 import type { AIInsight, ProfileData } from '@/types';
@@ -16,6 +17,8 @@ type WeeklySummary = Awaited<ReturnType<typeof nutritionService.getWeeklySummary
 export default function DailyAnalyticsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const DS = useDS();
+  const styles = useMemo(() => makeStyles(DS), [DS]);
 
   const [summary, setSummary] = useState<WeeklySummary | null>(null);
   const [profile, setProfile] = useState<ProfileData | null>(null);
@@ -43,7 +46,7 @@ export default function DailyAnalyticsScreen() {
   if (loading || !summary) {
     return (
       <SafeAreaView style={[styles.container, styles.centered]} edges={['top']}>
-        <ActivityIndicator color="#000000" />
+        <ActivityIndicator color={DS.accent} />
       </SafeAreaView>
     );
   }
@@ -66,7 +69,7 @@ export default function DailyAnalyticsScreen() {
       {/* Top Header */}
       <View style={styles.topHeader}>
         <Pressable style={styles.iconBtn} onPress={() => router.back()}>
-          <Ionicons name="arrow-back-outline" size={24} color="#000000" />
+          <Ionicons name="arrow-back-outline" size={24} color={DS.textPrimary} />
         </Pressable>
         <ThemedText style={styles.headerTitle}>Trends & Analytics</ThemedText>
         <View style={styles.iconBtn} />
@@ -100,7 +103,7 @@ export default function DailyAnalyticsScreen() {
                     <Ionicons
                       name={summary.calorieDeltaPercent >= 0 ? 'arrow-up-outline' : 'arrow-down-outline'}
                       size={12}
-                      color="#000000"
+                      color={DS.textPrimary}
                     />
                     <ThemedText style={styles.deltaText}>
                       {Math.abs(summary.calorieDeltaPercent)}% vs last week
@@ -208,7 +211,7 @@ export default function DailyAnalyticsScreen() {
                 <View
                   key={insight.id}
                   style={[styles.insightRow, idx === insights.length - 1 && { borderBottomWidth: 0 }]}>
-                  <Ionicons name={(insight.icon as any) || 'sparkles-outline'} size={20} color="#000000" />
+                  <Ionicons name={(insight.icon as any) || 'sparkles-outline'} size={20} color={DS.textPrimary} />
                   <ThemedText style={styles.insightSub}>{insight.text}</ThemedText>
                 </View>
               ))}
@@ -221,211 +224,205 @@ export default function DailyAnalyticsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F9F9F9',
-  },
-  centered: { alignItems: 'center', justifyContent: 'center' },
-  topHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: Spacing.md,
-    height: 54,
-    borderBottomWidth: 1,
-    borderBottomColor: DS.border,
-    backgroundColor: '#FFFFFF',
-  },
-  iconBtn: {
-    padding: 6,
-    width: 36,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#000000',
-  },
-  scroll: {
-    paddingHorizontal: Spacing.md,
-    paddingTop: Spacing.lg,
-  },
-  card: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: DS.border,
-    borderRadius: Radius.md,
-    padding: Spacing.lg,
-    marginBottom: Spacing.lg,
-  },
-  sectionHeaderCaps: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: DS.textSecond,
-    letterSpacing: 0.5,
-    marginBottom: Spacing.xs,
-  },
-  emptyState: {
-    alignItems: 'center',
-    paddingVertical: Spacing.md,
-    gap: 8,
-  },
-  emptyTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#000000',
-  },
-  emptySub: {
-    fontSize: 13,
-    color: DS.textSecond,
-    textAlign: 'center',
-    lineHeight: 18,
-  },
-  chartHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    justifyContent: 'space-between',
-    marginBottom: Spacing.lg,
-  },
-  chartBigVal: {
-    fontFamily: Fonts.mono,
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#000000',
-    letterSpacing: -0.5,
-  },
-  chartBigValSmall: {
-    fontFamily: Fonts.mono,
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#000000',
-  },
-  chartUnit: {
-    fontSize: 14,
-    fontWeight: '400',
-    color: DS.textSecond,
-  },
-  deltaBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: '#F3F3F3',
-    borderWidth: 1,
-    borderColor: DS.border,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: Radius.sm,
-  },
-  deltaText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#000000',
-  },
-  barChartContainer: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'space-between',
-    height: 140,
-    paddingTop: Spacing.md,
-  },
-  barColumn: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  barTrack: {
-    width: 24,
-    height: 110,
-    backgroundColor: '#F3F3F3',
-    borderRadius: Radius.sm,
-    justifyContent: 'flex-end',
-    overflow: 'hidden',
-  },
-  barFill: {
-    width: '100%',
-    backgroundColor: '#7E7576',
-    borderRadius: Radius.sm,
-  },
-  barFillActive: {
-    backgroundColor: '#000000',
-  },
-  barDayLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: DS.textSecond,
-    marginTop: 6,
-  },
-  barDayLabelActive: {
-    color: '#000000',
-  },
-  macroProgressRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 6,
-  },
-  macroName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#000000',
-  },
-  macroValMono: {
-    fontFamily: Fonts.mono,
-    fontSize: 12,
-    color: DS.textSecond,
-  },
-  macroPctText: {
-    fontFamily: Fonts.mono,
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#000000',
-  },
-  progressTrack: {
-    height: 6,
-    backgroundColor: '#F3F3F3',
-    borderRadius: 3,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: '#000000',
-    borderRadius: 3,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: DS.border,
-    marginVertical: Spacing.md,
-  },
-  bodyGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: Spacing.md,
-    paddingTop: Spacing.xs,
-  },
-  bodyStat: {
-    minWidth: '40%',
-    gap: 2,
-  },
-  section: {
-    marginBottom: Spacing.xl,
-  },
-  cardGroup: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: DS.border,
-    borderRadius: Radius.md,
-    overflow: 'hidden',
-  },
-  insightRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.md,
-    padding: Spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: DS.border,
-  },
-  insightSub: {
-    flex: 1,
-    fontSize: 13,
-    color: '#000000',
-  },
-});
+function makeStyles(DS: ReturnType<typeof useDS>) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: DS.bg,
+    },
+    centered: { alignItems: 'center', justifyContent: 'center' },
+    topHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: Spacing.md,
+      height: 54,
+      backgroundColor: DS.bg,
+    },
+    iconBtn: {
+      padding: 6,
+      width: 36,
+    },
+    headerTitle: {
+      fontSize: 18,
+      fontWeight: '700',
+      color: DS.textPrimary,
+    },
+    scroll: {
+      paddingHorizontal: Spacing.md,
+      paddingTop: Spacing.lg,
+    },
+    card: {
+      backgroundColor: DS.surface,
+      borderRadius: Radius.xl,
+      padding: Spacing.lg,
+      marginBottom: Spacing.lg,
+    },
+    sectionHeaderCaps: {
+      fontSize: 11,
+      fontWeight: '600',
+      color: DS.textSecond,
+      letterSpacing: 0.5,
+      marginBottom: Spacing.xs,
+    },
+    emptyState: {
+      alignItems: 'center',
+      paddingVertical: Spacing.md,
+      gap: 8,
+    },
+    emptyTitle: {
+      fontSize: 15,
+      fontWeight: '600',
+      color: DS.textPrimary,
+    },
+    emptySub: {
+      fontSize: 13,
+      color: DS.textSecond,
+      textAlign: 'center',
+      lineHeight: 18,
+    },
+    chartHeaderRow: {
+      flexDirection: 'row',
+      alignItems: 'baseline',
+      justifyContent: 'space-between',
+      marginBottom: Spacing.lg,
+    },
+    chartBigVal: {
+      fontFamily: Fonts.mono,
+      fontSize: 32,
+      fontWeight: '700',
+      color: DS.textPrimary,
+      letterSpacing: -0.5,
+    },
+    chartBigValSmall: {
+      fontFamily: Fonts.mono,
+      fontSize: 22,
+      fontWeight: '700',
+      color: DS.textPrimary,
+    },
+    chartUnit: {
+      fontSize: 14,
+      fontWeight: '400',
+      color: DS.textSecond,
+    },
+    deltaBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      backgroundColor: DS.raised,
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: Radius.sm,
+    },
+    deltaText: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: DS.textPrimary,
+    },
+    barChartContainer: {
+      flexDirection: 'row',
+      alignItems: 'flex-end',
+      justifyContent: 'space-between',
+      height: 140,
+      paddingTop: Spacing.md,
+    },
+    barColumn: {
+      alignItems: 'center',
+      flex: 1,
+    },
+    barTrack: {
+      width: 24,
+      height: 110,
+      backgroundColor: DS.raised,
+      borderRadius: Radius.sm,
+      justifyContent: 'flex-end',
+      overflow: 'hidden',
+    },
+    barFill: {
+      width: '100%',
+      backgroundColor: DS.textMuted,
+      borderRadius: Radius.sm,
+    },
+    barFillActive: {
+      backgroundColor: DS.accent,
+    },
+    barDayLabel: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: DS.textSecond,
+      marginTop: 6,
+    },
+    barDayLabelActive: {
+      color: DS.textPrimary,
+    },
+    macroProgressRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 6,
+    },
+    macroName: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: DS.textPrimary,
+    },
+    macroValMono: {
+      fontFamily: Fonts.mono,
+      fontSize: 12,
+      color: DS.textSecond,
+    },
+    macroPctText: {
+      fontFamily: Fonts.mono,
+      fontSize: 14,
+      fontWeight: '700',
+      color: DS.textPrimary,
+    },
+    progressTrack: {
+      height: 6,
+      backgroundColor: DS.raised,
+      borderRadius: 3,
+      overflow: 'hidden',
+    },
+    progressFill: {
+      height: '100%',
+      backgroundColor: DS.accent,
+      borderRadius: 3,
+    },
+    divider: {
+      height: 1,
+      backgroundColor: DS.border,
+      marginVertical: Spacing.md,
+    },
+    bodyGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: Spacing.md,
+      paddingTop: Spacing.xs,
+    },
+    bodyStat: {
+      minWidth: '40%',
+      gap: 2,
+    },
+    section: {
+      marginBottom: Spacing.xl,
+    },
+    cardGroup: {
+      backgroundColor: DS.surface,
+      borderRadius: Radius.lg,
+      overflow: 'hidden',
+    },
+    insightRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.md,
+      padding: Spacing.md,
+      borderBottomWidth: 1,
+      borderBottomColor: DS.border,
+    },
+    insightSub: {
+      flex: 1,
+      fontSize: 13,
+      color: DS.textPrimary,
+    },
+  });
+}

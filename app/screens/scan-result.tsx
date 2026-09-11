@@ -1,12 +1,13 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
-import { DS, Fonts, Radius, Spacing } from '@/constants/theme';
+import { useDS } from '@/contexts/ThemeContext';
+import { Fonts, Radius, Spacing } from '@/constants/theme';
 import { nutritionService } from '@/services/api/nutrition';
 import { triggerHaptic } from '@/utils/haptics';
 import type { MealType } from '@/types';
@@ -16,6 +17,8 @@ const MEAL_TYPES: MealType[] = ['Breakfast', 'Lunch', 'Dinner', 'Snacks'];
 export default function ScanResultScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const DS = useDS();
+  const styles = useMemo(() => makeStyles(DS), [DS]);
   const params = useLocalSearchParams<{
     barcode?: string;
     name?: string;
@@ -69,7 +72,7 @@ export default function ScanResultScreen() {
       {/* Top Header */}
       <View style={styles.topHeader}>
         <Pressable style={styles.iconBtn} onPress={() => router.back()}>
-          <Ionicons name="arrow-back-outline" size={24} color="#000000" />
+          <Ionicons name="arrow-back-outline" size={24} color={DS.textPrimary} />
         </Pressable>
         <ThemedText style={styles.headerTitle}>Scan Result</ThemedText>
         <View style={styles.iconBtn} />
@@ -126,13 +129,13 @@ export default function ScanResultScreen() {
               <Pressable
                 style={styles.stepperBtn}
                 onPress={() => setQuantity(q => Math.max(0.5, q - 0.5))}>
-                <Ionicons name="remove" size={18} color="#000000" />
+                <Ionicons name="remove" size={18} color={DS.textPrimary} />
               </Pressable>
               <ThemedText style={styles.stepperValue}>{quantity.toFixed(1)}</ThemedText>
               <Pressable
                 style={styles.stepperBtn}
                 onPress={() => setQuantity(q => q + 0.5)}>
-                <Ionicons name="add" size={18} color="#000000" />
+                <Ionicons name="add" size={18} color={DS.textPrimary} />
               </Pressable>
             </View>
           </View>
@@ -172,7 +175,7 @@ export default function ScanResultScreen() {
       <View style={[styles.stickyFooter, { paddingBottom: insets.bottom || Spacing.md }]}>
         <Pressable style={styles.logBtn} onPress={onLog} disabled={logging}>
           {logging ? (
-            <ActivityIndicator color="#FFFFFF" />
+            <ActivityIndicator color={DS.accentText} />
           ) : (
             <ThemedText style={styles.logBtnText}>Log to {selectedMeal} - {totalCal} kcal</ThemedText>
           )}
@@ -182,218 +185,207 @@ export default function ScanResultScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F9F9F9',
-  },
-  topHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: Spacing.md,
-    height: 54,
-    borderBottomWidth: 1,
-    borderBottomColor: DS.border,
-    backgroundColor: '#FFFFFF',
-  },
-  iconBtn: {
-    padding: 6,
-    width: 36,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#000000',
-  },
-  scroll: {
-    paddingHorizontal: Spacing.md,
-    paddingTop: Spacing.lg,
-  },
-  productImage: {
-    width: '100%',
-    height: 160,
-    borderRadius: Radius.md,
-    marginBottom: Spacing.lg,
-    backgroundColor: '#FFFFFF',
-  },
-  titleSection: {
-    marginBottom: Spacing.lg,
-  },
-  barcodeBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginBottom: 8,
-  },
-  barcodeText: {
-    fontFamily: Fonts.mono,
-    fontSize: 12,
-    color: DS.textSecond,
-  },
-  foodTitle: {
-    fontSize: 26,
-    fontWeight: '700',
-    color: '#000000',
-    letterSpacing: -0.5,
-    marginBottom: 4,
-  },
-  foodSubtitle: {
-    fontSize: 14,
-    color: DS.textSecond,
-  },
-  mealSegmentRow: {
-    flexDirection: 'row',
-    gap: Spacing.xs,
-    marginBottom: Spacing.lg,
-  },
-  mealChip: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: DS.border,
-    borderRadius: Radius.full,
-    paddingVertical: 8,
-    alignItems: 'center',
-  },
-  mealChipActive: {
-    backgroundColor: '#000000',
-    borderColor: '#000000',
-  },
-  mealChipText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: DS.textSecond,
-  },
-  mealChipTextActive: {
-    color: '#FFFFFF',
-  },
-  card: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: DS.border,
-    borderRadius: Radius.md,
-    padding: Spacing.lg,
-    marginBottom: Spacing.lg,
-  },
-  controlRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  controlLabel: {
-    fontSize: 15,
-    fontWeight: '500',
-    color: '#000000',
-  },
-  unitSelector: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: '#F9F9F9',
-    borderWidth: 1,
-    borderColor: DS.border,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: 6,
-    borderRadius: Radius.sm,
-  },
-  unitText: {
-    fontSize: 13,
-    color: DS.textSecond,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: DS.border,
-    marginVertical: Spacing.md,
-  },
-  stepperRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.md,
-  },
-  stepperBtn: {
-    width: 34,
-    height: 34,
-    borderRadius: Radius.sm,
-    backgroundColor: '#F3F3F3',
-    borderWidth: 1,
-    borderColor: DS.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  stepperValue: {
-    fontFamily: Fonts.mono,
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#000000',
-    minWidth: 32,
-    textAlign: 'center',
-  },
-  sectionHeaderCaps: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: DS.textSecond,
-    letterSpacing: 0.5,
-    marginBottom: Spacing.md,
-  },
-  heroCalRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    gap: 6,
-    marginBottom: Spacing.lg,
-  },
-  heroCalBig: {
-    fontFamily: Fonts.mono,
-    fontSize: 48,
-    fontWeight: '700',
-    color: '#000000',
-    letterSpacing: -1,
-  },
-  heroCalUnit: {
-    fontSize: 16,
-    color: DS.textSecond,
-  },
-  macrosRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingTop: Spacing.md,
-    borderTopWidth: 1,
-    borderTopColor: DS.border,
-  },
-  macroBlock: {
-    gap: 4,
-  },
-  macroName: {
-    fontSize: 13,
-    color: DS.textSecond,
-  },
-  macroVal: {
-    fontFamily: Fonts.mono,
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#000000',
-  },
-  stickyFooter: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: '#FFFFFF',
-    borderTopWidth: 1,
-    borderTopColor: DS.border,
-    paddingHorizontal: Spacing.md,
-    paddingTop: Spacing.md,
-  },
-  logBtn: {
-    backgroundColor: '#000000',
-    height: 50,
-    borderRadius: Radius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logBtnText: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-});
+function makeStyles(DS: ReturnType<typeof useDS>) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: DS.bg,
+    },
+    topHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: Spacing.md,
+      height: 54,
+      backgroundColor: DS.bg,
+    },
+    iconBtn: {
+      padding: 6,
+      width: 36,
+    },
+    headerTitle: {
+      fontSize: 18,
+      fontWeight: '700',
+      color: DS.textPrimary,
+    },
+    scroll: {
+      paddingHorizontal: Spacing.md,
+      paddingTop: Spacing.lg,
+    },
+    productImage: {
+      width: '100%',
+      height: 160,
+      borderRadius: Radius.lg,
+      marginBottom: Spacing.lg,
+      backgroundColor: DS.raised,
+    },
+    titleSection: {
+      marginBottom: Spacing.lg,
+    },
+    barcodeBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      marginBottom: 8,
+    },
+    barcodeText: {
+      fontFamily: Fonts.mono,
+      fontSize: 12,
+      color: DS.textSecond,
+    },
+    foodTitle: {
+      fontSize: 26,
+      fontWeight: '700',
+      color: DS.textPrimary,
+      letterSpacing: -0.5,
+      marginBottom: 4,
+    },
+    foodSubtitle: {
+      fontSize: 14,
+      color: DS.textSecond,
+    },
+    mealSegmentRow: {
+      flexDirection: 'row',
+      gap: Spacing.xs,
+      marginBottom: Spacing.lg,
+    },
+    mealChip: {
+      flex: 1,
+      backgroundColor: DS.raised,
+      borderRadius: Radius.full,
+      paddingVertical: 8,
+      alignItems: 'center',
+    },
+    mealChipActive: {
+      backgroundColor: DS.accent,
+    },
+    mealChipText: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: DS.textSecond,
+    },
+    mealChipTextActive: {
+      color: DS.accentText,
+    },
+    card: {
+      backgroundColor: DS.surface,
+      borderRadius: Radius.lg,
+      padding: Spacing.lg,
+      marginBottom: Spacing.lg,
+    },
+    controlRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    controlLabel: {
+      fontSize: 15,
+      fontWeight: '500',
+      color: DS.textPrimary,
+    },
+    unitSelector: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      backgroundColor: DS.raised,
+      paddingHorizontal: Spacing.md,
+      paddingVertical: 6,
+      borderRadius: Radius.sm,
+    },
+    unitText: {
+      fontSize: 13,
+      color: DS.textSecond,
+    },
+    divider: {
+      height: 1,
+      backgroundColor: DS.border,
+      marginVertical: Spacing.md,
+    },
+    stepperRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.md,
+    },
+    stepperBtn: {
+      width: 34,
+      height: 34,
+      borderRadius: Radius.sm,
+      backgroundColor: DS.raised,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    stepperValue: {
+      fontFamily: Fonts.mono,
+      fontSize: 16,
+      fontWeight: '600',
+      color: DS.textPrimary,
+      minWidth: 32,
+      textAlign: 'center',
+    },
+    sectionHeaderCaps: {
+      fontSize: 11,
+      fontWeight: '600',
+      color: DS.textSecond,
+      letterSpacing: 0.5,
+      marginBottom: Spacing.md,
+    },
+    heroCalRow: {
+      flexDirection: 'row',
+      alignItems: 'baseline',
+      gap: 6,
+      marginBottom: Spacing.lg,
+    },
+    heroCalBig: {
+      fontFamily: Fonts.mono,
+      fontSize: 48,
+      fontWeight: '700',
+      color: DS.textPrimary,
+      letterSpacing: -1,
+    },
+    heroCalUnit: {
+      fontSize: 16,
+      color: DS.textSecond,
+    },
+    macrosRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      paddingTop: Spacing.md,
+      borderTopWidth: 1,
+      borderTopColor: DS.border,
+    },
+    macroBlock: {
+      gap: 4,
+    },
+    macroName: {
+      fontSize: 13,
+      color: DS.textSecond,
+    },
+    macroVal: {
+      fontFamily: Fonts.mono,
+      fontSize: 20,
+      fontWeight: '600',
+      color: DS.textPrimary,
+    },
+    stickyFooter: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      backgroundColor: DS.bg,
+      paddingHorizontal: Spacing.md,
+      paddingTop: Spacing.md,
+    },
+    logBtn: {
+      backgroundColor: DS.accent,
+      height: 50,
+      borderRadius: Radius.full,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    logBtnText: {
+      fontSize: 15,
+      fontWeight: '600',
+      color: DS.accentText,
+    },
+  });
+}

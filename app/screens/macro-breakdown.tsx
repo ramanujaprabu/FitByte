@@ -5,12 +5,12 @@ import { MonoText } from '@/components/shared/MonoText';
 import { ProgressBar } from '@/components/shared/ProgressBar';
 import { ScreenHeader } from '@/components/shared/ScreenHeader';
 import { ThemedText } from '@/components/themed-text';
-import { DS } from '@/constants/theme';
+import { useDS } from '@/contexts/ThemeContext';
 import { nutritionService } from '@/services/api/nutrition';
 import type { AIInsight, DailyNutrition } from '@/types';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useFocusEffect } from '@react-navigation/native';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -21,6 +21,8 @@ const CAL_PER_GRAM = { Protein: 4, Carbs: 4, Fats: 9 } as const;
 
 export default function MacroBreakdownScreen() {
   const insets = useSafeAreaInsets();
+  const DS = useDS();
+  const styles = useMemo(() => makeStyles(DS), [DS]);
   const [today, setToday] = useState<DailyNutrition | null>(null);
   const [weekly, setWeekly] = useState<WeeklySummary | null>(null);
   const [insights, setInsights] = useState<AIInsight[]>([]);
@@ -165,40 +167,42 @@ export default function MacroBreakdownScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: DS.bg },
-  scroll: { paddingHorizontal: 20 },
+function makeStyles(DS: ReturnType<typeof useDS>) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: DS.bg },
+    scroll: { paddingHorizontal: 20 },
 
-  calRow: { flexDirection: 'row', alignItems: 'center', gap: 16, marginBottom: 14 },
-  calMain: {},
-  calBig: { fontSize: 34, lineHeight: 38 },
-  calLabel: { fontSize: 11, color: DS.textMuted, marginTop: 2 },
-  calDivider: { width: 1, height: 40, backgroundColor: DS.border },
-  calSide: { flex: 1 },
-  calSideVal: { fontSize: 16 },
-  calSideLabel: { fontSize: 11, color: DS.textMuted, marginTop: 2 },
-  calSub: { fontSize: 11, color: DS.textMuted, marginTop: 8 },
+    calRow: { flexDirection: 'row', alignItems: 'center', gap: 16, marginBottom: 14 },
+    calMain: {},
+    calBig: { fontSize: 34, lineHeight: 38 },
+    calLabel: { fontSize: 11, color: DS.textMuted, marginTop: 2 },
+    calDivider: { width: 1, height: 40, backgroundColor: DS.border },
+    calSide: { flex: 1 },
+    calSideVal: { fontSize: 16 },
+    calSideLabel: { fontSize: 11, color: DS.textMuted, marginTop: 2 },
+    calSub: { fontSize: 11, color: DS.textMuted, marginTop: 8 },
 
-  macroTop: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 },
-  macroIcon: { width: 38, height: 38, borderRadius: 19, backgroundColor: DS.card, borderWidth: 1, borderColor: DS.border, justifyContent: 'center', alignItems: 'center' },
-  macroName: { fontWeight: '600', fontSize: 15, color: DS.textPrimary },
-  macroSub: { marginTop: 2, fontSize: 12, color: DS.textMuted },
-  macroPctBox: { backgroundColor: DS.raised, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8, borderWidth: 1, borderColor: DS.border },
-  macroPct: { fontSize: 14 },
-  macroStats: { flexDirection: 'row', gap: 0, marginTop: 14, paddingTop: 14, borderTopWidth: 1, borderTopColor: DS.border },
-  macroStat: { flex: 1, alignItems: 'center', gap: 3 },
-  macroStatVal: { fontSize: 17 },
-  macroStatLabel: { fontSize: 11, color: DS.textMuted },
+    macroTop: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 },
+    macroIcon: { width: 38, height: 38, borderRadius: 19, backgroundColor: DS.raised, justifyContent: 'center', alignItems: 'center' },
+    macroName: { fontWeight: '600', fontSize: 15, color: DS.textPrimary },
+    macroSub: { marginTop: 2, fontSize: 12, color: DS.textMuted },
+    macroPctBox: { backgroundColor: DS.raised, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8 },
+    macroPct: { fontSize: 14 },
+    macroStats: { flexDirection: 'row', gap: 0, marginTop: 14, paddingTop: 14, borderTopWidth: 1, borderTopColor: DS.border },
+    macroStat: { flex: 1, alignItems: 'center', gap: 3 },
+    macroStatVal: { fontSize: 17 },
+    macroStatLabel: { fontSize: 11, color: DS.textMuted },
 
-  sectionTitle: { fontSize: 15, fontWeight: '600', color: DS.textPrimary, marginBottom: 2 },
-  sectionSub: { fontSize: 11, color: DS.textMuted, marginBottom: 16 },
-  chart: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', height: 130 },
-  chartCol: { alignItems: 'center', gap: 4 },
-  chartVal: { fontSize: 9, color: DS.textMuted },
-  chartBar: { width: 20, borderRadius: 4, backgroundColor: DS.raised },
-  chartDay: { fontSize: 11, color: DS.textMuted },
+    sectionTitle: { fontSize: 15, fontWeight: '600', color: DS.textPrimary, marginBottom: 2 },
+    sectionSub: { fontSize: 11, color: DS.textMuted, marginBottom: 16 },
+    chart: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', height: 130 },
+    chartCol: { alignItems: 'center', gap: 4 },
+    chartVal: { fontSize: 9, color: DS.textMuted },
+    chartBar: { width: 20, borderRadius: 4, backgroundColor: DS.raised },
+    chartDay: { fontSize: 11, color: DS.textMuted },
 
-  aiHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 },
-  aiTitle: { fontSize: 14, fontWeight: '600', color: DS.textPrimary },
-  aiText: { fontSize: 13, color: DS.textSecond, lineHeight: 20 },
-});
+    aiHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 },
+    aiTitle: { fontSize: 14, fontWeight: '600', color: DS.textPrimary },
+    aiText: { fontSize: 13, color: DS.textSecond, lineHeight: 20 },
+  });
+}
