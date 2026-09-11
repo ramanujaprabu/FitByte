@@ -7,8 +7,9 @@
  * being stored redundantly.
  */
 import { supabase } from '@/lib/supabase';
-import type { DailyNutrition, FoodEntry, NutritionDay, AIInsight, ConsistencyLevel, MacroTarget } from '@/types';
+import type { DailyNutrition, FoodEntry, AIInsight, MacroTarget, MealType, PeriodBucket, PeriodSummary } from '@/types';
 import { dedupeFoodEntriesByName } from '@/utils/format';
+import { isoDate, periodRange, previousPeriodRange, type Period } from '@/utils/period';
 
 /**
  * Reads the locally cached session instead of `getUser()` — this needs to
@@ -69,6 +70,64 @@ function withinDay(entries: FoodEntry[], start: Date, end: Date): FoodEntry[] {
     const t = new Date(e.loggedAt).getTime();
     return t >= start.getTime() && t <= end.getTime();
   });
+}
+
+const DAY_LETTERS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+const MEAL_BUCKET_ORDER: MealType[] = ['Breakfast', 'Lunch', 'Dinner', 'Snacks'];
+
+/**
+ * The chart buckets for the calorie bar — what they represent changes with
+ * the period: a day breaks down by meal (there's only one day to show), a
+ * week shows its 7 days, and a month shows its Sunday-Saturday weeks
+ * (splitting a whole month into ~30 daily bars wouldn't fit on a phone).
+ */
+function buildBuckets(
+  period: Period,
+  start: Date,
+  end: Date,
+  byDay: Map<string, { cal: number; p: number; c: number; f: number }>,
+  entries: { meal: MealType; calories: number; logged_at: string }[]
+): PeriodBucket[] {
+  if (period === 'day') {
+    const totals = new Map<MealType, number>();
+    for (const e of entries) totals.set(e.meal, (totals.get(e.meal) ?? 0) + Number(e.calories));
+    return MEAL_BUCKET_ORDER.map((meal) => ({
+      label: meal.slice(0, 3),
+      date: isoDate(start),
+      calories: Math.round(totals.get(meal) ?? 0),
+    }));
+  }
+
+  if (period === 'week') {
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(start);
+      d.setDate(d.getDate() + i);
+      const key = isoDate(d);
+      return { label: DAY_LETTERS[d.getDay()], date: key, calories: Math.round(byDay.get(key)?.cal ?? 0) };
+    });
+  }
+
+  // month — bucket by Sunday-aligned week within the month.
+  const buckets: PeriodBucket[] = [];
+  let cursor = new Date(start);
+  let weekIndex = 1;
+  while (cursor <= end) {
+    const weekStart = new Date(cursor);
+    const weekEnd = new Date(cursor);
+    weekEnd.setDate(weekEnd.getDate() + (6 - weekStart.getDay()));
+    const clampedEnd = weekEnd > end ? end : weekEnd;
+
+    let total = 0;
+    for (let d = new Date(weekStart); d <= clampedEnd; d.setDate(d.getDate() + 1)) {
+      total += byDay.get(isoDate(d))?.cal ?? 0;
+    }
+    buckets.push({ label: `W${weekIndex}`, date: isoDate(weekStart), calories: Math.round(total) });
+
+    cursor = new Date(clampedEnd);
+    cursor.setDate(cursor.getDate() + 1);
+    weekIndex += 1;
+  }
+  return buckets;
 }
 
 import { offlineStorage } from '@/lib/offline-storage';
@@ -327,140 +386,157 @@ export const nutritionService = {
     if (error) throw error;
   },
 
-  /** Monthly heatmap — buckets each day's calorie total into a consistency level. */
-  async getNutritionHeatmap(month?: number, year?: number): Promise<NutritionDay[]> {
-    const userId = await currentUserId();
-    const now = new Date();
-    const y = year ?? now.getFullYear();
-    const m = month ?? now.getMonth();
-    const start = new Date(y, m, 1);
-    const end = new Date(y, m + 1, 0, 23, 59, 59);
-
-    const [{ data: entries, error }, { data: target }] = await Promise.all([
-      supabase
-        .from('food_entries')
-        .select('calories, logged_at')
-        .eq('user_id', userId)
-        .gte('logged_at', start.toISOString())
-        .lte('logged_at', end.toISOString()),
-      supabase.from('calorie_targets').select('daily').eq('user_id', userId).maybeSingle(),
-    ]);
-    if (error) throw error;
-
-    const goal = target?.daily ?? 2000;
-    const totalsByDay = new Map<number, number>();
-    for (const e of entries ?? []) {
-      const day = new Date(e.logged_at).getDate();
-      totalsByDay.set(day, (totalsByDay.get(day) ?? 0) + Number(e.calories));
-    }
-
-    const daysInMonth = end.getDate();
-    const result: NutritionDay[] = [];
-    for (let day = 1; day <= daysInMonth; day++) {
-      const total = totalsByDay.get(day) ?? 0;
-      const ratio = total / goal;
-      let level: ConsistencyLevel = 'empty';
-      if (ratio >= 0.9) level = 'high';
-      else if (ratio >= 0.5) level = 'mid';
-      else if (ratio > 0) level = 'low';
-      result.push({ date: day, level });
-    }
-    return result;
-  },
-
   /**
-   * Real (non-heatmap) 7-day nutrition summary: daily calorie totals, averages
-   * for calories/macros, the week-over-week calorie delta, and the active
-   * macro/calorie targets — used by the analytics screens instead of any
-   * placeholder numbers.
+   * The single source of truth for the Trends tab's Day/Week/Month views:
+   * real calorie/macro buckets (meals for a day, days for a week, weeks for
+   * a month), averages, the vs-previous-period delta, meal-split actual vs
+   * target, top foods, and net calories (consumed − burned via workouts).
+   * Nothing here is a placeholder — every number comes from this user's own
+   * logged data, or the real targets set in onboarding/Profile.
    */
-  async getWeeklySummary(): Promise<{
-    days: { label: string; date: string; calories: number }[];
-    avgCalories: number;
-    avgProtein: number;
-    avgCarbs: number;
-    avgFats: number;
-    calorieGoal: number;
-    macroTargets: MacroTarget;
-    calorieDeltaPercent: number | null;
-  }> {
-    const dayLabels = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-    const now = new Date();
-    const start = new Date(now);
-    start.setDate(start.getDate() - 13);
-    start.setHours(0, 0, 0, 0);
-    const end = new Date(now);
-    end.setHours(23, 59, 59, 999);
+  async getPeriodSummary(period: Period, referenceDate: Date = new Date()): Promise<PeriodSummary> {
+    const { start, end, rangeLabel } = periodRange(period, referenceDate);
+    const prev = previousPeriodRange(period, referenceDate);
 
     let calorieGoal = 2000;
     let macroTargets: MacroTarget = { protein: 150, carbs: 200, fats: 70 };
-    const dayTotals = new Map<string, { cal: number; p: number; c: number; f: number }>();
+    let mealSplit: Record<string, number> = { Breakfast: 25, Lunch: 35, Dinner: 30, Snacks: 10 };
+    let entries: any[] = [];
+    let prevEntries: any[] = [];
+    let caloriesBurned = 0;
 
     try {
       const userId = await currentUserId();
-      const [{ data: entries }, { data: target }, { data: goal }] = await Promise.all([
+      const [entriesRes, prevEntriesRes, targetRes, goalRes, sessionsRes] = await Promise.all([
         supabase
           .from('food_entries')
-          .select('calories, protein, carbs, fats, logged_at')
+          .select('name, meal, calories, protein, carbs, fats, logged_at')
           .eq('user_id', userId)
           .gte('logged_at', start.toISOString())
           .lte('logged_at', end.toISOString()),
+        supabase
+          .from('food_entries')
+          .select('calories, logged_at')
+          .eq('user_id', userId)
+          .gte('logged_at', prev.start.toISOString())
+          .lte('logged_at', prev.end.toISOString()),
         supabase.from('calorie_targets').select('daily').eq('user_id', userId).maybeSingle(),
         supabase
           .from('fitness_goals')
-          .select('macro_protein, macro_carbs, macro_fats')
+          .select('macro_protein, macro_carbs, macro_fats, meal_split')
           .eq('user_id', userId)
           .eq('is_active', true)
           .maybeSingle(),
+        supabase
+          .from('workout_sessions')
+          .select('calories_burned')
+          .eq('user_id', userId)
+          .gte('performed_at', start.toISOString())
+          .lte('performed_at', end.toISOString()),
       ]);
 
-      if (target?.daily) calorieGoal = target.daily;
-      if (goal) {
-        macroTargets = { protein: goal.macro_protein, carbs: goal.macro_carbs, fats: goal.macro_fats };
+      entries = entriesRes.data ?? [];
+      prevEntries = prevEntriesRes.data ?? [];
+      if (targetRes.data?.daily) calorieGoal = targetRes.data.daily;
+      if (goalRes.data) {
+        macroTargets = { protein: goalRes.data.macro_protein, carbs: goalRes.data.macro_carbs, fats: goalRes.data.macro_fats };
+        if (goalRes.data.meal_split && Object.keys(goalRes.data.meal_split).length > 0) mealSplit = goalRes.data.meal_split;
       }
-
-      for (const e of entries ?? []) {
-        const key = new Date(e.logged_at).toISOString().slice(0, 10);
-        const t = dayTotals.get(key) ?? { cal: 0, p: 0, c: 0, f: 0 };
-        t.cal += Number(e.calories);
-        t.p += Number(e.protein);
-        t.c += Number(e.carbs);
-        t.f += Number(e.fats);
-        dayTotals.set(key, t);
-      }
+      caloriesBurned = (sessionsRes.data ?? []).reduce((s: number, r: any) => s + (r.calories_burned ?? 0), 0);
     } catch {
-      // No connection / not authenticated — fall through with empty totals.
+      // No connection / not authenticated — fall through with empty data.
     }
 
-    const dateKey = (daysAgo: number) => {
-      const d = new Date(now);
-      d.setDate(d.getDate() - daysAgo);
-      return { key: d.toISOString().slice(0, 10), label: dayLabels[d.getDay()] };
-    };
+    // Per-day totals across the whole range — used for the week/month bucket
+    // charts AND for daysOnTarget, so a 31-day month only costs one query.
+    const byDay = new Map<string, { cal: number; p: number; c: number; f: number }>();
+    for (const e of entries) {
+      const key = isoDate(new Date(e.logged_at));
+      const t = byDay.get(key) ?? { cal: 0, p: 0, c: 0, f: 0 };
+      t.cal += Number(e.calories);
+      t.p += Number(e.protein);
+      t.c += Number(e.carbs);
+      t.f += Number(e.fats);
+      byDay.set(key, t);
+    }
 
-    const days = Array.from({ length: 7 }, (_, i) => {
-      const { key, label } = dateKey(6 - i);
-      return { label, date: key, calories: Math.round(dayTotals.get(key)?.cal ?? 0) };
-    });
-    const previousWeekCalories = Array.from({ length: 7 }, (_, i) => dayTotals.get(dateKey(13 - i).key)?.cal ?? 0);
+    const buckets: PeriodBucket[] = buildBuckets(period, start, end, byDay, entries);
 
-    const loggedThisWeek = days.filter((d) => d.calories > 0);
+    const loggedDays = Array.from(byDay.values());
     const avg = (vals: number[]) => (vals.length ? Math.round(vals.reduce((s, v) => s + v, 0) / vals.length) : 0);
+    const totalCalories = Math.round(loggedDays.reduce((s, d) => s + d.cal, 0));
+    const avgCalories = avg(loggedDays.map((d) => Math.round(d.cal)));
+    const avgProtein = avg(loggedDays.map((d) => Math.round(d.p)));
+    const avgCarbs = avg(loggedDays.map((d) => Math.round(d.c)));
+    const avgFats = avg(loggedDays.map((d) => Math.round(d.f)));
 
-    const avgCalories = avg(loggedThisWeek.map((d) => d.calories));
-    const thisWeekTotals = loggedThisWeek
-      .map((d) => dayTotals.get(d.date))
-      .filter((t): t is { cal: number; p: number; c: number; f: number } => !!t);
-    const avgProtein = avg(thisWeekTotals.map((t) => t.p));
-    const avgCarbs = avg(thisWeekTotals.map((t) => t.c));
-    const avgFats = avg(thisWeekTotals.map((t) => t.f));
+    const daysOnTarget = loggedDays.filter((d) => calorieGoal > 0 && d.cal >= calorieGoal * 0.85 && d.cal <= calorieGoal * 1.1).length;
+    const totalDaysElapsed = Math.min(
+      Math.floor((Math.min(end.getTime(), Date.now()) - start.getTime()) / 86_400_000) + 1,
+      Math.floor((end.getTime() - start.getTime()) / 86_400_000) + 1
+    );
 
-    const prevLoggedDays = previousWeekCalories.filter((c) => c > 0);
-    const prevAvg = prevLoggedDays.length ? prevLoggedDays.reduce((s, v) => s + v, 0) / prevLoggedDays.length : null;
-    const calorieDeltaPercent =
-      prevAvg && avgCalories ? Math.round(((avgCalories - prevAvg) / prevAvg) * 100) : null;
+    const prevTotal = prevEntries.reduce((s, e) => s + Number(e.calories), 0);
+    const prevDaysLogged = new Set(prevEntries.map((e) => isoDate(new Date(e.logged_at)))).size;
+    const prevAvg = prevDaysLogged ? prevTotal / prevDaysLogged : null;
+    const calorieDeltaPercent = prevAvg && avgCalories ? Math.round(((avgCalories - prevAvg) / prevAvg) * 100) : null;
 
-    return { days, avgCalories, avgProtein, avgCarbs, avgFats, calorieGoal, macroTargets, calorieDeltaPercent };
+    // Meal split — actual share of calories per meal, vs the user's planned split.
+    const mealTotals = new Map<MealType, number>();
+    for (const e of entries) {
+      mealTotals.set(e.meal, (mealTotals.get(e.meal) ?? 0) + Number(e.calories));
+    }
+    const mealBreakdown = (['Breakfast', 'Lunch', 'Dinner', 'Snacks'] as MealType[])
+      .filter((m) => mealSplit[m] != null)
+      .map((meal) => {
+        const cal = mealTotals.get(meal) ?? 0;
+        return {
+          meal,
+          calories: Math.round(cal),
+          actualPercent: totalCalories > 0 ? Math.round((cal / totalCalories) * 100) : 0,
+          targetPercent: Math.round(mealSplit[meal] ?? 0),
+        };
+      });
+
+    // Top foods — aggregated by name across the period.
+    const foodTotals = new Map<string, { name: string; calories: number; protein: number; count: number }>();
+    for (const e of entries) {
+      const existing = foodTotals.get(e.name);
+      if (existing) {
+        existing.calories += Number(e.calories);
+        existing.protein += Number(e.protein);
+        existing.count += 1;
+      } else {
+        foodTotals.set(e.name, { name: e.name, calories: Number(e.calories), protein: Number(e.protein), count: 1 });
+      }
+    }
+    const foodList = Array.from(foodTotals.values());
+    const topFoodsByCalories = [...foodList].sort((a, b) => b.calories - a.calories).slice(0, 5)
+      .map((f) => ({ name: f.name, calories: Math.round(f.calories), count: f.count }));
+    const topFoodsByProtein = [...foodList].filter((f) => f.protein > 0).sort((a, b) => b.protein - a.protein).slice(0, 5)
+      .map((f) => ({ name: f.name, protein: Math.round(f.protein), count: f.count }));
+
+    return {
+      period,
+      rangeLabel,
+      buckets,
+      totalCalories,
+      avgCalories,
+      calorieGoal,
+      daysLogged: loggedDays.length,
+      daysOnTarget,
+      totalDays: Math.max(1, totalDaysElapsed),
+      calorieDeltaPercent,
+      avgProtein,
+      avgCarbs,
+      avgFats,
+      macroTargets,
+      mealBreakdown,
+      topFoodsByCalories,
+      topFoodsByProtein,
+      caloriesBurned: Math.round(caloriesBurned),
+      netCalories: Math.round(totalCalories - caloriesBurned),
+    };
   },
 
   async getAIInsights(): Promise<AIInsight[]> {

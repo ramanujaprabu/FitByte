@@ -4,7 +4,10 @@ import { useRouter } from 'expo-router';
 import React, { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { Circle, Line, Polyline } from 'react-native-svg';
 
+import { ProgressBar } from '@/components/shared/ProgressBar';
+import { SegmentedControl } from '@/components/shared/SegmentedControl';
 import { ThemedText } from '@/components/themed-text';
 import { useDS } from '@/contexts/ThemeContext';
 import { useUnits } from '@/contexts/UnitsContext';
@@ -12,19 +15,16 @@ import { Fonts, Radius, Spacing } from '@/constants/theme';
 import { nutritionService } from '@/services/api/nutrition';
 import { userService } from '@/services/api/user';
 import { workoutService } from '@/services/api/workout';
-import type { ProfileData, WorkoutStats } from '@/types';
+import type { PeriodSummary, PeriodTrainingStats, ProfileData } from '@/types';
 import { triggerHaptic } from '@/utils/haptics';
 import { formatWeight, parseWeightToKg, weightUnitLabel } from '@/utils/units';
+import { isCurrentOrFuturePeriod, shiftPeriod, type Period } from '@/utils/period';
 
-type WeeklySummary = Awaited<ReturnType<typeof nutritionService.getWeeklySummary>>;
-
-const DAY_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-
-function startOfDay(d: Date): Date {
-  const copy = new Date(d);
-  copy.setHours(0, 0, 0, 0);
-  return copy;
-}
+const PERIOD_OPTIONS: { value: Period; label: string }[] = [
+  { value: 'day', label: 'Day' },
+  { value: 'week', label: 'Week' },
+  { value: 'month', label: 'Month' },
+];
 
 export default function TrendsTabScreen() {
   const insets = useSafeAreaInsets();
@@ -33,9 +33,10 @@ export default function TrendsTabScreen() {
   const styles = useMemo(() => makeStyles(DS), [DS]);
   const { units } = useUnits();
 
-  const [summary, setSummary] = useState<WeeklySummary | null>(null);
-  const [workoutStats, setWorkoutStats] = useState<WorkoutStats | null>(null);
-  const [workoutDaysWithSession, setWorkoutDaysWithSession] = useState<Set<string>>(new Set());
+  const [period, setPeriod] = useState<Period>('week');
+  const [referenceDate, setReferenceDate] = useState(() => new Date());
+  const [summary, setSummary] = useState<PeriodSummary | null>(null);
+  const [training, setTraining] = useState<PeriodTrainingStats | null>(null);
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [weightHistory, setWeightHistory] = useState<{ date: string; weightKg: number }[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,51 +48,52 @@ export default function TrendsTabScreen() {
   const loadData = useCallback(() => {
     setLoading(true);
     Promise.all([
-      nutritionService.getWeeklySummary(),
-      workoutService.getWeeklyStats(),
-      workoutService.getRecentSessions(30),
+      nutritionService.getPeriodSummary(period, referenceDate),
+      workoutService.getPeriodTrainingStats(period, referenceDate),
       userService.getProfile(),
-      userService.getWeightHistory(90).catch(() => []),
+      userService.getWeightHistory(period === 'month' ? 120 : 30).catch(() => []),
     ])
-      .then(([s, w, sessions, p, weights]) => {
+      .then(([s, t, p, w]) => {
         setSummary(s);
-        setWorkoutStats(w);
-        setWorkoutDaysWithSession(new Set(sessions.map((sess) => startOfDay(new Date(sess.performedAt)).toDateString())));
+        setTraining(t);
         setProfile(p);
-        setWeightHistory(weights);
+        setWeightHistory(w);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, []);
+  }, [period, referenceDate]);
 
   useFocusEffect(loadData);
 
-  const hasLoggedData = (summary && summary.days.some((d) => d.calories > 0)) || (workoutStats && workoutStats.weeklyWorkouts > 0);
+  const goPrev = () => {
+    triggerHaptic('selection');
+    setReferenceDate((d) => shiftPeriod(period, d, -1));
+  };
+  const goNext = () => {
+    if (isCurrentOrFuturePeriod(period, referenceDate)) return;
+    triggerHaptic('selection');
+    setReferenceDate((d) => shiftPeriod(period, d, 1));
+  };
+  const atCurrentPeriod = isCurrentOrFuturePeriod(period, referenceDate);
 
-  const weekDays = useMemo(() => {
-    const today = new Date();
-    return Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(today);
-      d.setDate(d.getDate() - (6 - i));
-      const isToday = i === 6;
-      const worked = workoutDaysWithSession.has(startOfDay(d).toDateString());
-      return { day: DAY_LABELS[d.getDay()], isToday, worked };
-    });
-  }, [workoutDaysWithSession]);
+  const changePeriod = (label: string) => {
+    const opt = PERIOD_OPTIONS.find((o) => o.label === label);
+    if (opt) {
+      triggerHaptic('selection');
+      setPeriod(opt.value);
+    }
+  };
 
-  const maxCal = summary ? Math.max(summary.calorieGoal, ...summary.days.map((d) => d.calories), 1) : 1;
-  const daysHitTarget = summary ? summary.days.filter((d) => summary.calorieGoal && d.calories >= summary.calorieGoal * 0.85 && d.calories <= summary.calorieGoal * 1.1).length : 0;
-
-  // Body metrics from profile + weight history
+  const hasNutritionData = !!summary && summary.totalCalories > 0;
+  const hasTrainingData = !!training && training.workouts > 0;
   const bodyWeightKg = profile?.bodyMetrics?.weight ?? null;
   const goalWeightKg = profile?.bodyMetrics?.goalWeight ?? null;
+
   const weightDelta = useMemo(() => {
     if (weightHistory.length < 2) return null;
     const latest = weightHistory[weightHistory.length - 1];
-    const twoWeeksAgo = new Date(latest.date);
-    twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
-    const reference = weightHistory.find((w) => new Date(w.date) >= twoWeeksAgo) ?? weightHistory[0];
-    return Number((latest.weightKg - reference.weightKg).toFixed(1));
+    const earliest = weightHistory[0];
+    return Number((latest.weightKg - earliest.weightKg).toFixed(1));
   }, [weightHistory]);
 
   const openWeightModal = () => {
@@ -110,20 +112,27 @@ export default function TrendsTabScreen() {
       setWeightModalVisible(false);
       loadData();
     } catch {
-      // Keep the modal open with the value the user typed so they can retry.
+      // Keep the modal open so the user can retry.
     } finally {
       setSavingWeight(false);
     }
   };
+
+  const macros = summary
+    ? [
+        { name: 'Protein', consumed: summary.avgProtein, target: summary.macroTargets.protein, color: DS.textPrimary },
+        { name: 'Carbs', consumed: summary.avgCarbs, target: summary.macroTargets.carbs, color: DS.textSecond },
+        { name: 'Fats', consumed: summary.avgFats, target: summary.macroTargets.fats, color: DS.borderMid },
+      ]
+    : [];
+  const maxBucket = summary ? Math.max(...summary.buckets.map((b) => b.calories), summary.calorieGoal, 1) : 1;
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Top Bar Header */}
       <View style={styles.topHeader}>
         <ThemedText style={styles.appTitle}>FitByte</ThemedText>
-        <Pressable
-          style={styles.iconBtn}
-          onPress={() => router.push('/screens/account-settings' as any)}>
+        <Pressable style={styles.iconBtn} onPress={() => router.push('/screens/account-settings' as any)}>
           <Ionicons name="settings-outline" size={22} color={DS.textPrimary} />
         </Pressable>
       </View>
@@ -133,157 +142,263 @@ export default function TrendsTabScreen() {
         contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 80 }]}>
 
         {/* Page Title */}
-        <View style={styles.titleSection}>
-          <ThemedText style={styles.pageTitle}>Trends</ThemedText>
-          <ThemedText style={styles.pageSubtitle}>
-            Historical analytics across nutrition, training, and body composition.
-          </ThemedText>
+        <ThemedText style={styles.pageTitle}>Trends</ThemedText>
+
+        {/* Period Selector */}
+        <SegmentedControl
+          options={PERIOD_OPTIONS.map((o) => o.label)}
+          value={PERIOD_OPTIONS.find((o) => o.value === period)?.label ?? 'Week'}
+          onChange={changePeriod}
+        />
+
+        {/* Date Navigator */}
+        <View style={styles.dateNavRow}>
+          <Pressable style={styles.dateNavBtn} onPress={goPrev} hitSlop={8}>
+            <Ionicons name="chevron-back" size={16} color={DS.textPrimary} />
+          </Pressable>
+          <ThemedText style={styles.dateRangeLabel}>{summary?.rangeLabel ?? '—'}</ThemedText>
+          <Pressable
+            style={[styles.dateNavBtn, atCurrentPeriod && styles.dateNavBtnDisabled]}
+            onPress={goNext}
+            disabled={atCurrentPeriod}
+            hitSlop={8}>
+            <Ionicons name="chevron-forward" size={16} color={atCurrentPeriod ? DS.textMuted : DS.textPrimary} />
+          </Pressable>
         </View>
 
-        {loading && !summary && !workoutStats ? (
+        {loading && !summary ? (
           <View style={styles.initialSpinner}>
             <ActivityIndicator color={DS.accent} />
           </View>
         ) : (
         <>
-        {/* Empty State Banner if no logged data */}
-        {!hasLoggedData && (
+
+        {!loading && !hasNutritionData && !hasTrainingData && (
           <View style={styles.emptyStateBanner}>
-            <Ionicons name="stats-chart-outline" size={28} color={DS.textMuted} style={{ marginBottom: 8 }} />
-            <ThemedText style={styles.emptyStateTitle}>Log food & workouts to see insights</ThemedText>
+            <Ionicons name="stats-chart-outline" size={26} color={DS.textMuted} style={{ marginBottom: 8 }} />
+            <ThemedText style={styles.emptyStateTitle}>Nothing logged for this {period}</ThemedText>
             <ThemedText style={styles.emptyStateSub}>
-              Start tracking your daily meals and workout sessions to generate historical charts, volume graphs, and AI trends.
+              Log meals and workouts to see charts, trends, and top foods here.
             </ThemedText>
-            <View style={styles.emptyStateActionsRow}>
-              <Pressable
-                style={styles.emptyActionBtnPrimary}
-                onPress={() => router.push('/screens/trackfood' as any)}>
-                <ThemedText style={styles.emptyActionTextPrimary}>Log Food</ThemedText>
-              </Pressable>
-              <Pressable
-                style={styles.emptyActionBtnSecondary}
-                onPress={() => router.push('/screens/log-workout' as any)}>
-                <ThemedText style={styles.emptyActionTextSecondary}>Start Workout</ThemedText>
-              </Pressable>
-            </View>
           </View>
         )}
 
-        {/* 1. NUTRITION SECTION */}
-        <View style={styles.bentoCard}>
-          <View style={styles.bentoHeaderRow}>
-            <ThemedText style={styles.bentoTitle}>Nutrition</ThemedText>
-            <ThemedText style={styles.bentoMeta}>Last 7 Days</ThemedText>
-          </View>
-
-          {!summary || summary.days.every((d) => d.calories === 0) ? (
-            <View style={styles.sectionEmptyState}>
-              <Ionicons name="nutrition-outline" size={24} color={DS.textMuted} />
-              <ThemedText style={styles.sectionEmptyText}>Log meals to see your nutrition trends</ThemedText>
-              <Pressable style={styles.sectionEmptyBtn} onPress={() => router.push('/screens/trackfood' as any)}>
-                <ThemedText style={styles.sectionEmptyBtnText}>Log Food</ThemedText>
-              </Pressable>
+        {/* 1. CALORIES */}
+        {summary && (
+          <View style={styles.card}>
+            <View style={styles.cardHeaderRow}>
+              <ThemedText style={styles.cardTitle}>Calories</ThemedText>
+              {summary.calorieDeltaPercent != null && (
+                <View style={styles.deltaBadge}>
+                  <Ionicons
+                    name={summary.calorieDeltaPercent >= 0 ? 'arrow-up-outline' : 'arrow-down-outline'}
+                    size={11}
+                    color={DS.textPrimary}
+                  />
+                  <ThemedText style={styles.deltaText}>{Math.abs(summary.calorieDeltaPercent)}% vs last {period}</ThemedText>
+                </View>
+              )}
             </View>
-          ) : (
-            <>
-              {/* Calorie Bar Chart — real day-by-day totals, not a heatmap approximation */}
-              <View style={styles.chartContainer}>
-                <View style={styles.barsRow}>
-                  {summary.days.map((item, idx) => {
-                    const ratio = Math.min(1, item.calories / maxCal);
-                    const isToday = idx === summary.days.length - 1;
+
+            {hasNutritionData ? (
+              <>
+                <View style={styles.calorieHeroRow}>
+                  <ThemedText style={styles.calorieHeroVal}>
+                    {(period === 'day' ? summary.totalCalories : summary.avgCalories).toLocaleString()}
+                  </ThemedText>
+                  <ThemedText style={styles.calorieHeroUnit}>
+                    kcal{period !== 'day' ? '/day avg' : ''} · goal {summary.calorieGoal.toLocaleString()}
+                  </ThemedText>
+                </View>
+
+                <View style={styles.barChartContainer}>
+                  {summary.buckets.map((b, idx) => {
+                    const ratio = Math.min(1, b.calories / maxBucket);
                     return (
-                      <View key={idx} style={styles.barCol}>
+                      <View key={idx} style={styles.barColumn}>
                         <View style={styles.barTrack}>
-                          <View
-                            style={[
-                              styles.barFill,
-                              { height: `${item.calories > 0 ? Math.max(ratio * 100, 4) : 0}%` },
-                              isToday && styles.barFillActive,
-                            ]}
-                          />
+                          <View style={[styles.barFill, { height: `${b.calories > 0 ? Math.max(ratio * 100, 4) : 0}%` }]} />
                         </View>
-                        <ThemedText style={[styles.barDayText, isToday && styles.barDayTextActive]}>
-                          {item.label}
-                        </ThemedText>
+                        <ThemedText style={styles.barLabel}>{b.label}</ThemedText>
                       </View>
                     );
                   })}
                 </View>
-              </View>
 
-              <View style={styles.divider} />
+                {period !== 'day' && (
+                  <>
+                    <View style={styles.divider} />
+                    <View style={styles.subMetricRow}>
+                      <ThemedText style={styles.subMetricLabel}>Calorie Target Hit</ThemedText>
+                      <ThemedText style={styles.subMetricVal}>{summary.daysOnTarget}/{summary.totalDays} days</ThemedText>
+                    </View>
+                    <ProgressBar progress={summary.totalDays ? summary.daysOnTarget / summary.totalDays : 0} height={6} />
+                  </>
+                )}
 
-              {/* Sub-chart: Nutrition Consistency */}
-              <View style={styles.subMetricBox}>
-                <View style={styles.subMetricHeader}>
-                  <ThemedText style={styles.subMetricLabel}>Calorie Target Hit</ThemedText>
-                  <ThemedText style={styles.subMetricValMono}>{daysHitTarget}/7 Days</ThemedText>
+                <View style={styles.divider} />
+                <View style={styles.netRow}>
+                  <View style={styles.netItem}>
+                    <ThemedText style={styles.netVal}>{summary.totalCalories.toLocaleString()}</ThemedText>
+                    <ThemedText style={styles.netLabel}>Consumed</ThemedText>
+                  </View>
+                  <View style={styles.netItem}>
+                    <ThemedText style={styles.netVal}>{summary.caloriesBurned.toLocaleString()}</ThemedText>
+                    <ThemedText style={styles.netLabel}>Burned</ThemedText>
+                  </View>
+                  <View style={styles.netItem}>
+                    <ThemedText style={styles.netVal}>{summary.netCalories.toLocaleString()}</ThemedText>
+                    <ThemedText style={styles.netLabel}>Net</ThemedText>
+                  </View>
                 </View>
-                <View style={styles.progressTrack}>
-                  <View style={[styles.progressFill, { width: `${Math.round((daysHitTarget / 7) * 100)}%` }]} />
-                </View>
-              </View>
-            </>
-          )}
-        </View>
-
-        {/* 2. TRAINING SECTION */}
-        <View style={styles.bentoCard}>
-          <View style={styles.bentoHeaderRow}>
-            <ThemedText style={styles.bentoTitle}>Training</ThemedText>
-            <ThemedText style={styles.bentoMeta}>This Week</ThemedText>
+              </>
+            ) : (
+              <SectionEmpty DS={DS} styles={styles} icon="nutrition-outline" text="Log meals to see calorie trends" actionLabel="Log Food" onAction={() => router.push('/screens/trackfood' as any)} />
+            )}
           </View>
+        )}
 
-          {!workoutStats || workoutStats.weeklyWorkouts === 0 ? (
-            <View style={styles.sectionEmptyState}>
-              <Ionicons name="barbell-outline" size={24} color={DS.textMuted} />
-              <ThemedText style={styles.sectionEmptyText}>Start a workout to see training trends</ThemedText>
-              <Pressable style={styles.sectionEmptyBtn} onPress={() => router.push('/screens/log-workout' as any)}>
-                <ThemedText style={styles.sectionEmptyBtnText}>Start Workout</ThemedText>
-              </Pressable>
+        {/* 2. MACROS */}
+        {summary && hasNutritionData && (
+          <View style={styles.card}>
+            <ThemedText style={styles.cardTitle}>Macros</ThemedText>
+            <View style={styles.macroDonutRow}>
+              <MacroDonut macros={macros} trackColor={DS.ringTrack} size={110} strokeWidth={16} />
+              <View style={styles.macroLegend}>
+                {macros.map((m) => (
+                  <View key={m.name} style={styles.legendRow}>
+                    <View style={[styles.legendDot, { backgroundColor: m.color }]} />
+                    <ThemedText style={styles.legendLabel}>{m.name}</ThemedText>
+                    <ThemedText style={styles.legendVal}>{m.consumed}g</ThemedText>
+                  </View>
+                ))}
+              </View>
             </View>
-          ) : (
-            <>
-              {/* Training Stats Grid */}
-              <View style={styles.trainingStatsGrid}>
-                <View style={styles.trainingStat}>
-                  <ThemedText style={styles.trainingStatValue}>{workoutStats.weeklyWorkouts}</ThemedText>
-                  <ThemedText style={styles.trainingStatLabel}>Workouts</ThemedText>
+            <View style={styles.divider} />
+            {macros.map((m) => {
+              const pct = m.target ? Math.min(1, m.consumed / m.target) : 0;
+              return (
+                <View key={m.name} style={styles.macroTargetRow}>
+                  <ThemedText style={styles.macroTargetLabel}>{m.name} avg vs target</ThemedText>
+                  <ThemedText style={styles.macroTargetVal}>{m.consumed}g / {m.target}g</ThemedText>
+                  <ProgressBar progress={pct} color={m.color} height={5} />
                 </View>
-                <View style={styles.trainingStat}>
-                  <ThemedText style={styles.trainingStatValue}>{workoutStats.weeklyHours}</ThemedText>
-                  <ThemedText style={styles.trainingStatLabel}>Duration</ThemedText>
+              );
+            })}
+          </View>
+        )}
+
+        {/* 3. MEALS */}
+        {summary && hasNutritionData && summary.mealBreakdown.length > 0 && (
+          <View style={styles.card}>
+            <ThemedText style={styles.cardTitle}>Meal Split</ThemedText>
+            <ThemedText style={styles.cardSubtitle}>Actual share of calories vs your planned split</ThemedText>
+            {summary.mealBreakdown.map((m) => (
+              <View key={m.meal} style={styles.mealRow}>
+                <View style={styles.mealRowHeader}>
+                  <ThemedText style={styles.mealName}>{m.meal}</ThemedText>
+                  <ThemedText style={styles.mealVal}>{m.calories} kcal · {m.actualPercent}%</ThemedText>
                 </View>
-                <View style={styles.trainingStat}>
-                  <ThemedText style={styles.trainingStatValue}>{workoutStats.weeklyCalories}</ThemedText>
-                  <ThemedText style={styles.trainingStatLabel}>Calories</ThemedText>
-                </View>
-                <View style={styles.trainingStat}>
-                  <ThemedText style={styles.trainingStatValue}>{workoutStats.currentStreak}d</ThemedText>
-                  <ThemedText style={styles.trainingStatLabel}>Streak</ThemedText>
+                <View style={styles.mealTrack}>
+                  <View style={[styles.mealFill, { width: `${Math.min(100, m.actualPercent)}%` }]} />
+                  <View style={[styles.mealTargetTick, { left: `${Math.min(100, m.targetPercent)}%` }]} />
                 </View>
               </View>
-
-              <View style={styles.divider} />
-
-              {/* Sub-chart: real per-day workout frequency (not derived from food data) */}
-              <View style={styles.freqRow}>
-                <ThemedText style={styles.subMetricLabel}>Workout Frequency</ThemedText>
-                <View style={styles.dotsRow}>
-                  {weekDays.map((d, idx) => (
-                    <View key={idx} style={[styles.heatDot, d.worked && styles.heatDotActive]} />
-                  ))}
-                </View>
+            ))}
+            <View style={styles.mealLegendRow}>
+              <View style={styles.legendRow}>
+                <View style={[styles.legendDot, { backgroundColor: DS.accent }]} />
+                <ThemedText style={styles.legendLabel}>Actual</ThemedText>
               </View>
-            </>
-          )}
-        </View>
+              <View style={styles.legendRow}>
+                <View style={[styles.legendTick, { backgroundColor: DS.statusBad }]} />
+                <ThemedText style={styles.legendLabel}>Planned target</ThemedText>
+              </View>
+            </View>
+          </View>
+        )}
 
-        {/* 3. BODY SECTION */}
-        <View style={styles.bentoCard}>
-          <View style={styles.bentoHeaderRow}>
-            <ThemedText style={styles.bentoTitle}>Body</ThemedText>
+        {/* 4. TOP FOODS */}
+        {summary && hasNutritionData && (summary.topFoodsByCalories.length > 0) && (
+          <View style={styles.card}>
+            <ThemedText style={styles.cardTitle}>Top Foods</ThemedText>
+            <ThemedText style={styles.sectionLabelCaps}>BY CALORIES</ThemedText>
+            {summary.topFoodsByCalories.map((f, i) => (
+              <View key={f.name} style={styles.topFoodRow}>
+                <ThemedText style={styles.topFoodRank}>{i + 1}</ThemedText>
+                <ThemedText style={styles.topFoodName} numberOfLines={1}>{f.name}{f.count > 1 ? ` ×${f.count}` : ''}</ThemedText>
+                <ThemedText style={styles.topFoodVal}>{f.calories} kcal</ThemedText>
+              </View>
+            ))}
+            {summary.topFoodsByProtein.length > 0 && (
+              <>
+                <ThemedText style={[styles.sectionLabelCaps, { marginTop: Spacing.md }]}>BY PROTEIN</ThemedText>
+                {summary.topFoodsByProtein.map((f, i) => (
+                  <View key={f.name} style={styles.topFoodRow}>
+                    <ThemedText style={styles.topFoodRank}>{i + 1}</ThemedText>
+                    <ThemedText style={styles.topFoodName} numberOfLines={1}>{f.name}{f.count > 1 ? ` ×${f.count}` : ''}</ThemedText>
+                    <ThemedText style={styles.topFoodVal}>{f.protein}g</ThemedText>
+                  </View>
+                ))}
+              </>
+            )}
+          </View>
+        )}
+
+        {/* 5. TRAINING */}
+        {training && (
+          <View style={styles.card}>
+            <ThemedText style={styles.cardTitle}>Training</ThemedText>
+            {hasTrainingData ? (
+              <>
+                <View style={styles.trainingStatsGrid}>
+                  <View style={styles.trainingStat}>
+                    <ThemedText style={styles.trainingStatValue}>{training.workouts}</ThemedText>
+                    <ThemedText style={styles.trainingStatLabel}>Workouts</ThemedText>
+                  </View>
+                  <View style={styles.trainingStat}>
+                    <ThemedText style={styles.trainingStatValue}>{(training.totalMinutes / 60).toFixed(1)}h</ThemedText>
+                    <ThemedText style={styles.trainingStatLabel}>Duration</ThemedText>
+                  </View>
+                  <View style={styles.trainingStat}>
+                    <ThemedText style={styles.trainingStatValue}>{(training.totalVolumeKg / 1000).toFixed(1)}k</ThemedText>
+                    <ThemedText style={styles.trainingStatLabel}>Volume (kg)</ThemedText>
+                  </View>
+                  <View style={styles.trainingStat}>
+                    <ThemedText style={styles.trainingStatValue}>{training.currentStreak}d</ThemedText>
+                    <ThemedText style={styles.trainingStatLabel}>Streak</ThemedText>
+                  </View>
+                </View>
+
+                {training.muscleBreakdown.length > 0 && (
+                  <>
+                    <View style={styles.divider} />
+                    <ThemedText style={styles.sectionLabelCaps}>SETS BY MUSCLE GROUP</ThemedText>
+                    {training.muscleBreakdown.slice(0, 6).map((m) => {
+                      const maxSets = training.muscleBreakdown[0]?.sets || 1;
+                      return (
+                        <View key={m.muscleGroup} style={styles.muscleRow}>
+                          <ThemedText style={styles.muscleLabel} numberOfLines={1}>{m.muscleGroup}</ThemedText>
+                          <View style={styles.muscleBarTrack}>
+                            <View style={[styles.muscleBarFill, { width: `${Math.max(6, (m.sets / maxSets) * 100)}%` }]} />
+                          </View>
+                          <ThemedText style={styles.muscleSets}>{m.sets}</ThemedText>
+                        </View>
+                      );
+                    })}
+                  </>
+                )}
+              </>
+            ) : (
+              <SectionEmpty DS={DS} styles={styles} icon="barbell-outline" text="Start a workout to see training trends" actionLabel="Start Workout" onAction={() => router.push('/screens/log-workout' as any)} />
+            )}
+          </View>
+        )}
+
+        {/* 6. BODY / WEIGHT */}
+        <View style={styles.card}>
+          <View style={styles.cardHeaderRow}>
+            <ThemedText style={styles.cardTitle}>Body</ThemedText>
             <Pressable style={styles.logWeightBtn} onPress={openWeightModal}>
               <Ionicons name="add" size={13} color={DS.accentText} />
               <ThemedText style={styles.logWeightBtnText}>Log Weight</ThemedText>
@@ -291,24 +406,18 @@ export default function TrendsTabScreen() {
           </View>
 
           {bodyWeightKg == null || bodyWeightKg === 0 ? (
-            <View style={styles.sectionEmptyState}>
-              <Ionicons name="body-outline" size={24} color={DS.textMuted} />
-              <ThemedText style={styles.sectionEmptyText}>Log your weight to start tracking your body trend</ThemedText>
-              <Pressable style={styles.sectionEmptyBtn} onPress={openWeightModal}>
-                <ThemedText style={styles.sectionEmptyBtnText}>Log Weight</ThemedText>
-              </Pressable>
-            </View>
+            <SectionEmpty DS={DS} styles={styles} icon="body-outline" text="Log your weight to start tracking your body trend" actionLabel="Log Weight" onAction={openWeightModal} />
           ) : (
             <>
               <View style={styles.bodyMetricsGrid}>
                 <View style={styles.bodyMetricItem}>
                   <ThemedText style={styles.bodyMetricValue}>{formatWeight(bodyWeightKg, units, 1)}</ThemedText>
-                  <ThemedText style={styles.bodyMetricLabel}>Current Weight</ThemedText>
+                  <ThemedText style={styles.bodyMetricLabel}>Current</ThemedText>
                 </View>
                 {!!goalWeightKg && (
                   <View style={styles.bodyMetricItem}>
                     <ThemedText style={styles.bodyMetricValue}>{formatWeight(goalWeightKg, units, 1)}</ThemedText>
-                    <ThemedText style={styles.bodyMetricLabel}>Goal Weight</ThemedText>
+                    <ThemedText style={styles.bodyMetricLabel}>Goal</ThemedText>
                   </View>
                 )}
                 {profile?.bodyMetrics?.bmi != null && profile.bodyMetrics.bmi > 0 && (
@@ -324,14 +433,26 @@ export default function TrendsTabScreen() {
                   </View>
                 )}
               </View>
-              {weightDelta !== null && (
-                <ThemedText style={styles.weightDeltaText}>
-                  {weightDelta === 0 ? 'No change' : `${weightDelta > 0 ? '+' : ''}${formatWeight(Math.abs(weightDelta), units, 1)} ${weightDelta > 0 ? 'gained' : 'lost'}`} vs ~2 weeks ago
-                </ThemedText>
+
+              {weightHistory.length >= 2 && (
+                <>
+                  <View style={styles.divider} />
+                  <WeightChart
+                    DS={DS}
+                    history={weightHistory}
+                    goalWeightKg={goalWeightKg}
+                  />
+                  {weightDelta !== null && (
+                    <ThemedText style={styles.weightDeltaText}>
+                      {weightDelta === 0 ? 'No change' : `${weightDelta > 0 ? '+' : ''}${formatWeight(Math.abs(weightDelta), units, 1)} ${weightDelta > 0 ? 'gained' : 'lost'}`} over this range
+                    </ThemedText>
+                  )}
+                </>
               )}
             </>
           )}
         </View>
+
         </>
         )}
 
@@ -372,12 +493,119 @@ export default function TrendsTabScreen() {
   );
 }
 
+/** Small "log something to see this" placeholder used inside multiple cards. */
+function SectionEmpty({
+  DS, styles, icon, text, actionLabel, onAction,
+}: {
+  DS: ReturnType<typeof useDS>;
+  styles: ReturnType<typeof makeStyles>;
+  icon: React.ComponentProps<typeof Ionicons>['name'];
+  text: string;
+  actionLabel: string;
+  onAction: () => void;
+}) {
+  return (
+    <View style={styles.sectionEmptyState}>
+      <Ionicons name={icon} size={22} color={DS.textMuted} />
+      <ThemedText style={styles.sectionEmptyText}>{text}</ThemedText>
+      <Pressable style={styles.sectionEmptyBtn} onPress={onAction}>
+        <ThemedText style={styles.sectionEmptyBtnText}>{actionLabel}</ThemedText>
+      </Pressable>
+    </View>
+  );
+}
+
+/** Three-segment donut — each macro's share of the day's calories (protein/carbs × 4, fats × 9). */
+function MacroDonut({
+  macros, trackColor, size, strokeWidth,
+}: {
+  macros: { name: string; consumed: number; color: string }[];
+  trackColor: string;
+  size: number;
+  strokeWidth: number;
+}) {
+  const CAL_PER_GRAM: Record<string, number> = { Protein: 4, Carbs: 4, Fats: 9 };
+  const calorieShares = macros.map((m) => (m.consumed || 0) * (CAL_PER_GRAM[m.name] ?? 4));
+  const total = calorieShares.reduce((s, v) => s + v, 0);
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+
+  if (total === 0) {
+    return (
+      <Svg width={size} height={size}>
+        <Circle cx={size / 2} cy={size / 2} r={radius} stroke={trackColor} strokeWidth={strokeWidth} fill="none" />
+      </Svg>
+    );
+  }
+
+  let cumulative = 0;
+  return (
+    <Svg width={size} height={size}>
+      <Circle cx={size / 2} cy={size / 2} r={radius} stroke={trackColor} strokeWidth={strokeWidth} fill="none" />
+      {macros.map((m, i) => {
+        const fraction = calorieShares[i] / total;
+        const dashArray = `${fraction * circumference} ${circumference}`;
+        const dashOffset = -cumulative * circumference;
+        cumulative += fraction;
+        return (
+          <Circle
+            key={m.name}
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            stroke={m.color}
+            strokeWidth={strokeWidth}
+            fill="none"
+            strokeDasharray={dashArray}
+            strokeDashoffset={dashOffset}
+            rotation={-90}
+            origin={`${size / 2}, ${size / 2}`}
+          />
+        );
+      })}
+    </Svg>
+  );
+}
+
+/** Weight trend line with an optional goal reference line. */
+function WeightChart({
+  DS, history, goalWeightKg,
+}: {
+  DS: ReturnType<typeof useDS>;
+  history: { date: string; weightKg: number }[];
+  goalWeightKg: number | null;
+}) {
+  const width = 300;
+  const height = 90;
+  const padding = 8;
+
+  const values = history.map((h) => h.weightKg);
+  const allValues = goalWeightKg ? [...values, goalWeightKg] : values;
+  const min = Math.min(...allValues);
+  const max = Math.max(...allValues);
+  const range = max - min || 1;
+
+  const points = history.map((h, i) => {
+    const x = padding + (i / (history.length - 1)) * (width - padding * 2);
+    const y = height - padding - ((h.weightKg - min) / range) * (height - padding * 2);
+    return `${x},${y}`;
+  }).join(' ');
+
+  const goalY = goalWeightKg != null ? height - padding - ((goalWeightKg - min) / range) * (height - padding * 2) : null;
+
+  return (
+    <Svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`}>
+      {goalY != null && (
+        <Line x1={padding} y1={goalY} x2={width - padding} y2={goalY} stroke={DS.textMuted} strokeWidth={1} strokeDasharray="3,4" />
+      )}
+      <Polyline points={points} fill="none" stroke={DS.accent} strokeWidth={2.5} strokeLinejoin="round" strokeLinecap="round" />
+    </Svg>
+  );
+}
+
 function makeStyles(DS: ReturnType<typeof useDS>) {
   return StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: DS.bg,
-    },
+    container: { flex: 1, backgroundColor: DS.bg },
     topHeader: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -397,156 +625,39 @@ function makeStyles(DS: ReturnType<typeof useDS>) {
       paddingHorizontal: Spacing.md,
       paddingTop: Spacing.md,
     },
-    titleSection: {
-      marginBottom: Spacing.lg,
-    },
     pageTitle: {
       fontSize: 32,
       fontWeight: '700',
       color: DS.textPrimary,
       letterSpacing: -1,
+      marginBottom: Spacing.md,
     },
-    pageSubtitle: {
-      fontSize: 14,
-      color: DS.textSecond,
-      marginTop: 4,
+    dateNavRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: Spacing.md,
+      marginTop: Spacing.md,
+      marginBottom: Spacing.lg,
     },
+    dateNavBtn: {
+      width: 28,
+      height: 28,
+      borderRadius: 14,
+      backgroundColor: DS.raised,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    dateNavBtnDisabled: { opacity: 0.4 },
     initialSpinner: {
       paddingVertical: Spacing.xxl,
       alignItems: 'center',
     },
-    bentoCard: {
-      backgroundColor: DS.surface,
-      borderRadius: Radius.xl,
-      padding: Spacing.lg,
-      marginBottom: Spacing.md,
-    },
-    bentoHeaderRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: Spacing.md,
-    },
-    bentoTitle: {
-      fontSize: 20,
+    dateRangeLabel: {
+      fontSize: 14,
       fontWeight: '600',
-      color: DS.textPrimary,
-    },
-    bentoMeta: {
-      fontFamily: Fonts.mono,
-      fontSize: 12,
       color: DS.textSecond,
-    },
-    logWeightBtn: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 4,
-      backgroundColor: DS.accent,
-      paddingHorizontal: 10,
-      paddingVertical: 6,
-      borderRadius: Radius.full,
-    },
-    logWeightBtnText: {
-      fontSize: 12,
-      fontWeight: '600',
-      color: DS.accentText,
-    },
-    chartContainer: {
-      height: 140,
-      justifyContent: 'flex-end',
-      marginBottom: Spacing.sm,
-    },
-    barsRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-around',
-      alignItems: 'flex-end',
-      height: 110,
-    },
-    barCol: {
-      alignItems: 'center',
-      height: '100%',
-      justifyContent: 'flex-end',
-    },
-    barTrack: {
-      width: 24,
-      height: 85,
-      backgroundColor: DS.raised,
-      borderRadius: Radius.sm,
-      justifyContent: 'flex-end',
-      overflow: 'hidden',
-    },
-    barFill: {
-      width: '100%',
-      backgroundColor: DS.textMuted,
-      borderRadius: Radius.sm,
-    },
-    barFillActive: {
-      backgroundColor: DS.accent,
-    },
-    barDayText: {
-      fontFamily: Fonts.mono,
-      fontSize: 11,
-      color: DS.textSecond,
-      marginTop: 6,
-    },
-    barDayTextActive: {
-      color: DS.textPrimary,
-      fontWeight: '700',
-    },
-    divider: {
-      height: 1,
-      backgroundColor: DS.border,
-      marginVertical: Spacing.md,
-    },
-    subMetricBox: {},
-    subMetricHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      marginBottom: Spacing.xs,
-    },
-    subMetricLabel: {
-      fontSize: 13,
-      color: DS.textSecond,
-    },
-    subMetricValMono: {
-      fontFamily: Fonts.mono,
-      fontSize: 12,
-      color: DS.textPrimary,
-      fontWeight: '600',
-    },
-    progressTrack: {
-      height: 8,
-      backgroundColor: DS.raised,
-      borderRadius: Radius.full,
-      overflow: 'hidden',
-    },
-    progressFill: {
-      height: '100%',
-      backgroundColor: DS.accent,
-      borderRadius: Radius.full,
-    },
-    freqRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-    },
-    dotsRow: {
-      flexDirection: 'row',
-      gap: 6,
-    },
-    heatDot: {
-      width: 12,
-      height: 12,
-      borderRadius: 4,
-      backgroundColor: DS.raised,
-    },
-    heatDotActive: {
-      backgroundColor: DS.accent,
-    },
-    weightDeltaText: {
-      fontSize: 12,
-      color: DS.textSecond,
-      marginTop: Spacing.sm,
+      minWidth: 140,
       textAlign: 'center',
     },
     emptyStateBanner: {
@@ -568,33 +679,232 @@ function makeStyles(DS: ReturnType<typeof useDS>) {
       color: DS.textSecond,
       textAlign: 'center',
       lineHeight: 18,
+    },
+    card: {
+      backgroundColor: DS.surface,
+      borderRadius: Radius.xl,
+      padding: Spacing.lg,
       marginBottom: Spacing.md,
     },
-    emptyStateActionsRow: {
+    cardHeaderRow: {
       flexDirection: 'row',
-      gap: Spacing.md,
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: Spacing.md,
     },
-    emptyActionBtnPrimary: {
-      backgroundColor: DS.accent,
-      paddingHorizontal: Spacing.md,
-      paddingVertical: 10,
-      borderRadius: Radius.full,
-    },
-    emptyActionTextPrimary: {
-      fontSize: 13,
-      fontWeight: '600',
-      color: DS.accentText,
-    },
-    emptyActionBtnSecondary: {
-      backgroundColor: DS.raised,
-      paddingHorizontal: Spacing.md,
-      paddingVertical: 10,
-      borderRadius: Radius.full,
-    },
-    emptyActionTextSecondary: {
-      fontSize: 13,
+    cardTitle: {
+      fontSize: 18,
       fontWeight: '600',
       color: DS.textPrimary,
+    },
+    cardSubtitle: {
+      fontSize: 12,
+      color: DS.textSecond,
+      marginTop: -Spacing.sm,
+      marginBottom: Spacing.md,
+    },
+    deltaBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      backgroundColor: DS.raised,
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: Radius.sm,
+    },
+    deltaText: {
+      fontSize: 11,
+      fontWeight: '600',
+      color: DS.textPrimary,
+    },
+    calorieHeroRow: {
+      marginBottom: Spacing.md,
+    },
+    calorieHeroVal: {
+      fontFamily: Fonts.mono,
+      fontSize: 32,
+      fontWeight: '700',
+      color: DS.textPrimary,
+      letterSpacing: -0.5,
+    },
+    calorieHeroUnit: {
+      fontSize: 12,
+      color: DS.textSecond,
+      marginTop: 2,
+    },
+    barChartContainer: {
+      flexDirection: 'row',
+      alignItems: 'flex-end',
+      justifyContent: 'space-between',
+      height: 120,
+      marginBottom: Spacing.sm,
+    },
+    barColumn: {
+      alignItems: 'center',
+      flex: 1,
+    },
+    barTrack: {
+      width: 22,
+      height: 95,
+      backgroundColor: DS.raised,
+      borderRadius: Radius.sm,
+      justifyContent: 'flex-end',
+      overflow: 'hidden',
+    },
+    barFill: {
+      width: '100%',
+      backgroundColor: DS.accent,
+      borderRadius: Radius.sm,
+    },
+    barLabel: {
+      fontFamily: Fonts.mono,
+      fontSize: 10,
+      color: DS.textSecond,
+      marginTop: 6,
+    },
+    divider: {
+      height: 1,
+      backgroundColor: DS.border,
+      marginVertical: Spacing.md,
+    },
+    subMetricRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginBottom: 6,
+    },
+    subMetricLabel: { fontSize: 13, color: DS.textSecond },
+    subMetricVal: { fontFamily: Fonts.mono, fontSize: 12, color: DS.textPrimary, fontWeight: '600' },
+    netRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+    },
+    netItem: { alignItems: 'center', flex: 1 },
+    netVal: { fontFamily: Fonts.mono, fontSize: 16, fontWeight: '700', color: DS.textPrimary },
+    netLabel: { fontSize: 11, color: DS.textMuted, marginTop: 2 },
+    macroDonutRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.lg,
+      marginBottom: Spacing.sm,
+    },
+    macroLegend: { flex: 1, gap: 10 },
+    legendRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    legendDot: { width: 10, height: 10, borderRadius: 5 },
+    legendTick: { width: 10, height: 2, borderRadius: 1 },
+    legendLabel: { fontSize: 13, color: DS.textSecond, flex: 1 },
+    legendVal: { fontFamily: Fonts.mono, fontSize: 13, fontWeight: '600', color: DS.textPrimary },
+    macroTargetRow: { marginBottom: Spacing.sm },
+    macroTargetLabel: { fontSize: 12, color: DS.textSecond, marginBottom: 2 },
+    macroTargetVal: { fontFamily: Fonts.mono, fontSize: 11, color: DS.textMuted, marginBottom: 4 },
+    mealRow: { marginBottom: Spacing.md },
+    mealRowHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
+    mealName: { fontSize: 14, fontWeight: '600', color: DS.textPrimary },
+    mealVal: { fontFamily: Fonts.mono, fontSize: 11, color: DS.textSecond },
+    mealTrack: {
+      height: 8,
+      backgroundColor: DS.raised,
+      borderRadius: 4,
+      overflow: 'visible',
+      position: 'relative',
+    },
+    mealFill: {
+      height: 8,
+      backgroundColor: DS.accent,
+      borderRadius: 4,
+    },
+    mealTargetTick: {
+      position: 'absolute',
+      top: -3,
+      width: 2,
+      height: 14,
+      backgroundColor: DS.statusBad,
+      borderRadius: 1,
+    },
+    mealLegendRow: { flexDirection: 'row', gap: Spacing.lg, marginTop: Spacing.xs },
+    sectionLabelCaps: {
+      fontSize: 11,
+      fontWeight: '600',
+      color: DS.textMuted,
+      letterSpacing: 0.5,
+      marginBottom: Spacing.sm,
+    },
+    topFoodRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.sm,
+      paddingVertical: 7,
+    },
+    topFoodRank: {
+      fontFamily: Fonts.mono,
+      fontSize: 11,
+      color: DS.textMuted,
+      width: 14,
+    },
+    topFoodName: { flex: 1, fontSize: 13, color: DS.textPrimary },
+    topFoodVal: { fontFamily: Fonts.mono, fontSize: 12, color: DS.textSecond },
+    trainingStatsGrid: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+    },
+    trainingStat: { alignItems: 'center', flex: 1 },
+    trainingStatValue: {
+      fontSize: 18,
+      fontWeight: '700',
+      fontFamily: Fonts.mono,
+      color: DS.textPrimary,
+      marginBottom: 2,
+    },
+    trainingStatLabel: {
+      fontSize: 10,
+      color: DS.textSecond,
+      textTransform: 'uppercase',
+      letterSpacing: 0.3,
+    },
+    muscleRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, marginBottom: 8 },
+    muscleLabel: { width: 76, fontSize: 12, color: DS.textSecond },
+    muscleBarTrack: { flex: 1, height: 8, backgroundColor: DS.raised, borderRadius: 4, overflow: 'hidden' },
+    muscleBarFill: { height: 8, backgroundColor: DS.accent, borderRadius: 4 },
+    muscleSets: { fontFamily: Fonts.mono, fontSize: 11, color: DS.textPrimary, width: 20, textAlign: 'right' },
+    logWeightBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      backgroundColor: DS.accent,
+      paddingHorizontal: 10,
+      paddingVertical: 6,
+      borderRadius: Radius.full,
+    },
+    logWeightBtnText: { fontSize: 12, fontWeight: '600', color: DS.accentText },
+    bodyMetricsGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: Spacing.md,
+    },
+    bodyMetricItem: {
+      alignItems: 'center',
+      width: '45%',
+      backgroundColor: DS.raised,
+      borderRadius: Radius.md,
+      paddingVertical: Spacing.md,
+    },
+    bodyMetricValue: {
+      fontSize: 18,
+      fontWeight: '700',
+      fontFamily: Fonts.mono,
+      color: DS.textPrimary,
+      marginBottom: 2,
+    },
+    bodyMetricLabel: {
+      fontSize: 10,
+      color: DS.textSecond,
+      textTransform: 'uppercase',
+      letterSpacing: 0.3,
+    },
+    weightDeltaText: {
+      fontSize: 12,
+      color: DS.textSecond,
+      marginTop: Spacing.sm,
+      textAlign: 'center',
     },
     sectionEmptyState: {
       alignItems: 'center',
@@ -617,55 +927,6 @@ function makeStyles(DS: ReturnType<typeof useDS>) {
       fontSize: 13,
       fontWeight: '600',
       color: DS.accentText,
-    },
-    trainingStatsGrid: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      paddingVertical: Spacing.md,
-    },
-    trainingStat: {
-      alignItems: 'center',
-      flex: 1,
-    },
-    trainingStatValue: {
-      fontSize: 20,
-      fontWeight: '700',
-      fontFamily: Fonts.mono,
-      color: DS.textPrimary,
-      marginBottom: 2,
-    },
-    trainingStatLabel: {
-      fontSize: 11,
-      color: DS.textSecond,
-      textTransform: 'uppercase',
-      letterSpacing: 0.3,
-    },
-    bodyMetricsGrid: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      justifyContent: 'space-between',
-      paddingVertical: Spacing.md,
-      gap: Spacing.md,
-    },
-    bodyMetricItem: {
-      alignItems: 'center',
-      width: '45%',
-      backgroundColor: DS.raised,
-      borderRadius: Radius.md,
-      paddingVertical: Spacing.md,
-    },
-    bodyMetricValue: {
-      fontSize: 20,
-      fontWeight: '700',
-      fontFamily: Fonts.mono,
-      color: DS.textPrimary,
-      marginBottom: 2,
-    },
-    bodyMetricLabel: {
-      fontSize: 11,
-      color: DS.textSecond,
-      textTransform: 'uppercase',
-      letterSpacing: 0.3,
     },
     modalOverlay: {
       flex: 1,

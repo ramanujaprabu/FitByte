@@ -85,7 +85,7 @@ export default function ProfileScreen() {
         <View style={styles.section}>
           <ThemedText style={styles.sectionHeaderCaps}>GOALS</ThemedText>
           <View style={styles.cardGroup}>
-            <Pressable style={styles.rowItem} onPress={() => router.push('/screens/daily-analytics')}>
+            <Pressable style={styles.rowItem} onPress={() => router.push('/(tabs)/trends' as any)}>
               <View style={styles.rowLeft}>
                 <Ionicons name="flag-outline" size={20} color={DS.textSecond} />
                 <ThemedText style={styles.rowTitle}>Daily Calories</ThemedText>
@@ -98,7 +98,7 @@ export default function ProfileScreen() {
               </View>
             </Pressable>
 
-            <Pressable style={[styles.rowItem, styles.lastRowItem]} onPress={() => router.push('/screens/macro-breakdown')}>
+            <Pressable style={[styles.rowItem, styles.lastRowItem]} onPress={() => router.push('/(tabs)/trends' as any)}>
               <View style={styles.rowLeft}>
                 <Ionicons name="pie-chart-outline" size={20} color={DS.textSecond} />
                 <ThemedText style={styles.rowTitle}>Macro Targets</ThemedText>

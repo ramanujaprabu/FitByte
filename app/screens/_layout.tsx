@@ -13,9 +13,7 @@ export default function ScreensLayout() {
       <Stack.Screen name="food-detail" />
       <Stack.Screen name="meal-detail" />
       <Stack.Screen name="meal-history" />
-      <Stack.Screen name="macro-breakdown" />
       <Stack.Screen name="scan-result" />
-      <Stack.Screen name="daily-analytics" />
       <Stack.Screen name="workout-detail" />
       <Stack.Screen name="create-routine" />
       <Stack.Screen name="exercise-picker" options={{ animation: 'slide_from_bottom' }} />

@@ -17,16 +17,17 @@ import type {
   Equipment,
   Exercise,
   ExerciseRecord,
+  MuscleGroupVolume,
+  PeriodTrainingStats,
   RoutineExercise,
   SessionExercise,
   SetType,
-  WorkoutDayLevel,
   WorkoutIntensity,
   WorkoutRoutine,
   WorkoutSession,
   WorkoutSet,
-  WorkoutStats,
 } from '@/types';
+import { periodRange, type Period } from '@/utils/period';
 
 /** Reads the locally cached session — see nutrition.ts for why this avoids getUser(). */
 async function currentUserId(): Promise<string> {
@@ -531,64 +532,110 @@ export const workoutService = {
     return Array.from(map.values()).slice(0, limit);
   },
 
-  async getWeeklyStats(): Promise<WorkoutStats> {
+  /**
+   * Current daily workout streak, counting consecutive days (today
+   * backwards) with at least one session. Looks back up to a year so a
+   * genuinely long streak isn't silently capped by a short query window.
+   */
+  async getCurrentStreak(): Promise<number> {
     const userId = await currentUserId();
-    const weekAgo = new Date();
-    weekAgo.setDate(weekAgo.getDate() - 7);
+    const since = new Date();
+    since.setDate(since.getDate() - 365);
 
     const { data, error } = await supabase
       .from('workout_sessions')
-      .select('duration_mins, calories_burned, performed_at')
+      .select('performed_at')
       .eq('user_id', userId)
-      .gte('performed_at', weekAgo.toISOString());
+      .gte('performed_at', since.toISOString());
     if (error) throw error;
 
-    const rows = data ?? [];
-    const totalMins = rows.reduce((s, r: any) => s + r.duration_mins, 0);
-    const totalCalories = rows.reduce((s, r: any) => s + r.calories_burned, 0);
-
-    // Streak: count consecutive days (from today backwards) with at least one session.
-    const daysWithSession = new Set(rows.map((r: any) => new Date(r.performed_at).toDateString()));
+    const daysWithSession = new Set((data ?? []).map((r: any) => new Date(r.performed_at).toDateString()));
     let streak = 0;
     const cursor = new Date();
     while (daysWithSession.has(cursor.toDateString())) {
       streak += 1;
       cursor.setDate(cursor.getDate() - 1);
     }
+    return streak;
+  },
+
+  /**
+   * Training summary for the Trends tab's Day/Week/Month view: workouts,
+   * duration, total weight lifted, and a per-muscle-group set/volume
+   * breakdown (so "Training" can show what you actually worked, not just
+   * how long you were in the gym).
+   */
+  async getPeriodTrainingStats(period: Period, referenceDate: Date = new Date()): Promise<PeriodTrainingStats> {
+    const userId = await currentUserId();
+    const { start, end } = periodRange(period, referenceDate);
+
+    const [{ data: sessions, error }, currentStreak] = await Promise.all([
+      supabase
+        .from('workout_sessions')
+        .select('id, duration_mins, calories_burned')
+        .eq('user_id', userId)
+        .gte('performed_at', start.toISOString())
+        .lte('performed_at', end.toISOString()),
+      this.getCurrentStreak().catch(() => 0),
+    ]);
+    if (error) throw error;
+
+    const sessionRows = sessions ?? [];
+    const sessionIds = sessionRows.map((s: any) => s.id);
+    const totalMinutes = sessionRows.reduce((s: number, r: any) => s + r.duration_mins, 0);
+    const totalCaloriesBurned = sessionRows.reduce((s: number, r: any) => s + r.calories_burned, 0);
+
+    let totalVolumeKg = 0;
+    let muscleBreakdown: MuscleGroupVolume[] = [];
+
+    if (sessionIds.length) {
+      const { data: sessionExercises } = await supabase
+        .from('workout_session_exercises')
+        .select('id, exercise_id')
+        .in('session_id', sessionIds);
+      const exRows = sessionExercises ?? [];
+      const sessionExerciseIds = exRows.map((e: any) => e.id);
+
+      const libraryIds = Array.from(new Set(exRows.map((e: any) => e.exercise_id).filter(Boolean)));
+      const muscleByExerciseId = new Map<string, string>();
+      if (libraryIds.length) {
+        const { data: libraryRows } = await supabase.from('exercises').select('id, muscle_group').in('id', libraryIds);
+        for (const r of libraryRows ?? []) muscleByExerciseId.set(r.id, r.muscle_group);
+      }
+      const exerciseIdBySessionExercise = new Map(exRows.map((e: any) => [e.id, e.exercise_id]));
+
+      if (sessionExerciseIds.length) {
+        const { data: sets } = await supabase
+          .from('workout_session_sets')
+          .select('session_exercise_id, weight_kg, reps')
+          .in('session_exercise_id', sessionExerciseIds)
+          .eq('completed', true);
+
+        const muscleMap = new Map<string, { sets: number; volumeKg: number }>();
+        for (const s of sets ?? []) {
+          const exerciseId = exerciseIdBySessionExercise.get(s.session_exercise_id);
+          const muscle = (exerciseId && muscleByExerciseId.get(exerciseId)) || 'Other';
+          const volume = Number(s.weight_kg) * s.reps;
+          totalVolumeKg += volume;
+          const entry = muscleMap.get(muscle) ?? { sets: 0, volumeKg: 0 };
+          entry.sets += 1;
+          entry.volumeKg += volume;
+          muscleMap.set(muscle, entry);
+        }
+        muscleBreakdown = Array.from(muscleMap.entries())
+          .map(([muscleGroup, v]) => ({ muscleGroup, sets: v.sets, volumeKg: Math.round(v.volumeKg) }))
+          .sort((a, b) => b.sets - a.sets);
+      }
+    }
 
     return {
-      weeklyWorkouts: rows.length,
-      weeklyHours: `${(totalMins / 60).toFixed(1)}h`,
-      weeklyCalories: `${(totalCalories / 1000).toFixed(1)}k`,
-      currentStreak: streak,
+      workouts: sessionRows.length,
+      totalMinutes,
+      totalVolumeKg: Math.round(totalVolumeKg),
+      totalCaloriesBurned,
+      muscleBreakdown,
+      currentStreak,
     };
   },
 
-  async getCalendarData(month?: number, year?: number): Promise<Record<number, WorkoutDayLevel>> {
-    const userId = await currentUserId();
-    const now = new Date();
-    const y = year ?? now.getFullYear();
-    const m = month ?? now.getMonth();
-    const start = new Date(y, m, 1);
-    const end = new Date(y, m + 1, 0, 23, 59, 59);
-
-    const { data, error } = await supabase
-      .from('workout_sessions')
-      .select('duration_mins, performed_at')
-      .eq('user_id', userId)
-      .gte('performed_at', start.toISOString())
-      .lte('performed_at', end.toISOString());
-    if (error) throw error;
-
-    const result: Record<number, WorkoutDayLevel> = {};
-    for (const row of data ?? []) {
-      const day = new Date(row.performed_at).getDate();
-      const level: WorkoutDayLevel = row.duration_mins >= 60 ? 'high' : row.duration_mins >= 30 ? 'mid' : 'low';
-      const order: WorkoutDayLevel[] = ['empty', 'low', 'mid', 'high'];
-      if (!result[day] || order.indexOf(level) > order.indexOf(result[day])) {
-        result[day] = level;
-      }
-    }
-    return result;
-  },
 };

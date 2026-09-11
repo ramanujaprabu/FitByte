@@ -92,13 +92,6 @@ export interface DailyNutrition {
   nutritionScore: number;
 }
 
-export type ConsistencyLevel = 'empty' | 'low' | 'mid' | 'high';
-
-export interface NutritionDay {
-  date: number;           // day of month
-  level: ConsistencyLevel;
-}
-
 export interface AIInsight {
   id: string;
   type: 'positive' | 'warning' | 'critical';
@@ -106,10 +99,73 @@ export interface AIInsight {
   icon: string;
 }
 
+// ─── Analytics (Trends tab) ────────────────────────────────────────────────
+
+export interface PeriodBucket {
+  label: string;
+  date: string;
+  calories: number;
+}
+
+export interface PeriodMealBreakdown {
+  meal: MealType;
+  calories: number;
+  actualPercent: number;
+  targetPercent: number;
+}
+
+export interface PeriodTopFood {
+  name: string;
+  calories: number;
+  count: number;
+}
+
+export interface PeriodTopFoodByProtein {
+  name: string;
+  protein: number;
+  count: number;
+}
+
+export interface PeriodSummary {
+  period: 'day' | 'week' | 'month';
+  rangeLabel: string;
+  buckets: PeriodBucket[];
+  totalCalories: number;
+  avgCalories: number;
+  calorieGoal: number;
+  daysLogged: number;
+  daysOnTarget: number;
+  totalDays: number;
+  calorieDeltaPercent: number | null;
+  avgProtein: number;
+  avgCarbs: number;
+  avgFats: number;
+  macroTargets: MacroTarget;
+  mealBreakdown: PeriodMealBreakdown[];
+  topFoodsByCalories: PeriodTopFood[];
+  topFoodsByProtein: PeriodTopFoodByProtein[];
+  caloriesBurned: number;
+  netCalories: number;
+}
+
+export interface MuscleGroupVolume {
+  muscleGroup: string;
+  sets: number;
+  volumeKg: number;
+}
+
+export interface PeriodTrainingStats {
+  workouts: number;
+  totalMinutes: number;
+  totalVolumeKg: number;
+  totalCaloriesBurned: number;
+  muscleBreakdown: MuscleGroupVolume[];
+  currentStreak: number;
+}
+
 // ─── Workout ──────────────────────────────────────────────────────────────────
 
 export type WorkoutIntensity = 'Low' | 'Medium' | 'High' | 'Extreme';
-export type WorkoutDayLevel = 'empty' | 'low' | 'mid' | 'high';
 export type Equipment = 'Barbell' | 'Dumbbell' | 'Machine' | 'Cable' | 'Bodyweight' | 'Kettlebell' | 'Other';
 export type ExerciseCategory = 'strength' | 'cardio' | 'bodyweight' | 'stretching';
 export type SetType = 'warmup' | 'normal' | 'dropset' | 'failure';
@@ -176,13 +232,6 @@ export interface WorkoutSession {
   performedAt: string;
   /** Only populated by `getSessionDetail` — the actual logged exercises/sets. */
   exercises?: SessionExercise[];
-}
-
-export interface WorkoutStats {
-  weeklyWorkouts: number;
-  weeklyHours: string;
-  weeklyCalories: string;
-  currentStreak: number;
 }
 
 /** A single exercise's best-ever numbers, for the "new PR" moment on Finish. */

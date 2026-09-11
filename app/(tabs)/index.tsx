@@ -27,8 +27,7 @@ const MEAL_EMPTY_COPY: Record<MealType, string> = {
 
 const MORE_LINKS: { label: string; icon: React.ComponentProps<typeof Ionicons>['name']; route: string }[] = [
   { label: 'Meal History', icon: 'time-outline', route: '/screens/meal-history' },
-  { label: 'Macro Breakdown', icon: 'pie-chart-outline', route: '/screens/macro-breakdown' },
-  { label: 'Performance Trends', icon: 'trending-up-outline', route: '/screens/daily-analytics' },
+  { label: 'Trends & Analytics', icon: 'trending-up-outline', route: '/(tabs)/trends' },
 ];
 
 function startOfDay(d: Date): Date {
@@ -156,7 +155,7 @@ export default function LogHomeScreen() {
         {/* Calorie Banner */}
         <Pressable
           style={({ pressed }) => [styles.calorieBanner, pressed && styles.pressedFade]}
-          onPress={() => router.push('/screens/daily-analytics' as any)}>
+          onPress={() => router.push('/(tabs)/trends' as any)}>
           <View style={styles.calorieBannerIcon}>
             <Ionicons name="restaurant-outline" size={20} color={DS.textPrimary} />
           </View>
