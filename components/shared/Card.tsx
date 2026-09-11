@@ -1,5 +1,6 @@
 /**
  * Card — Base surface container used throughout the app.
+<<<<<<< HEAD
  * Soft, low-boxy surface: a subtle shadow instead of a hard 1px border,
  * larger corner radius. Replaces repeated sectionCard/analyticsCard/heroCard
  * patterns.
@@ -8,18 +9,32 @@ import React, { useMemo } from 'react';
 import { Platform, View, StyleSheet, type ViewProps } from 'react-native';
 import { useDS } from '@/contexts/ThemeContext';
 import { Radius, Spacing } from '@/constants/theme';
+=======
+ * Replaces repeated sectionCard/analyticsCard/heroCard patterns.
+ */
+import React from 'react';
+import { View, StyleSheet, type ViewProps } from 'react-native';
+import { DS } from '@/constants/theme';
+>>>>>>> 46b69503e3227789042a618d42dcb60179f909f6
 
 interface CardProps extends ViewProps {
   /** Tighter padding variant */
   compact?: boolean;
+<<<<<<< HEAD
   /** Remove the shadow/elevation */
+=======
+  /** Remove the border */
+>>>>>>> 46b69503e3227789042a618d42dcb60179f909f6
   borderless?: boolean;
 }
 
 export function Card({ compact, borderless, style, children, ...rest }: CardProps) {
+<<<<<<< HEAD
   const DS = useDS();
   const styles = useMemo(() => makeStyles(DS), [DS]);
 
+=======
+>>>>>>> 46b69503e3227789042a618d42dcb60179f909f6
   return (
     <View
       style={[
@@ -34,6 +49,7 @@ export function Card({ compact, borderless, style, children, ...rest }: CardProp
   );
 }
 
+<<<<<<< HEAD
 function makeStyles(DS: ReturnType<typeof useDS>) {
   return StyleSheet.create({
     base: {
@@ -61,3 +77,21 @@ function makeStyles(DS: ReturnType<typeof useDS>) {
     },
   });
 }
+=======
+const styles = StyleSheet.create({
+  base: {
+    backgroundColor: DS.surface,
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: DS.border,
+  },
+  compact: {
+    padding: 14,
+  },
+  borderless: {
+    borderWidth: 0,
+  },
+});
+>>>>>>> 46b69503e3227789042a618d42dcb60179f909f6

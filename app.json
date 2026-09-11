@@ -19,8 +19,12 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
+<<<<<<< HEAD
       "predictiveBackGestureEnabled": false,
       "package": "com.anonymous.FitByte"
+=======
+      "predictiveBackGestureEnabled": false
+>>>>>>> 46b69503e3227789042a618d42dcb60179f909f6
     },
     "web": {
       "output": "static",
@@ -39,6 +43,7 @@
             "backgroundColor": "#000000"
           }
         }
+<<<<<<< HEAD
       ],
       "expo-font",
       "expo-secure-store",
@@ -48,6 +53,8 @@
           "microphonePermission": "Allow FitByte to use the microphone to log food by voice.",
           "speechRecognitionPermission": "Allow FitByte to use speech recognition to log food by voice."
         }
+=======
+>>>>>>> 46b69503e3227789042a618d42dcb60179f909f6
       ]
     ],
     "experiments": {

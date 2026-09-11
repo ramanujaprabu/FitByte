@@ -1,8 +1,12 @@
+<<<<<<< HEAD
 import { Avatar } from '@/components/shared/Avatar';
+=======
+>>>>>>> 46b69503e3227789042a618d42dcb60179f909f6
 import { BackButton } from '@/components/shared/BackButton';
 import { Card } from '@/components/shared/Card';
 import { ScreenHeader } from '@/components/shared/ScreenHeader';
 import { ThemedText } from '@/components/themed-text';
+<<<<<<< HEAD
 import { useDS } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { userService } from '@/services/api/user';
@@ -10,12 +14,21 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import * as ImagePicker from 'expo-image-picker';
 import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+=======
+import { DS } from '@/constants/theme';
+import { MOCK_USER } from '@/data/profile';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { Image } from 'expo-image';
+import React, { useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+>>>>>>> 46b69503e3227789042a618d42dcb60179f909f6
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const GOALS = ['Lose Fat', 'Build Muscle', 'Maintain Weight', 'Improve Endurance', 'Increase Strength'];
 
 export default function EditProfileScreen() {
   const insets = useSafeAreaInsets();
+<<<<<<< HEAD
   const DS = useDS();
   const styles = useMemo(() => makeStyles(DS), [DS]);
   const { user, refreshUser } = useAuth();
@@ -92,6 +105,15 @@ export default function EditProfileScreen() {
       },
     ]);
   };
+=======
+  const [name, setName] = useState(MOCK_USER.name);
+  const [email, setEmail] = useState(MOCK_USER.email);
+  const [quote, setQuote] = useState(MOCK_USER.quote);
+  const [goal, setGoal] = useState(MOCK_USER.goal);
+  const [saved, setSaved] = useState(false);
+
+  const handleSave = () => { setSaved(true); setTimeout(() => setSaved(false), 2000); };
+>>>>>>> 46b69503e3227789042a618d42dcb60179f909f6
 
   return (
     <View style={styles.container}>
@@ -104,6 +126,7 @@ export default function EditProfileScreen() {
         {/* Avatar */}
         <Card>
           <View style={styles.avatarSection}>
+<<<<<<< HEAD
             {uploadingAvatar ? (
               <View style={[styles.avatarLoading, { width: 90, height: 90 }]}>
                 <ActivityIndicator color={DS.textSecond} />
@@ -122,12 +145,20 @@ export default function EditProfileScreen() {
                 </Pressable>
               )}
             </View>
+=======
+            <Image source={{ uri: MOCK_USER.avatarUrl }} style={styles.avatar} contentFit="cover" />
+            <Pressable style={styles.changeAvatarBtn}>
+              <Ionicons name="camera-outline" size={15} color={DS.textSecond} />
+              <ThemedText style={styles.changeAvatarText}>Change Photo</ThemedText>
+            </Pressable>
+>>>>>>> 46b69503e3227789042a618d42dcb60179f909f6
           </View>
         </Card>
 
         {/* Fields */}
         <Card>
           <ThemedText style={styles.sectionLabel}>Personal Info</ThemedText>
+<<<<<<< HEAD
           <View style={styles.fieldGroup}>
             <ThemedText style={styles.fieldLabel}>Full Name</ThemedText>
             <TextInput
@@ -148,6 +179,23 @@ export default function EditProfileScreen() {
               style={[styles.input, { opacity: 0.6 }]}
             />
           </View>
+=======
+          {[
+            { label: 'Full Name', val: name, set: setName, placeholder: 'Your name' },
+            { label: 'Email', val: email, set: setEmail, placeholder: 'your@email.com' },
+          ].map(field => (
+            <View key={field.label} style={styles.fieldGroup}>
+              <ThemedText style={styles.fieldLabel}>{field.label}</ThemedText>
+              <TextInput
+                value={field.val}
+                onChangeText={field.set}
+                placeholder={field.placeholder}
+                placeholderTextColor={DS.textMuted}
+                style={styles.input}
+              />
+            </View>
+          ))}
+>>>>>>> 46b69503e3227789042a618d42dcb60179f909f6
         </Card>
 
         <Card>
@@ -175,6 +223,7 @@ export default function EditProfileScreen() {
           ))}
         </Card>
 
+<<<<<<< HEAD
         <Pressable onPress={handleSave} disabled={saving}
           style={({ pressed }) => [styles.saveBtn, pressed && { opacity: 0.85 }]}>
           {saving ? (
@@ -185,6 +234,12 @@ export default function EditProfileScreen() {
               <ThemedText style={styles.saveBtnText}>{saved ? 'Saved!' : 'Save Changes'}</ThemedText>
             </>
           )}
+=======
+        <Pressable onPress={handleSave}
+          style={({ pressed }) => [styles.saveBtn, pressed && { opacity: 0.85 }]}>
+          <Ionicons name={saved ? 'checkmark-circle-outline' : 'save-outline'} size={18} color="#fff" />
+          <ThemedText style={styles.saveBtnText}>{saved ? 'Saved!' : 'Save Changes'}</ThemedText>
+>>>>>>> 46b69503e3227789042a618d42dcb60179f909f6
         </Pressable>
 
       </ScrollView>
@@ -192,6 +247,7 @@ export default function EditProfileScreen() {
   );
 }
 
+<<<<<<< HEAD
 function makeStyles(DS: ReturnType<typeof useDS>) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: DS.bg },
@@ -217,3 +273,25 @@ function makeStyles(DS: ReturnType<typeof useDS>) {
     saveBtnText: { color: DS.accentText, fontWeight: '600', fontSize: 15 },
   });
 }
+=======
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: DS.bg },
+  scroll: { paddingHorizontal: 20 },
+  avatarSection: { alignItems: 'center', gap: 14 },
+  avatar: { width: 90, height: 90, borderRadius: 45, borderWidth: 2, borderColor: DS.border },
+  changeAvatarBtn: { flexDirection: 'row', alignItems: 'center', gap: 7, backgroundColor: DS.raised, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999, borderWidth: 1, borderColor: DS.border },
+  changeAvatarText: { fontSize: 13, color: DS.textSecond, fontWeight: '500' },
+  sectionLabel: { fontSize: 12, color: DS.textMuted, fontWeight: '600', marginBottom: 14, textTransform: 'uppercase', letterSpacing: 0.5 },
+  fieldGroup: { marginBottom: 14 },
+  fieldLabel: { fontSize: 12, color: DS.textMuted, marginBottom: 7 },
+  input: { backgroundColor: DS.card, borderRadius: 10, borderWidth: 1, borderColor: DS.border, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: DS.textPrimary },
+  textarea: { minHeight: 80, textAlignVertical: 'top' },
+  goalRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10 },
+  radioOuter: { width: 20, height: 20, borderRadius: 10, borderWidth: 2, borderColor: DS.border, justifyContent: 'center', alignItems: 'center' },
+  radioActive: { borderColor: DS.accent },
+  radioInner: { width: 10, height: 10, borderRadius: 5, backgroundColor: DS.accent },
+  goalText: { fontSize: 14, color: DS.textPrimary },
+  saveBtn: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 8, backgroundColor: DS.accent, paddingVertical: 15, borderRadius: 14 },
+  saveBtnText: { color: '#fff', fontWeight: '600', fontSize: 15 },
+});
+>>>>>>> 46b69503e3227789042a618d42dcb60179f909f6

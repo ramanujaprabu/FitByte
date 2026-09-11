@@ -1,11 +1,23 @@
 /**
  * FitByte — Auth Service
  *
+<<<<<<< HEAD
  * Wraps Supabase Auth (email/password). A `profiles` row (plus defaults in
  * `body_metrics` / `calorie_targets`) is created automatically server-side
  * by the `on_auth_user_created` trigger — see supabase/migrations/0001_init.sql.
  */
 import { supabase } from '@/lib/supabase';
+=======
+ * Placeholder for authentication integration.
+ * Replace the `Promise.resolve` calls with real API/SDK calls when backend is ready.
+ *
+ * Integrations to wire up:
+ *   - Firebase Auth / Supabase Auth / custom JWT
+ *   - OAuth providers (Google, Apple)
+ *   - Token storage (expo-secure-store)
+ */
+
+>>>>>>> 46b69503e3227789042a618d42dcb60179f909f6
 import type { User } from '@/types';
 
 export interface LoginCredentials {
@@ -19,6 +31,7 @@ export interface RegisterCredentials {
   password: string;
 }
 
+<<<<<<< HEAD
 function mapProfileToUser(profile: any, fallbackUser?: any): User {
   if (profile) {
     return {
@@ -147,5 +160,56 @@ export const authService = {
       .maybeSingle();
 
     return mapProfileToUser(profile, sessionData.session.user);
+=======
+export interface AuthTokens {
+  accessToken: string;
+  refreshToken: string;
+}
+
+// ─── Auth Service ─────────────────────────────────────────────────────────────
+
+export const authService = {
+  /**
+   * Sign in with email/password.
+   * @todo Replace with real API call: POST /auth/login
+   */
+  async login(credentials: LoginCredentials): Promise<{ user: User; tokens: AuthTokens }> {
+    // TODO: implement real login
+    return Promise.reject(new Error('Auth not implemented — connect backend'));
+  },
+
+  /**
+   * Register a new user.
+   * @todo Replace with real API call: POST /auth/register
+   */
+  async register(credentials: RegisterCredentials): Promise<{ user: User; tokens: AuthTokens }> {
+    // TODO: implement real registration
+    return Promise.reject(new Error('Auth not implemented — connect backend'));
+  },
+
+  /**
+   * Sign out and clear tokens.
+   * @todo Clear expo-secure-store entries
+   */
+  async logout(): Promise<void> {
+    // TODO: clear stored tokens
+    return Promise.resolve();
+  },
+
+  /**
+   * Refresh the access token.
+   * @todo Replace with real API call: POST /auth/refresh
+   */
+  async refreshToken(refreshToken: string): Promise<AuthTokens> {
+    return Promise.reject(new Error('Token refresh not implemented'));
+  },
+
+  /**
+   * Get the currently authenticated user.
+   * @todo Decode from stored JWT or fetch from API: GET /auth/me
+   */
+  async getCurrentUser(): Promise<User | null> {
+    return Promise.resolve(null);
+>>>>>>> 46b69503e3227789042a618d42dcb60179f909f6
   },
 };

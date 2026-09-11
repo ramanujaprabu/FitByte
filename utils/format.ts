@@ -2,6 +2,7 @@
  * FitByte — Utility/formatting functions.
  * Pure functions for display formatting — no side effects.
  */
+<<<<<<< HEAD
 import type { FoodEntry, MealType } from '@/types';
 
 export interface GroupedFoodEntry {
@@ -79,6 +80,8 @@ export function dedupeFoodEntriesByName(entries: FoodEntry[]): FoodEntry[] {
   }
   return result;
 }
+=======
+>>>>>>> 46b69503e3227789042a618d42dcb60179f909f6
 
 /** Format a number with commas: 2100 → "2,100" */
 export function formatNumber(n: number): string {
