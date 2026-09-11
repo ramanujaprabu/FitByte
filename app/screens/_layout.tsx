@@ -11,6 +11,7 @@ export default function ScreensLayout() {
       <Stack.Screen name="scan" />
       <Stack.Screen name="voice-log" />
       <Stack.Screen name="food-detail" />
+      <Stack.Screen name="meal-detail" />
       <Stack.Screen name="meal-history" />
       <Stack.Screen name="macro-breakdown" />
       <Stack.Screen name="scan-result" />

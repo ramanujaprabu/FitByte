@@ -505,4 +505,11 @@ export const userService = {
 
     return data.publicUrl;
   },
+
+  /** Clears the profile photo, reverting to the initials fallback. */
+  async removeAvatar(): Promise<void> {
+    const userId = await currentUserId();
+    const { error } = await supabase.from('profiles').update({ avatar_url: '' }).eq('id', userId);
+    if (error) throw error;
+  },
 };

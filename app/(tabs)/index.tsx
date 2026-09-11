@@ -263,6 +263,14 @@ export default function LogHomeScreen() {
                 <ThemedText style={styles.mealSectionTitle}>{meal}</ThemedText>
                 <View style={styles.mealSectionRight}>
                   <ThemedText style={styles.mealSectionCal}>{Math.round(consumed)} of {target} Cal</ThemedText>
+                  {items.length > 0 && (
+                    <Pressable
+                      style={({ pressed }) => [styles.editMealBtn, pressed && styles.pressedFade]}
+                      onPress={() => router.push({ pathname: '/screens/meal-detail' as any, params: { meal, date: dateParam } })}
+                      hitSlop={6}>
+                      <Ionicons name="pencil" size={14} color={DS.textSecond} />
+                    </Pressable>
+                  )}
                   <Pressable
                     style={({ pressed }) => [styles.addMealBtn, pressed && styles.pressedFade]}
                     onPress={() => router.push({ pathname: '/screens/trackfood' as any, params: { meal, date: dateParam } })}>
@@ -523,6 +531,14 @@ function makeStyles(DS: ReturnType<typeof useDS>) {
       fontFamily: Fonts.mono,
       fontSize: 12,
       color: DS.textSecond,
+    },
+    editMealBtn: {
+      width: 26,
+      height: 26,
+      borderRadius: 13,
+      backgroundColor: DS.raised,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
     addMealBtn: {
       width: 26,

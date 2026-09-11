@@ -2,10 +2,10 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import React, { useCallback, useMemo, useState } from 'react';
-import { Image } from 'expo-image';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { Avatar } from '@/components/shared/Avatar';
 import { ThemedText } from '@/components/themed-text';
 import { useDS, useThemeMode, type ThemeMode } from '@/contexts/ThemeContext';
 import { useUnits } from '@/contexts/UnitsContext';
@@ -47,7 +47,6 @@ export default function ProfileScreen() {
   const userName = user?.name || profile?.user.name || 'User';
   const userEmail = user?.email || profile?.user.email || '';
   const userAvatar = user?.avatarUrl || profile?.user.avatarUrl || '';
-  const userInitials = userName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || 'U';
 
   const dailyCalories = profile?.calorieTarget.daily;
   const macros = profile?.fitnessGoal.macroTargets;
@@ -61,18 +60,7 @@ export default function ProfileScreen() {
       {/* App Header */}
       <View style={styles.topHeader}>
         <View style={styles.headerLeft}>
-          {userAvatar ? (
-            <Image
-              source={{ uri: userAvatar }}
-              style={styles.headerAvatar}
-              cachePolicy="memory-disk"
-              transition={200}
-            />
-          ) : (
-            <View style={[styles.headerAvatar, styles.initialsCircle]}>
-              <ThemedText style={styles.initialsTextSmall}>{userInitials}</ThemedText>
-            </View>
-          )}
+          <Avatar uri={userAvatar || undefined} name={userName} size={32} />
           <ThemedText style={styles.appTitle}>FitByte</ThemedText>
         </View>
         <Pressable style={styles.iconBtn} onPress={() => router.push('/screens/account-settings')}>
@@ -87,18 +75,7 @@ export default function ProfileScreen() {
         {/* Profile Header */}
         <View style={styles.profileHeaderSection}>
           <Pressable style={styles.avatarWrapper} onPress={() => router.push('/screens/edit-profile')}>
-            {userAvatar ? (
-              <Image
-                source={{ uri: userAvatar }}
-                style={styles.avatarImage}
-                cachePolicy="memory-disk"
-                transition={200}
-              />
-            ) : (
-              <View style={[styles.avatarImage, styles.initialsCircleLg]}>
-                <ThemedText style={styles.initialsTextLg}>{userInitials}</ThemedText>
-              </View>
-            )}
+            <Avatar uri={userAvatar || undefined} name={userName} size={96} />
           </Pressable>
           <ThemedText style={styles.profileName}>{userName}</ThemedText>
           <ThemedText style={styles.profileSub}>{userEmail || 'Member'}</ThemedText>
@@ -230,11 +207,6 @@ function makeStyles(DS: ReturnType<typeof useDS>) {
       alignItems: 'center',
       gap: Spacing.sm,
     },
-    headerAvatar: {
-      width: 32,
-      height: 32,
-      borderRadius: 16,
-    },
     appTitle: {
       fontSize: 20,
       fontWeight: '700',
@@ -253,15 +225,7 @@ function makeStyles(DS: ReturnType<typeof useDS>) {
       marginBottom: Spacing.xl,
     },
     avatarWrapper: {
-      width: 96,
-      height: 96,
-      borderRadius: 48,
-      overflow: 'hidden',
       marginBottom: Spacing.md,
-    },
-    avatarImage: {
-      width: '100%',
-      height: '100%',
     },
     profileName: {
       fontSize: 28,
@@ -367,27 +331,6 @@ function makeStyles(DS: ReturnType<typeof useDS>) {
     signOutText: {
       fontSize: 15,
       fontWeight: '500',
-      color: DS.textSecond,
-    },
-    initialsCircle: {
-      backgroundColor: DS.raised,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    initialsTextSmall: {
-      fontSize: 12,
-      fontWeight: '700',
-      color: DS.textSecond,
-    },
-    initialsCircleLg: {
-      backgroundColor: DS.raised,
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderRadius: 999,
-    },
-    initialsTextLg: {
-      fontSize: 28,
-      fontWeight: '700',
       color: DS.textSecond,
     },
   });
