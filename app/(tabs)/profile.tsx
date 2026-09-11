@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import React, { useCallback, useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/components/shared/Avatar';
@@ -31,6 +31,7 @@ export default function ProfileScreen() {
 
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -38,6 +39,11 @@ export default function ProfileScreen() {
   }, []);
 
   useFocusEffect(load);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    userService.getProfile().then(setProfile).catch(() => {}).finally(() => setRefreshing(false));
+  }, []);
 
   const onLogout = async () => {
     await logout();
@@ -70,7 +76,8 @@ export default function ProfileScreen() {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 80 }]}>
+        contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 80 }]}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={DS.accent} />}>
 
         {/* Profile Header */}
         <View style={styles.profileHeaderSection}>
@@ -83,7 +90,12 @@ export default function ProfileScreen() {
 
         {/* GOALS SECTION */}
         <View style={styles.section}>
-          <ThemedText style={styles.sectionHeaderCaps}>GOALS</ThemedText>
+          <View style={styles.sectionHeaderRow}>
+            <ThemedText style={styles.sectionHeaderCaps}>GOALS</ThemedText>
+            <Pressable style={styles.editGoalsBtn} onPress={() => router.push('/screens/edit-goals' as any)} hitSlop={6}>
+              <Ionicons name="pencil" size={13} color={DS.textSecond} />
+            </Pressable>
+          </View>
           <View style={styles.cardGroup}>
             <Pressable style={styles.rowItem} onPress={() => router.push('/(tabs)/trends' as any)}>
               <View style={styles.rowLeft}>
@@ -241,12 +253,25 @@ function makeStyles(DS: ReturnType<typeof useDS>) {
     section: {
       marginBottom: Spacing.xl,
     },
+    sectionHeaderRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
     sectionHeaderCaps: {
       fontSize: 12,
       fontWeight: '600',
       color: DS.textSecond,
       letterSpacing: 0.5,
       marginBottom: Spacing.sm,
+    },
+    editGoalsBtn: {
+      width: 24,
+      height: 24,
+      borderRadius: 12,
+      backgroundColor: DS.raised,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
     cardGroup: {
       backgroundColor: DS.surface,

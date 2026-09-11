@@ -11,6 +11,7 @@ import { ThemedText } from '@/components/themed-text';
 import { useDS } from '@/contexts/ThemeContext';
 import { Radius, Spacing } from '@/constants/theme';
 import { nutritionService } from '@/services/api/nutrition';
+import { triggerHaptic } from '@/utils/haptics';
 import type { FoodEntry, MealType } from '@/types';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -47,6 +48,7 @@ export default function MealDetailScreen() {
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Remove', style: 'destructive', onPress: async () => {
+          triggerHaptic('success');
           setDeletingId(entry.id);
           try {
             await nutritionService.deleteFood(entry.id);

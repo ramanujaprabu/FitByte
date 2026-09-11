@@ -257,6 +257,12 @@ export default function LogWorkoutScreen() {
       } else {
         router.back();
       }
+    } catch (e: any) {
+      // logSession itself is resilient (it caches offline before ever
+      // touching the network), so this only fires for something upstream
+      // like an expired session — keep the user on screen with their sets
+      // intact instead of failing silently.
+      Alert.alert('Could not finish workout', e?.message ?? 'Please try again.');
     } finally {
       setFinishing(false);
     }

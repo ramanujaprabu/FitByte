@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import React, { useCallback, useMemo, useState } from 'react';
-import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, Modal, Pressable, RefreshControl, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle, Line, Polyline } from 'react-native-svg';
 
@@ -45,25 +45,33 @@ export default function TrendsTabScreen() {
   const [weightInput, setWeightInput] = useState('');
   const [savingWeight, setSavingWeight] = useState(false);
 
-  const loadData = useCallback(() => {
-    setLoading(true);
-    Promise.all([
+  const [refreshing, setRefreshing] = useState(false);
+
+  const fetchData = useCallback(() => {
+    return Promise.all([
       nutritionService.getPeriodSummary(period, referenceDate),
       workoutService.getPeriodTrainingStats(period, referenceDate),
       userService.getProfile(),
       userService.getWeightHistory(period === 'month' ? 120 : 30).catch(() => []),
-    ])
-      .then(([s, t, p, w]) => {
-        setSummary(s);
-        setTraining(t);
-        setProfile(p);
-        setWeightHistory(w);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    ]).then(([s, t, p, w]) => {
+      setSummary(s);
+      setTraining(t);
+      setProfile(p);
+      setWeightHistory(w);
+    }).catch(() => {});
   }, [period, referenceDate]);
 
+  const loadData = useCallback(() => {
+    setLoading(true);
+    fetchData().finally(() => setLoading(false));
+  }, [fetchData]);
+
   useFocusEffect(loadData);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchData().finally(() => setRefreshing(false));
+  }, [fetchData]);
 
   const goPrev = () => {
     triggerHaptic('selection');
@@ -139,7 +147,8 @@ export default function TrendsTabScreen() {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 80 }]}>
+        contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 80 }]}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={DS.accent} />}>
 
         {/* Page Title */}
         <ThemedText style={styles.pageTitle}>Trends</ThemedText>

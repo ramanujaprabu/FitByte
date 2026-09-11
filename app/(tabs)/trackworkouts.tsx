@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import React, { useCallback, useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
@@ -20,19 +20,26 @@ export default function WorkoutTrackerScreen() {
   const [routines, setRoutines] = useState<WorkoutRoutine[]>([]);
   const [recentSessions, setRecentSessions] = useState<WorkoutSession[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const fetchData = useCallback(() => {
+    return Promise.all([
+      workoutService.getRoutines(),
+      workoutService.getRecentSessions(5),
+    ]).then(([r, s]) => { setRoutines(r); setRecentSessions(s); }).catch(() => {});
+  }, []);
 
   const load = useCallback(() => {
     setLoading(true);
-    Promise.all([
-      workoutService.getRoutines(),
-      workoutService.getRecentSessions(5),
-    ])
-      .then(([r, s]) => { setRoutines(r); setRecentSessions(s); })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
+    fetchData().finally(() => setLoading(false));
+  }, [fetchData]);
 
   useFocusEffect(load);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchData().finally(() => setRefreshing(false));
+  }, [fetchData]);
 
   // Only block on a spinner before the very first paint of real data — on
   // every later refocus/refresh, keep showing what's already on screen
@@ -51,7 +58,8 @@ export default function WorkoutTrackerScreen() {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 80 }]}>
+        contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 80 }]}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={DS.accent} />}>
 
         {/* Headline & Action */}
         <View style={styles.headlineRow}>

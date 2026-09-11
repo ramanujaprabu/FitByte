@@ -24,6 +24,7 @@ export default function ScreensLayout() {
           way out. */}
       <Stack.Screen name="log-workout" options={{ gestureEnabled: false }} />
       <Stack.Screen name="edit-profile" />
+      <Stack.Screen name="edit-goals" />
       <Stack.Screen name="account-settings" />
     </Stack>
   );

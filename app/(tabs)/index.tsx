@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ProgressBar } from '@/components/shared/ProgressBar';
@@ -55,25 +55,32 @@ export default function LogHomeScreen() {
   const [today, setToday] = useState<DailyNutrition | null>(null);
   const [fitnessGoal, setFitnessGoal] = useState<FitnessGoal | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [waterBusy, setWaterBusy] = useState(false);
 
   const isToday = useMemo(() => startOfDay(new Date()).getTime() === selectedDate.getTime(), [selectedDate]);
 
-  const load = useCallback(() => {
-    setLoading(true);
-    Promise.all([
+  const fetchData = useCallback(() => {
+    return Promise.all([
       nutritionService.getDailyNutrition(selectedDate.toISOString()),
       userService.getActiveFitnessGoal().catch(() => null),
-    ])
-      .then(([daily, goal]) => {
-        setToday(daily);
-        setFitnessGoal(goal);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    ]).then(([daily, goal]) => {
+      setToday(daily);
+      setFitnessGoal(goal);
+    }).catch(() => {});
   }, [selectedDate]);
 
+  const load = useCallback(() => {
+    setLoading(true);
+    fetchData().finally(() => setLoading(false));
+  }, [fetchData]);
+
   useFocusEffect(load);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchData().finally(() => setRefreshing(false));
+  }, [fetchData]);
 
   const goToDay = (deltaDays: number) => {
     triggerHaptic('selection');
@@ -129,7 +136,8 @@ export default function LogHomeScreen() {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 100 }]}>
+        contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 100 }]}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={DS.accent} />}>
 
         {/* Date Navigator */}
         <View style={styles.dateNavRow}>
@@ -145,6 +153,15 @@ export default function LogHomeScreen() {
             <Ionicons name="chevron-forward" size={18} color={isToday ? DS.textMuted : DS.textPrimary} />
           </Pressable>
         </View>
+
+        {!isToday && (
+          <Pressable
+            style={styles.jumpToTodayBtn}
+            onPress={() => { triggerHaptic('light'); setSelectedDate(startOfDay(new Date())); }}>
+            <Ionicons name="today-outline" size={13} color={DS.textSecond} />
+            <ThemedText style={styles.jumpToTodayText}>Jump to Today</ThemedText>
+          </Pressable>
+        )}
 
         {loading && !today ? (
           <View style={styles.initialSpinner}>
@@ -380,6 +397,22 @@ function makeStyles(DS: ReturnType<typeof useDS>) {
     initialSpinner: {
       paddingVertical: Spacing.xxl,
       alignItems: 'center',
+    },
+    jumpToTodayBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 5,
+      alignSelf: 'center',
+      backgroundColor: DS.raised,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: Radius.full,
+      marginBottom: Spacing.md,
+    },
+    jumpToTodayText: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: DS.textSecond,
     },
     dateTitle: {
       fontSize: 20,
