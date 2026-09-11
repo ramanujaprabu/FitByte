@@ -4,23 +4,18 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { HapticTab } from '@/components/haptic-tab';
-import { DS } from '@/constants/theme';
+import { useDS } from '@/contexts/ThemeContext';
 
 type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
 
-function tabIcon(name: IoniconsName, focused: boolean) {
+function tabIcon(name: IoniconsName, focused: boolean, activeColor: string, inactiveColor: string) {
   const iconName = focused ? (name.replace('-outline', '') as IoniconsName) : name;
-  return (
-    <Ionicons
-      name={iconName}
-      size={22}
-      color={focused ? '#000000' : '#7E7576'}
-    />
-  );
+  return <Ionicons name={iconName} size={22} color={focused ? activeColor : inactiveColor} />;
 }
 
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
+  const DS = useDS();
 
   return (
     <Tabs
@@ -28,10 +23,10 @@ export default function TabLayout() {
       screenOptions={{
         headerShown: false,
         tabBarButton: HapticTab,
-        tabBarActiveTintColor: '#000000',
-        tabBarInactiveTintColor: '#7E7576',
+        tabBarActiveTintColor: DS.accent,
+        tabBarInactiveTintColor: DS.textMuted,
         tabBarStyle: {
-          backgroundColor: '#FFFFFF',
+          backgroundColor: DS.surface,
           borderTopColor: DS.border,
           borderTopWidth: 1,
           height: 60 + insets.bottom,
@@ -51,7 +46,7 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Log',
-          tabBarIcon: ({ focused }) => tabIcon('add-circle-outline', focused),
+          tabBarIcon: ({ focused }) => tabIcon('add-circle-outline', focused, DS.accent, DS.textMuted),
         }}
       />
 
@@ -59,7 +54,7 @@ export default function TabLayout() {
         name="trackworkouts"
         options={{
           title: 'Workouts',
-          tabBarIcon: ({ focused }) => tabIcon('barbell-outline', focused),
+          tabBarIcon: ({ focused }) => tabIcon('barbell-outline', focused, DS.accent, DS.textMuted),
         }}
       />
 
@@ -67,7 +62,7 @@ export default function TabLayout() {
         name="trends"
         options={{
           title: 'Trends',
-          tabBarIcon: ({ focused }) => tabIcon('stats-chart-outline', focused),
+          tabBarIcon: ({ focused }) => tabIcon('stats-chart-outline', focused, DS.accent, DS.textMuted),
         }}
       />
 
@@ -75,7 +70,7 @@ export default function TabLayout() {
         name="profile"
         options={{
           title: 'Profile',
-          tabBarIcon: ({ focused }) => tabIcon('person-outline', focused),
+          tabBarIcon: ({ focused }) => tabIcon('person-outline', focused, DS.accent, DS.textMuted),
         }}
       />
     </Tabs>

@@ -2,11 +2,12 @@
  * SegmentedControl — replaces the ad-hoc horizontal chip-scroll filters
  * (meal filters, date-range toggles) with one consistent selector.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { DS, Radius, Typography } from '@/constants/theme';
+import { useDS } from '@/contexts/ThemeContext';
+import { Radius, Typography } from '@/constants/theme';
 
 interface SegmentedControlProps {
   options: string[];
@@ -15,6 +16,9 @@ interface SegmentedControlProps {
 }
 
 export function SegmentedControl({ options, value, onChange }: SegmentedControlProps) {
+  const DS = useDS();
+  const styles = useMemo(() => makeStyles(DS), [DS]);
+
   return (
     <View style={styles.track}>
       {options.map(opt => {
@@ -26,7 +30,7 @@ export function SegmentedControl({ options, value, onChange }: SegmentedControlP
             style={[styles.segment, active && styles.segmentActive]}>
             <ThemedText
               numberOfLines={1}
-              style={[Typography.label, { color: active ? '#FFFFFF' : DS.textSecond }]}>
+              style={[Typography.label, { color: active ? DS.accentText : DS.textSecond }]}>
               {opt}
             </ThemedText>
           </Pressable>
@@ -36,22 +40,22 @@ export function SegmentedControl({ options, value, onChange }: SegmentedControlP
   );
 }
 
-const styles = StyleSheet.create({
-  track: {
-    flexDirection: 'row',
-    backgroundColor: DS.surface,
-    borderRadius: Radius.md,
-    borderWidth: 1,
-    borderColor: DS.border,
-    padding: 3,
-  },
-  segment: {
-    flex: 1,
-    paddingVertical: 8,
-    borderRadius: Radius.sm,
-    alignItems: 'center',
-  },
-  segmentActive: {
-    backgroundColor: DS.accent,
-  },
-});
+function makeStyles(DS: ReturnType<typeof useDS>) {
+  return StyleSheet.create({
+    track: {
+      flexDirection: 'row',
+      backgroundColor: DS.raised,
+      borderRadius: Radius.full,
+      padding: 3,
+    },
+    segment: {
+      flex: 1,
+      paddingVertical: 8,
+      borderRadius: Radius.full,
+      alignItems: 'center',
+    },
+    segmentActive: {
+      backgroundColor: DS.accent,
+    },
+  });
+}

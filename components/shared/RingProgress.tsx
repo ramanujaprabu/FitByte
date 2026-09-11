@@ -11,7 +11,7 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 
-import { DS } from '@/constants/theme';
+import { useDS } from '@/contexts/ThemeContext';
 
 interface RingProgressProps {
   progress: number;      // 0–1, values >1 are clamped (visually capped, not overflowed)
@@ -26,10 +26,11 @@ export function RingProgress({
   progress,
   size = 120,
   strokeWidth = 10,
-  color = DS.accent,
-  trackColor = DS.ringTrack,
+  color,
+  trackColor,
   children,
 }: RingProgressProps) {
+  const DS = useDS();
   const clamped = Math.max(0, Math.min(1, progress));
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -42,7 +43,7 @@ export function RingProgress({
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke={trackColor}
+          stroke={trackColor ?? DS.ringTrack}
           strokeWidth={strokeWidth}
           fill="none"
         />
@@ -50,7 +51,7 @@ export function RingProgress({
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke={color}
+          stroke={color ?? DS.accent}
           strokeWidth={strokeWidth}
           fill="none"
           strokeLinecap="round"

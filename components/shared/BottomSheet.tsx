@@ -2,8 +2,8 @@
  * BottomSheet — Animated slide-up panel with backdrop dismiss.
  * Uses react-native Animated API, no extra library needed.
  */
-import { DS } from '@/constants/theme';
-import React, { useEffect, useRef } from 'react';
+import { useDS } from '@/contexts/ThemeContext';
+import React, { useEffect, useMemo, useRef } from 'react';
 import {
   Animated,
   Modal,
@@ -25,6 +25,8 @@ interface BottomSheetProps {
 
 export function BottomSheet({ visible, onClose, children, height, style }: BottomSheetProps) {
   const insets = useSafeAreaInsets();
+  const DS = useDS();
+  const styles = useMemo(() => makeStyles(DS), [DS]);
   const slideAnim = useRef(new Animated.Value(300)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
@@ -57,7 +59,7 @@ export function BottomSheet({ visible, onClose, children, height, style }: Botto
         }),
       ]).start();
     }
-  }, [visible]);
+  }, [visible, slideAnim, fadeAnim]);
 
   return (
     <Modal transparent visible={visible} animationType="none" onRequestClose={onClose}>
@@ -82,32 +84,30 @@ export function BottomSheet({ visible, onClose, children, height, style }: Botto
   );
 }
 
-const styles = StyleSheet.create({
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-  },
-  sheet: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: DS.surface,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    borderTopWidth: 1,
-    borderLeftWidth: 1,
-    borderRightWidth: 1,
-    borderColor: DS.border,
-    paddingHorizontal: 20,
-    paddingTop: 12,
-  },
-  handle: {
-    width: 36,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: DS.borderMid,
-    alignSelf: 'center',
-    marginBottom: 20,
-  },
-});
+function makeStyles(DS: ReturnType<typeof useDS>) {
+  return StyleSheet.create({
+    backdrop: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: DS.overlay,
+    },
+    sheet: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      backgroundColor: DS.surface,
+      borderTopLeftRadius: 28,
+      borderTopRightRadius: 28,
+      paddingHorizontal: 20,
+      paddingTop: 12,
+    },
+    handle: {
+      width: 36,
+      height: 4,
+      borderRadius: 2,
+      backgroundColor: DS.borderMid,
+      alignSelf: 'center',
+      marginBottom: 20,
+    },
+  });
+}

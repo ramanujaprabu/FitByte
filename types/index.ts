@@ -76,6 +76,8 @@ export interface FoodEntry {
   carbs: number;
   fats: number;
   time: string;
+  /** Full ISO timestamp this was logged for — used to bucket entries by day. */
+  loggedAt: string;
   imageUrl: string;
 }
 
@@ -135,7 +137,10 @@ export interface WorkoutSession {
   caloriesBurned: string;
   muscles: string;
   intensity: WorkoutIntensity;
+  /** Human-readable display string, e.g. "Monday, 6:42 PM". */
   timestamp: string;
+  /** Full ISO timestamp — used to bucket sessions by day (e.g. weekly dots). */
+  performedAt: string;
 }
 
 export interface WorkoutStats {

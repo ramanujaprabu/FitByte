@@ -1,4 +1,4 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { DarkTheme, DefaultTheme, ThemeProvider as NavigationThemeProvider } from '@react-navigation/native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
@@ -12,13 +12,9 @@ import {
   useFonts,
 } from '@expo-google-fonts/jetbrains-mono';
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
-import { DS } from '@/constants/theme';
-
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
+import { ThemeProvider, useDS, useThemeMode } from '@/contexts/ThemeContext';
+import { UnitsProvider } from '@/contexts/UnitsContext';
 
 /**
  * Redirects between the (auth) and (tabs) groups based on session state, and
@@ -29,6 +25,7 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading, user, isRecoverySession } = useAuth();
   const segments = useSegments();
   const router = useRouter();
+  const DS = useDS();
 
   useEffect(() => {
     if (isLoading) return;
@@ -56,9 +53,31 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
+/** Everything that needs the resolved theme — rendered as a child of ThemeProvider so it can read it. */
+function AppShell() {
+  const { scheme } = useThemeMode();
 
+  return (
+    <AuthProvider>
+      <NavigationThemeProvider value={scheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <AuthGate>
+          <Stack>
+            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="screens" options={{ headerShown: false }} />
+          </Stack>
+        </AuthGate>
+        <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+      </NavigationThemeProvider>
+    </AuthProvider>
+  );
+}
+
+export const unstable_settings = {
+  anchor: '(tabs)',
+};
+
+export default function RootLayout() {
   useFonts({
     JetBrainsMono_400Regular,
     JetBrainsMono_600SemiBold,
@@ -66,18 +85,11 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <AuthProvider>
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-          <AuthGate>
-            <Stack>
-              <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="screens" options={{ headerShown: false }} />
-            </Stack>
-          </AuthGate>
-          <StatusBar style="dark" />
-        </ThemeProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <UnitsProvider>
+          <AppShell />
+        </UnitsProvider>
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }

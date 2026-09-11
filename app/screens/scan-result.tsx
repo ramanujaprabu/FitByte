@@ -55,7 +55,6 @@ export default function ScanResultScreen() {
         protein: totalP,
         carbs: totalC,
         fats: totalF,
-        time: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
         imageUrl: params.imageUrl || '',
       });
       triggerHaptic('success');

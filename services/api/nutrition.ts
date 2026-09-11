@@ -22,13 +22,30 @@ async function currentUserId(): Promise<string> {
   return data.session.user.id;
 }
 
+/**
+ * Resolves a day's [start, end] bounds in LOCAL time. `dateStr` may be a
+ * full ISO datetime (e.g. from `Date.toISOString()`) or a bare 'YYYY-MM-DD'
+ * date. Bare date-only strings are deliberately NOT passed to `new Date()`
+ * directly — JS parses those as UTC midnight, which rolls to the previous
+ * or next local day for any timezone ahead of or behind UTC (e.g. a food
+ * logged at 1am IST would land on the wrong day everywhere in this app).
+ */
 function dayRange(dateStr?: string) {
-  const day = dateStr ? new Date(dateStr) : new Date();
+  let day: Date;
+  if (!dateStr) {
+    day = new Date();
+  } else if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    day = new Date(y, m - 1, d);
+  } else {
+    day = new Date(dateStr);
+  }
   const start = new Date(day);
   start.setHours(0, 0, 0, 0);
   const end = new Date(day);
   end.setHours(23, 59, 59, 999);
-  return { start, end, isoDate: start.toISOString().slice(0, 10) };
+  const isoDate = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}-${String(start.getDate()).padStart(2, '0')}`;
+  return { start, end, isoDate };
 }
 
 function mapFoodEntry(row: any): FoodEntry {
@@ -41,8 +58,17 @@ function mapFoodEntry(row: any): FoodEntry {
     carbs: Number(row.carbs),
     fats: Number(row.fats),
     time: new Date(row.logged_at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
+    loggedAt: row.logged_at,
     imageUrl: row.image_url ?? '',
   };
+}
+
+/** Keeps only offline-cached entries that fall within [start, end] — without this, every offline entry ever logged shows up on every day's log. */
+function withinDay(entries: FoodEntry[], start: Date, end: Date): FoodEntry[] {
+  return entries.filter((e) => {
+    const t = new Date(e.loggedAt).getTime();
+    return t >= start.getTime() && t <= end.getTime();
+  });
 }
 
 import { offlineStorage } from '@/lib/offline-storage';
@@ -96,8 +122,10 @@ export const nutritionService = {
       // Offline fallback
     }
 
-    // Merge offline cache meals (scoped to the current user only)
-    const offlineMeals = userId ? await offlineStorage.getOfflineFoods(userId) : [];
+    // Merge offline cache meals (scoped to the current user AND this day —
+    // otherwise every offline-logged entry ever would show up on every day).
+    const offlineMealsAll = userId ? await offlineStorage.getOfflineFoods(userId) : [];
+    const offlineMeals = withinDay(offlineMealsAll, start, end);
     const mealMap = new Map<string, FoodEntry>();
     remoteMeals.forEach(m => mealMap.set(m.id, m));
     offlineMeals.forEach(m => {
@@ -190,9 +218,9 @@ export const nutritionService = {
   async getFoodLog(date?: string): Promise<FoodEntry[]> {
     let remoteLogs: FoodEntry[] = [];
     let userId: string | null = null;
+    const { start, end } = dayRange(date);
     try {
       userId = await currentUserId();
-      const { start, end } = dayRange(date);
       const { data } = await supabase
         .from('food_entries')
         .select('*')
@@ -203,20 +231,27 @@ export const nutritionService = {
       if (data) remoteLogs = data.map(mapFoodEntry);
     } catch {}
 
-    const offlineLogs = userId ? await offlineStorage.getOfflineFoods(userId) : [];
+    const offlineLogsAll = userId ? await offlineStorage.getOfflineFoods(userId) : [];
+    const offlineLogs = withinDay(offlineLogsAll, start, end);
     const map = new Map<string, FoodEntry>();
     remoteLogs.forEach(l => map.set(l.id, l));
     offlineLogs.forEach(l => { if (!map.has(l.id)) map.set(l.id, l); });
     return Array.from(map.values());
   },
 
-  /** Log a new food entry — typically fed from a `foodService.search()` result. */
-  async logFood(entry: Omit<FoodEntry, 'id'>): Promise<FoodEntry> {
+  /**
+   * Log a new food entry — typically fed from a `foodService.search()`
+   * result. Pass `loggedAt` to log to a specific day (e.g. from the Home
+   * tab's date navigator); defaults to right now.
+   */
+  async logFood(entry: Omit<FoodEntry, 'id' | 'loggedAt' | 'time'>, loggedAt: Date = new Date()): Promise<FoodEntry> {
     const userId = await currentUserId();
     const createdId = `log-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
     const newEntry: FoodEntry = {
       id: createdId,
       ...entry,
+      loggedAt: loggedAt.toISOString(),
+      time: loggedAt.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
     };
 
     // 1. Save to offline local storage immediately for 100% instant UI availability
@@ -235,6 +270,7 @@ export const nutritionService = {
           carbs: entry.carbs,
           fats: entry.fats,
           image_url: entry.imageUrl,
+          logged_at: loggedAt.toISOString(),
         })
         .select()
         .single();

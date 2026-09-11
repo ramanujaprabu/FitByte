@@ -1,11 +1,12 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
-import { DS, Radius, Spacing } from '@/constants/theme';
+import { useDS } from '@/contexts/ThemeContext';
+import { Radius, Spacing } from '@/constants/theme';
 import { foodService } from '@/services/api/food';
 import { nutritionService } from '@/services/api/nutrition';
 import { triggerHaptic } from '@/utils/haptics';
@@ -38,29 +39,21 @@ function macroSubtitle(protein: number, carbs: number, fats: number): string {
   return `P ${Math.round(protein)}g · C ${Math.round(carbs)}g · F ${Math.round(fats)}g`;
 }
 
-/** One tappable row: name + subtitle on the left, calories + an outlined add circle on the right. */
-function FoodRow({ name, subtitle, calories, onPress }: { name: string; subtitle: string; calories: number; onPress: () => void }) {
-  return (
-    <Pressable style={({ pressed }) => [styles.foodRow, pressed && styles.foodRowPressed]} onPress={onPress}>
-      <View style={{ flex: 1, marginRight: Spacing.sm }}>
-        <ThemedText style={styles.foodName} numberOfLines={1}>{name}</ThemedText>
-        <ThemedText style={styles.foodSub} numberOfLines={1}>{subtitle}</ThemedText>
-      </View>
-      <ThemedText style={styles.foodCal}>{Math.round(calories)} Cal</ThemedText>
-      <View style={styles.addCircleBtn}>
-        <Ionicons name="add" size={17} color="#000000" />
-      </View>
-    </Pressable>
-  );
-}
-
 export default function FoodTrackerScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const params = useLocalSearchParams<{ meal?: string }>();
+  const DS = useDS();
+  const styles = useMemo(() => makeStyles(DS), [DS]);
+  const params = useLocalSearchParams<{ meal?: string; date?: string }>();
   const selectedMeal: MealType = MEAL_OPTIONS.includes(params.meal as MealType)
     ? (params.meal as MealType)
     : defaultMealByTime();
+  const targetDate = params.date ? new Date(params.date) : new Date();
+  const isPastDay = (() => {
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const d = new Date(targetDate); d.setHours(0, 0, 0, 0);
+    return d.getTime() !== today.getTime();
+  })();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<FoodSearchResult[]>([]);
@@ -98,6 +91,11 @@ export default function FoodTrackerScreen() {
 
   const handleQuickAddFood = async (foodName: string, cal: number, p: number, c: number, f: number, img?: string) => {
     triggerHaptic('success');
+    // Log at the selected date, but "now" time-of-day when logging today —
+    // otherwise a past-day log would need a made-up time.
+    const loggedAt = isPastDay
+      ? new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate(), 12, 0, 0)
+      : new Date();
     await nutritionService.logFood({
       name: foodName,
       meal: selectedMeal,
@@ -105,9 +103,8 @@ export default function FoodTrackerScreen() {
       protein: Math.round(p),
       carbs: Math.round(c),
       fats: Math.round(f),
-      time: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
       imageUrl: img ?? '',
-    });
+    }, loggedAt);
     router.back();
   };
 
@@ -139,7 +136,7 @@ export default function FoodTrackerScreen() {
       {/* Top Header */}
       <View style={styles.topHeader}>
         <Pressable style={styles.iconBtn} onPress={() => router.back()}>
-          <Ionicons name="arrow-back-outline" size={24} color="#000000" />
+          <Ionicons name="arrow-back-outline" size={24} color={DS.textPrimary} />
         </Pressable>
       </View>
 
@@ -149,6 +146,14 @@ export default function FoodTrackerScreen() {
         contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 80 }]}>
 
         <ThemedText style={styles.pageTitle}>Track {selectedMeal}</ThemedText>
+        {isPastDay && (
+          <View style={styles.pastDayBadge}>
+            <Ionicons name="calendar-outline" size={13} color={DS.textSecond} />
+            <ThemedText style={styles.pastDayText}>
+              Logging for {targetDate.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+            </ThemedText>
+          </View>
+        )}
 
         {/* Search Bar */}
         <View style={styles.searchBar}>
@@ -166,7 +171,7 @@ export default function FoodTrackerScreen() {
             </Pressable>
           ) : (
             <Pressable onPress={() => router.push('/screens/scan' as any)} style={{ padding: 4 }}>
-              <Ionicons name="barcode-outline" size={20} color="#000000" />
+              <Ionicons name="barcode-outline" size={20} color={DS.textPrimary} />
             </Pressable>
           )}
         </View>
@@ -183,6 +188,8 @@ export default function FoodTrackerScreen() {
               searchResults.map(item => (
                 <FoodRow
                   key={item.id}
+                  DS={DS}
+                  styles={styles}
                   name={item.name}
                   subtitle={[item.brand, item.servingLabel].filter(Boolean).join(' · ') || '100 g'}
                   calories={item.calories}
@@ -205,6 +212,8 @@ export default function FoodTrackerScreen() {
                 recentFoods.map(item => (
                   <FoodRow
                     key={item.id}
+                    DS={DS}
+                    styles={styles}
                     name={item.name}
                     subtitle={macroSubtitle(item.protein, item.carbs, item.fats)}
                     calories={item.calories}
@@ -225,6 +234,8 @@ export default function FoodTrackerScreen() {
                 {frequentFoods.map((item, idx) => (
                   <FoodRow
                     key={`${item.name}-${idx}`}
+                    DS={DS}
+                    styles={styles}
                     name={item.name}
                     subtitle={macroSubtitle(item.protein, item.carbs, item.fats)}
                     calories={item.calories}
@@ -247,7 +258,7 @@ export default function FoodTrackerScreen() {
             <View style={styles.sheetTopRow}>
               <ThemedText style={styles.sectionLabel}>Adjust Quantity</ThemedText>
               <Pressable onPress={() => setQuantityModalVisible(false)}>
-                <Ionicons name="close" size={22} color="#000000" />
+                <Ionicons name="close" size={22} color={DS.textPrimary} />
               </Pressable>
             </View>
 
@@ -262,7 +273,7 @@ export default function FoodTrackerScreen() {
                   const qty = parseFloat(servingQty) || 1;
                   if (qty > 1) setServingQty((qty - 1).toString());
                 }}>
-                <Ionicons name="remove" size={20} color="#000000" />
+                <Ionicons name="remove" size={20} color={DS.textPrimary} />
               </Pressable>
 
               <TextInput
@@ -279,7 +290,7 @@ export default function FoodTrackerScreen() {
                   const qty = parseFloat(servingQty) || 0;
                   setServingQty((qty + 1).toString());
                 }}>
-                <Ionicons name="add" size={20} color="#000000" />
+                <Ionicons name="add" size={20} color={DS.textPrimary} />
               </Pressable>
             </View>
 
@@ -343,193 +354,230 @@ export default function FoodTrackerScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  topHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: Spacing.sm,
-    height: 48,
-  },
-  iconBtn: {
-    padding: 8,
-  },
-  scroll: {
-    paddingHorizontal: Spacing.md + 4,
-    paddingTop: Spacing.sm,
-  },
-  pageTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#000000',
-    letterSpacing: -0.5,
-    marginBottom: Spacing.lg,
-  },
-  searchBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1.5,
-    borderColor: '#000000',
-    borderRadius: Radius.full,
-    paddingHorizontal: Spacing.md + 2,
-    height: 52,
-    marginBottom: Spacing.xl,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 15,
-    color: '#000000',
-  },
-  section: {
-    marginBottom: Spacing.xl,
-  },
-  sectionHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: Spacing.sm + 2,
-  },
-  sectionLabel: {
-    fontSize: 14,
-    color: DS.textSecond,
-    marginBottom: Spacing.sm + 2,
-  },
-  viewAllLink: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#000000',
-  },
-  helperText: {
-    fontSize: 13,
-    color: DS.textMuted,
-    paddingVertical: Spacing.sm,
-  },
-  foodRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: Spacing.sm + 6,
-  },
-  foodRowPressed: {
-    opacity: 0.55,
-  },
-  foodName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#000000',
-  },
-  foodSub: {
-    fontSize: 13,
-    color: DS.textMuted,
-    marginTop: 2,
-  },
-  foodCal: {
-    fontSize: 15,
-    color: DS.textSecond,
-    marginRight: Spacing.sm,
-  },
-  addCircleBtn: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    borderWidth: 1.5,
-    borderColor: '#000000',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'flex-end',
-  },
-  sheet: {
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: Radius.xl,
-    borderTopRightRadius: Radius.xl,
-    padding: Spacing.lg,
-  },
-  sheetTopRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: Spacing.md,
-  },
-  quantityRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: Spacing.md,
-    gap: Spacing.md,
-  },
-  qtyBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#F0F0F0',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  qtyInput: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#000000',
-    width: 80,
-    height: 50,
-    borderBottomWidth: 2,
-    borderBottomColor: '#000000',
-  },
-  servingChip: {
-    backgroundColor: '#F0F0F0',
-    paddingHorizontal: Spacing.md,
-    paddingVertical: 8,
-    borderRadius: Radius.full,
-  },
-  servingChipActive: {
-    backgroundColor: '#000000',
-  },
-  servingChipText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#000000',
-  },
-  servingChipTextActive: {
-    color: '#FFFFFF',
-  },
-  nutritionPreviewRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    backgroundColor: '#F9F9F9',
-    borderRadius: Radius.md,
-    padding: Spacing.md,
-    marginBottom: Spacing.lg,
-  },
-  nutritonPreviewItem: {
-    alignItems: 'center',
-  },
-  nutVal: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#000000',
-  },
-  nutLbl: {
-    fontSize: 12,
-    color: DS.textSecond,
-    marginTop: 4,
-  },
-  logFoodBtn: {
-    backgroundColor: '#000000',
-    height: 48,
-    borderRadius: Radius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logFoodBtnText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    letterSpacing: 0.5,
-  },
-});
+/** One tappable row: name + subtitle on the left, calories + an outlined add circle on the right. */
+function FoodRow({
+  DS, styles, name, subtitle, calories, onPress,
+}: {
+  DS: ReturnType<typeof useDS>;
+  styles: ReturnType<typeof makeStyles>;
+  name: string; subtitle: string; calories: number; onPress: () => void;
+}) {
+  return (
+    <Pressable style={({ pressed }) => [styles.foodRow, pressed && styles.foodRowPressed]} onPress={onPress}>
+      <View style={{ flex: 1, marginRight: Spacing.sm }}>
+        <ThemedText style={styles.foodName} numberOfLines={1}>{name}</ThemedText>
+        <ThemedText style={styles.foodSub} numberOfLines={1}>{subtitle}</ThemedText>
+      </View>
+      <ThemedText style={styles.foodCal}>{Math.round(calories)} Cal</ThemedText>
+      <View style={styles.addCircleBtn}>
+        <Ionicons name="add" size={17} color={DS.textPrimary} />
+      </View>
+    </Pressable>
+  );
+}
+
+function makeStyles(DS: ReturnType<typeof useDS>) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: DS.surface,
+    },
+    topHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: Spacing.sm,
+      height: 48,
+    },
+    iconBtn: {
+      padding: 8,
+    },
+    scroll: {
+      paddingHorizontal: Spacing.md + 4,
+      paddingTop: Spacing.sm,
+    },
+    pageTitle: {
+      fontSize: 24,
+      fontWeight: '700',
+      color: DS.textPrimary,
+      letterSpacing: -0.5,
+    },
+    pastDayBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      alignSelf: 'flex-start',
+      backgroundColor: DS.raised,
+      paddingHorizontal: 10,
+      paddingVertical: 5,
+      borderRadius: Radius.full,
+      marginTop: 8,
+    },
+    pastDayText: {
+      fontSize: 12,
+      color: DS.textSecond,
+      fontWeight: '600',
+    },
+    searchBar: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: DS.raised,
+      borderRadius: Radius.full,
+      paddingHorizontal: Spacing.md + 2,
+      height: 52,
+      marginTop: Spacing.md,
+      marginBottom: Spacing.xl,
+    },
+    searchInput: {
+      flex: 1,
+      fontSize: 15,
+      color: DS.textPrimary,
+    },
+    section: {
+      marginBottom: Spacing.xl,
+    },
+    sectionHeaderRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: Spacing.sm + 2,
+    },
+    sectionLabel: {
+      fontSize: 14,
+      color: DS.textSecond,
+      marginBottom: Spacing.sm + 2,
+    },
+    viewAllLink: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: DS.textPrimary,
+    },
+    helperText: {
+      fontSize: 13,
+      color: DS.textMuted,
+      paddingVertical: Spacing.sm,
+    },
+    foodRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: Spacing.sm + 6,
+    },
+    foodRowPressed: {
+      opacity: 0.55,
+    },
+    foodName: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: DS.textPrimary,
+    },
+    foodSub: {
+      fontSize: 13,
+      color: DS.textMuted,
+      marginTop: 2,
+    },
+    foodCal: {
+      fontSize: 15,
+      color: DS.textSecond,
+      marginRight: Spacing.sm,
+    },
+    addCircleBtn: {
+      width: 30,
+      height: 30,
+      borderRadius: 15,
+      backgroundColor: DS.raised,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: DS.overlay,
+      justifyContent: 'flex-end',
+    },
+    sheet: {
+      backgroundColor: DS.surface,
+      borderTopLeftRadius: Radius.xl,
+      borderTopRightRadius: Radius.xl,
+      padding: Spacing.lg,
+    },
+    sheetTopRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: Spacing.md,
+    },
+    quantityRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginVertical: Spacing.md,
+      gap: Spacing.md,
+    },
+    qtyBtn: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: DS.raised,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    qtyInput: {
+      fontSize: 24,
+      fontWeight: '700',
+      color: DS.textPrimary,
+      width: 80,
+      height: 50,
+      borderBottomWidth: 2,
+      borderBottomColor: DS.textPrimary,
+    },
+    servingChip: {
+      backgroundColor: DS.raised,
+      paddingHorizontal: Spacing.md,
+      paddingVertical: 8,
+      borderRadius: Radius.full,
+    },
+    servingChipActive: {
+      backgroundColor: DS.accent,
+    },
+    servingChipText: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: DS.textPrimary,
+    },
+    servingChipTextActive: {
+      color: DS.accentText,
+    },
+    nutritionPreviewRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      backgroundColor: DS.raised,
+      borderRadius: Radius.md,
+      padding: Spacing.md,
+      marginBottom: Spacing.lg,
+    },
+    nutritonPreviewItem: {
+      alignItems: 'center',
+    },
+    nutVal: {
+      fontSize: 16,
+      fontWeight: '700',
+      color: DS.textPrimary,
+    },
+    nutLbl: {
+      fontSize: 12,
+      color: DS.textSecond,
+      marginTop: 4,
+    },
+    logFoodBtn: {
+      backgroundColor: DS.accent,
+      height: 48,
+      borderRadius: Radius.full,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    logFoodBtnText: {
+      fontSize: 14,
+      fontWeight: '700',
+      color: DS.accentText,
+      letterSpacing: 0.5,
+    },
+  });
+}

@@ -168,7 +168,6 @@ export default function VoiceLogScreen() {
             protein: Math.round(m.protein * item.quantity),
             carbs: Math.round(m.carbs * item.quantity),
             fats: Math.round(m.fats * item.quantity),
-            time: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
             imageUrl: m.imageUrl ?? '',
           });
         })

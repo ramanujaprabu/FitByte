@@ -2,18 +2,21 @@
  * Badge — Inline label chip used for tags, states, and metadata.
  * Replaces repeated chip/badge patterns across all screens.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, StyleSheet, type ViewProps } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
-import { DS } from '@/constants/theme';
+import { useDS } from '@/contexts/ThemeContext';
 
 interface BadgeProps extends ViewProps {
   label: string;
-  /** Tint the text and border with accent blue */
+  /** Tint the text and border with the accent color */
   accent?: boolean;
 }
 
 export function Badge({ label, accent, style, ...rest }: BadgeProps) {
+  const DS = useDS();
+  const styles = useMemo(() => makeStyles(DS), [DS]);
+
   return (
     <View
       style={[
@@ -29,25 +32,25 @@ export function Badge({ label, accent, style, ...rest }: BadgeProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  base: {
-    alignSelf: 'flex-start',
-    backgroundColor: DS.raised,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: DS.border,
-  },
-  text: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: DS.textSecond,
-  },
-  accentBorder: {
-    borderColor: DS.accent,
-  },
-  accentText: {
-    color: DS.accent,
-  },
-});
+function makeStyles(DS: ReturnType<typeof useDS>) {
+  return StyleSheet.create({
+    base: {
+      alignSelf: 'flex-start',
+      backgroundColor: DS.raised,
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+      borderRadius: 999,
+    },
+    text: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: DS.textSecond,
+    },
+    accentBorder: {
+      backgroundColor: DS.accentDim,
+    },
+    accentText: {
+      color: DS.textPrimary,
+    },
+  });
+}

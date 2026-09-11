@@ -183,7 +183,6 @@ export default function LogWorkoutScreen() {
               caloriesBurned: `${estCalories}`,
               muscles: sessionMuscles,
               intensity: 'High',
-              timestamp: new Date().toISOString(),
             });
             router.back();
           }}>

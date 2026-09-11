@@ -1,15 +1,16 @@
 /**
  * Button — the single button primitive for the whole app.
- * Variants: primary (accent fill), secondary (bordered), ghost (text-only),
+ * Variants: primary (accent fill), secondary (soft surface), ghost (text-only),
  * destructive (for delete/remove actions). Replaces the one-off
  * Pressable+StyleSheet button blocks that were duplicated per screen.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View, type ViewStyle } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { ThemedText } from '@/components/themed-text';
-import { DS, Radius, Spacing, Typography, MIN_TOUCH_TARGET } from '@/constants/theme';
+import { useDS } from '@/contexts/ThemeContext';
+import { Radius, Spacing, Typography, MIN_TOUCH_TARGET } from '@/constants/theme';
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'destructive';
 type Size = 'md' | 'sm';
@@ -37,10 +38,12 @@ export function Button({
   fullWidth = true,
   style,
 }: ButtonProps) {
+  const DS = useDS();
+  const styles = useMemo(() => makeStyles(DS), [DS]);
   const isDisabled = disabled || loading;
 
   const textColor =
-    variant === 'primary' ? '#FFFFFF' :
+    variant === 'primary' ? DS.accentText :
     variant === 'destructive' ? DS.statusBad :
     DS.textPrimary;
 
@@ -73,28 +76,30 @@ export function Button({
   );
 }
 
-const styles = StyleSheet.create({
-  base: {
-    minHeight: MIN_TOUCH_TARGET,
-    borderRadius: Radius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.lg,
-  },
-  sm: {
-    minHeight: 36,
-    paddingHorizontal: Spacing.md,
-    borderRadius: Radius.sm,
-  },
-  content: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.xs + 2,
-  },
-  primary: { backgroundColor: '#000000' },
-  secondary: { backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: DS.border },
-  ghost: { backgroundColor: 'transparent' },
-  destructive: { backgroundColor: DS.statusBadDim },
-  disabled: { opacity: 0.45 },
-  pressed: { opacity: 0.85 },
-});
+function makeStyles(DS: ReturnType<typeof useDS>) {
+  return StyleSheet.create({
+    base: {
+      minHeight: MIN_TOUCH_TARGET,
+      borderRadius: Radius.full,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: Spacing.lg,
+    },
+    sm: {
+      minHeight: 36,
+      paddingHorizontal: Spacing.md,
+      borderRadius: Radius.full,
+    },
+    content: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.xs + 2,
+    },
+    primary: { backgroundColor: DS.accent },
+    secondary: { backgroundColor: DS.raised },
+    ghost: { backgroundColor: 'transparent' },
+    destructive: { backgroundColor: DS.statusBadDim },
+    disabled: { opacity: 0.45 },
+    pressed: { opacity: 0.85 },
+  });
+}

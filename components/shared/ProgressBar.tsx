@@ -4,28 +4,30 @@
  */
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { DS } from '@/constants/theme';
+import { useDS } from '@/contexts/ThemeContext';
 
 interface ProgressBarProps {
   /** Value between 0 and 1 */
   progress: number;
-  /** Override fill color (defaults to DS.textSecond) */
+  /** Override fill color (defaults to the theme's accent) */
   color?: string;
   /** Bar height in pixels */
   height?: number;
 }
 
-export function ProgressBar({ progress, color = DS.accent, height = 4 }: ProgressBarProps) {
+export function ProgressBar({ progress, color, height = 4 }: ProgressBarProps) {
+  const DS = useDS();
   const clampedProgress = Math.min(Math.max(progress, 0), 1);
+  const fillColor = color ?? DS.accent;
 
   return (
-    <View style={[styles.track, { height }]}>
+    <View style={[styles.track, { height, backgroundColor: DS.ringTrack }]}>
       <View
         style={[
           styles.fill,
           {
             width: `${clampedProgress * 100}%`,
-            backgroundColor: color,
+            backgroundColor: fillColor,
             height,
           },
         ]}
@@ -37,7 +39,6 @@ export function ProgressBar({ progress, color = DS.accent, height = 4 }: Progres
 const styles = StyleSheet.create({
   track: {
     borderRadius: 999,
-    backgroundColor: DS.ringTrack,
     overflow: 'hidden',
   },
   fill: {

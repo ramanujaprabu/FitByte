@@ -53,6 +53,7 @@ function mapSession(row: any): WorkoutSession {
       hour: 'numeric',
       minute: '2-digit',
     }),
+    performedAt: row.performed_at,
   };
 }
 
@@ -109,12 +110,17 @@ export const workoutService = {
     return mapRoutine(created, routine.exerciseList);
   },
 
-  async logSession(session: Omit<WorkoutSession, 'id'>): Promise<WorkoutSession> {
+  async logSession(
+    session: Omit<WorkoutSession, 'id' | 'timestamp' | 'performedAt'>,
+    performedAt: Date = new Date()
+  ): Promise<WorkoutSession> {
     const userId = await currentUserId();
     const createdId = `workout-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
     const newSession: WorkoutSession = {
       id: createdId,
       ...session,
+      performedAt: performedAt.toISOString(),
+      timestamp: performedAt.toLocaleString([], { weekday: 'long', hour: 'numeric', minute: '2-digit' }),
     };
 
     // 1. Save locally to offline storage immediately for instant UI availability
@@ -134,6 +140,7 @@ export const workoutService = {
           calories_burned: caloriesBurned,
           muscles: session.muscles,
           intensity: session.intensity,
+          performed_at: performedAt.toISOString(),
         })
         .select()
         .single();

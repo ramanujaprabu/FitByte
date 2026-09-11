@@ -357,6 +357,56 @@ export const userService = {
     return mapBodyMetrics(data);
   },
 
+  /**
+   * Logs a new weight entry to the append-only `weight_logs` history and
+   * updates `body_metrics.weight` (and BMI, if height is known) so it stays
+   * a fast "current value" cache. This is the only way weight ever gets a
+   * trend on the Trends tab — `updateBodyMetrics` alone doesn't keep history.
+   */
+  async logWeight(weightKg: number, at: Date = new Date()): Promise<void> {
+    const userId = await currentUserId();
+
+    const { error: logError } = await supabase
+      .from('weight_logs')
+      .insert({ user_id: userId, weight_kg: weightKg, logged_at: at.toISOString() });
+    if (logError) throw logError;
+
+    const { data: metrics } = await supabase
+      .from('body_metrics')
+      .select('height_cm')
+      .eq('user_id', userId)
+      .maybeSingle();
+    const heightM = (metrics?.height_cm ?? 0) / 100;
+    const bmi = heightM > 0 ? Number((weightKg / (heightM * heightM)).toFixed(1)) : undefined;
+
+    const { error: updateError } = await supabase
+      .from('body_metrics')
+      .update({
+        weight: weightKg,
+        ...(bmi !== undefined ? { bmi } : {}),
+        updated_at: new Date().toISOString(),
+      })
+      .eq('user_id', userId);
+    if (updateError) throw updateError;
+  },
+
+  /** Weight history, oldest first, for the Trends tab's weight chart. */
+  async getWeightHistory(days = 90): Promise<{ date: string; weightKg: number }[]> {
+    const userId = await currentUserId();
+    const since = new Date();
+    since.setDate(since.getDate() - days);
+
+    const { data, error } = await supabase
+      .from('weight_logs')
+      .select('weight_kg, logged_at')
+      .eq('user_id', userId)
+      .gte('logged_at', since.toISOString())
+      .order('logged_at', { ascending: true });
+    if (error) throw error;
+
+    return (data ?? []).map((row: any) => ({ date: row.logged_at, weightKg: Number(row.weight_kg) }));
+  },
+
   async getCalorieTarget(): Promise<CalorieTarget> {
     return fetchCalorieTarget(await currentUserId());
   },
@@ -399,6 +449,12 @@ export const userService = {
     if (profileRes.error) throw profileRes.error;
     if (metricsRes.error) throw metricsRes.error;
     if (targetRes.error) throw targetRes.error;
+
+    // Seed weight history with the onboarding starting weight so the Trends
+    // tab has a first point to chart from immediately.
+    await supabase
+      .from('weight_logs')
+      .insert({ user_id: userId, weight_kg: input.weightKg, logged_at: nowIso });
 
     await supabase.from('fitness_goals').update({ is_active: false }).eq('user_id', userId).eq('is_active', true);
 

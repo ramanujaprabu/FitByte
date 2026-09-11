@@ -1,17 +1,19 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ProgressBar } from '@/components/shared/ProgressBar';
 import { ThemedText } from '@/components/themed-text';
-import { DS, Fonts, Radius, Spacing } from '@/constants/theme';
+import { useDS } from '@/contexts/ThemeContext';
+import { Fonts, Radius, Spacing } from '@/constants/theme';
 import { nutritionService } from '@/services/api/nutrition';
 import { userService } from '@/services/api/user';
 import type { DailyNutrition, FitnessGoal, MealType } from '@/types';
 import { groupFoodEntriesByMeal } from '@/utils/format';
+import { triggerHaptic } from '@/utils/haptics';
 
 const MEAL_ORDER: MealType[] = ['Breakfast', 'Lunch', 'Dinner', 'Snacks'];
 const DEFAULT_MEAL_SPLIT: Record<MealType, number> = { Breakfast: 25, Lunch: 35, Dinner: 30, Snacks: 10 };
@@ -27,21 +29,41 @@ const MORE_LINKS: { label: string; icon: React.ComponentProps<typeof Ionicons>['
   { label: 'Meal History', icon: 'time-outline', route: '/screens/meal-history' },
   { label: 'Macro Breakdown', icon: 'pie-chart-outline', route: '/screens/macro-breakdown' },
   { label: 'Performance Trends', icon: 'trending-up-outline', route: '/screens/daily-analytics' },
-  { label: 'Notifications', icon: 'notifications-outline', route: '/screens/notifications' },
 ];
+
+function startOfDay(d: Date): Date {
+  const copy = new Date(d);
+  copy.setHours(0, 0, 0, 0);
+  return copy;
+}
+
+function dateLabel(d: Date): string {
+  const today = startOfDay(new Date());
+  const target = startOfDay(d);
+  const diffDays = Math.round((today.getTime() - target.getTime()) / 86_400_000);
+  if (diffDays === 0) return 'Today';
+  if (diffDays === 1) return 'Yesterday';
+  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+}
 
 export default function LogHomeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const DS = useDS();
+  const styles = useMemo(() => makeStyles(DS), [DS]);
 
+  const [selectedDate, setSelectedDate] = useState(() => startOfDay(new Date()));
   const [today, setToday] = useState<DailyNutrition | null>(null);
   const [fitnessGoal, setFitnessGoal] = useState<FitnessGoal | null>(null);
   const [loading, setLoading] = useState(true);
+  const [waterBusy, setWaterBusy] = useState(false);
+
+  const isToday = useMemo(() => startOfDay(new Date()).getTime() === selectedDate.getTime(), [selectedDate]);
 
   const load = useCallback(() => {
     setLoading(true);
     Promise.all([
-      nutritionService.getDailyNutrition(),
+      nutritionService.getDailyNutrition(selectedDate.toISOString()),
       userService.getActiveFitnessGoal().catch(() => null),
     ])
       .then(([daily, goal]) => {
@@ -50,9 +72,18 @@ export default function LogHomeScreen() {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, []);
+  }, [selectedDate]);
 
   useFocusEffect(load);
+
+  const goToDay = (deltaDays: number) => {
+    triggerHaptic('selection');
+    setSelectedDate((d) => {
+      const next = new Date(d);
+      next.setDate(next.getDate() + deltaDays);
+      return startOfDay(next) > startOfDay(new Date()) ? d : next;
+    });
+  };
 
   const caloriesConsumed = today?.caloriesConsumed ?? 0;
   const calorieGoal = today?.calorieGoal ?? 2000;
@@ -63,11 +94,29 @@ export default function LogHomeScreen() {
   const carbs = today?.macros.carbs ?? { consumed: 0, target: 250 };
   const fats = today?.macros.fats ?? { consumed: 0, target: 65 };
 
+  const waterGlasses = today?.waterGlasses ?? 0;
+  const waterGoal = today?.waterGoal ?? 8;
+
   const mealSplit = fitnessGoal && Object.keys(fitnessGoal.mealSplit).length > 0 ? fitnessGoal.mealSplit : DEFAULT_MEAL_SPLIT;
   const mealsToShow = MEAL_ORDER.filter((m) => mealSplit[m] != null);
   const groupedByMeal = new Map((today ? groupFoodEntriesByMeal(today.meals) : []).map((g) => [g.meal, g.items]));
 
-  const formattedDate = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  const adjustWater = async (delta: number) => {
+    if (waterBusy) return;
+    const next = Math.max(0, waterGlasses + delta);
+    triggerHaptic('light');
+    setToday((t) => (t ? { ...t, waterGlasses: next } : t));
+    setWaterBusy(true);
+    try {
+      await nutritionService.setWaterGlasses(next, selectedDate.toISOString());
+    } catch {
+      // Optimistic update already applied; next focus/load will resync.
+    } finally {
+      setWaterBusy(false);
+    }
+  };
+
+  const dateParam = selectedDate.toISOString();
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -75,7 +124,7 @@ export default function LogHomeScreen() {
       <View style={styles.topHeader}>
         <ThemedText style={styles.appTitle}>FitByte</ThemedText>
         <Pressable style={styles.iconBtn} onPress={() => router.push('/screens/account-settings' as any)}>
-          <Ionicons name="settings-outline" size={22} color="#000000" />
+          <Ionicons name="settings-outline" size={22} color={DS.textPrimary} />
         </Pressable>
       </View>
 
@@ -83,33 +132,46 @@ export default function LogHomeScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 100 }]}>
 
-        <ThemedText style={styles.dateTitle}>Today, {formattedDate.split(', ')[1] || ''}</ThemedText>
+        {/* Date Navigator */}
+        <View style={styles.dateNavRow}>
+          <Pressable style={styles.dateNavBtn} onPress={() => goToDay(-1)} hitSlop={8}>
+            <Ionicons name="chevron-back" size={18} color={DS.textPrimary} />
+          </Pressable>
+          <ThemedText style={styles.dateTitle}>{dateLabel(selectedDate)}</ThemedText>
+          <Pressable
+            style={[styles.dateNavBtn, isToday && styles.dateNavBtnDisabled]}
+            onPress={() => goToDay(1)}
+            disabled={isToday}
+            hitSlop={8}>
+            <Ionicons name="chevron-forward" size={18} color={isToday ? DS.textMuted : DS.textPrimary} />
+          </Pressable>
+        </View>
 
         {/* Calorie Banner */}
         <Pressable
           style={({ pressed }) => [styles.calorieBanner, pressed && styles.pressedFade]}
           onPress={() => router.push('/screens/daily-analytics' as any)}>
           <View style={styles.calorieBannerIcon}>
-            <Ionicons name="restaurant-outline" size={20} color="#000000" />
+            <Ionicons name="restaurant-outline" size={20} color={DS.textPrimary} />
           </View>
           <View style={{ flex: 1 }}>
             <ThemedText style={styles.calorieBannerTitle}>Eat up to {caloriesRemaining.toLocaleString()} Cal</ThemedText>
             <View style={styles.calorieBannerProgressWrap}>
-              <ProgressBar progress={calRatio} height={4} color="#000000" />
+              <ProgressBar progress={calRatio} height={4} />
             </View>
           </View>
           <View style={styles.calorieBannerBadge}>
-            <Ionicons name="stats-chart" size={15} color="#000000" />
+            <Ionicons name="stats-chart" size={15} color={DS.textPrimary} />
           </View>
         </Pressable>
 
-        {/* Macros Bento Grid */}
+        {/* Macros Grid */}
         <View style={styles.bentoGrid}>
           <View style={styles.macroCard}>
             <ThemedText style={styles.macroLabelCaps}>PROTEIN</ThemedText>
             <View>
               <ThemedText style={styles.macroBigNum}>{Math.round(protein.consumed)}<ThemedText style={styles.macroUnit}>g</ThemedText></ThemedText>
-              <ProgressBar progress={Math.min(1, protein.consumed / (protein.target || 1))} height={4} color="#000000" />
+              <ProgressBar progress={Math.min(1, protein.consumed / (protein.target || 1))} height={4} />
               <ThemedText style={styles.macroSubTarget}>/ {protein.target}g</ThemedText>
             </View>
           </View>
@@ -118,7 +180,7 @@ export default function LogHomeScreen() {
             <ThemedText style={styles.macroLabelCaps}>CARBS</ThemedText>
             <View>
               <ThemedText style={styles.macroBigNum}>{Math.round(carbs.consumed)}<ThemedText style={styles.macroUnit}>g</ThemedText></ThemedText>
-              <ProgressBar progress={Math.min(1, carbs.consumed / (carbs.target || 1))} height={4} color="#000000" />
+              <ProgressBar progress={Math.min(1, carbs.consumed / (carbs.target || 1))} height={4} />
               <ThemedText style={styles.macroSubTarget}>/ {carbs.target}g</ThemedText>
             </View>
           </View>
@@ -127,31 +189,64 @@ export default function LogHomeScreen() {
             <ThemedText style={styles.macroLabelCaps}>FAT</ThemedText>
             <View>
               <ThemedText style={styles.macroBigNum}>{Math.round(fats.consumed)}<ThemedText style={styles.macroUnit}>g</ThemedText></ThemedText>
-              <ProgressBar progress={Math.min(1, fats.consumed / (fats.target || 1))} height={4} color="#000000" />
+              <ProgressBar progress={Math.min(1, fats.consumed / (fats.target || 1))} height={4} />
               <ThemedText style={styles.macroSubTarget}>/ {fats.target}g</ThemedText>
             </View>
           </View>
         </View>
 
+        {/* Water — compact, single row */}
+        <View style={styles.waterRow}>
+          <View style={styles.waterLeft}>
+            <Ionicons name="water" size={16} color={DS.textSecond} />
+            <ThemedText style={styles.waterText}>
+              Water <ThemedText style={styles.waterCount}>{waterGlasses}/{waterGoal}</ThemedText>
+            </ThemedText>
+          </View>
+          <View style={styles.waterControls}>
+            <Pressable style={styles.waterBtn} onPress={() => adjustWater(-1)} hitSlop={8} disabled={waterGlasses === 0}>
+              <Ionicons name="remove" size={15} color={waterGlasses === 0 ? DS.textMuted : DS.textPrimary} />
+            </Pressable>
+            <Pressable style={styles.waterBtn} onPress={() => adjustWater(1)} hitSlop={8}>
+              <Ionicons name="add" size={15} color={DS.textPrimary} />
+            </Pressable>
+          </View>
+        </View>
+
         {/* Quick Actions */}
         <View style={styles.quickActionsRow}>
-          <Pressable style={({ pressed }) => [styles.actionBtn, pressed && styles.pressedFade]} onPress={() => router.push('/screens/trackfood' as any)}>
+          <Pressable
+            style={({ pressed }) => [styles.actionBtn, pressed && styles.pressedFade]}
+            onPress={() => router.push({ pathname: '/screens/trackfood' as any, params: { date: dateParam } })}>
             <View style={styles.actionIconWrap}>
-              <Ionicons name="search" size={18} color="#FFFFFF" />
+              <Ionicons name="search" size={18} color={DS.accentText} />
             </View>
             <ThemedText style={styles.actionBtnText}>Search</ThemedText>
           </Pressable>
 
-          <Pressable style={({ pressed }) => [styles.actionBtn, pressed && styles.pressedFade]} onPress={() => router.push('/screens/scan' as any)}>
+          <Pressable
+            style={({ pressed }) => [styles.actionBtn, pressed && styles.pressedFade]}
+            onPress={() => router.push('/screens/scan' as any)}>
             <View style={styles.actionIconWrap}>
-              <Ionicons name="barcode-outline" size={18} color="#FFFFFF" />
+              <Ionicons name="barcode-outline" size={18} color={DS.accentText} />
             </View>
             <ThemedText style={styles.actionBtnText}>Scan</ThemedText>
           </Pressable>
 
-          <Pressable style={({ pressed }) => [styles.actionBtn, pressed && styles.pressedFade]} onPress={() => router.push('/screens/meal-history' as any)}>
+          <Pressable
+            style={({ pressed }) => [styles.actionBtn, pressed && styles.pressedFade]}
+            onPress={() => router.push('/screens/voice-log' as any)}>
             <View style={styles.actionIconWrap}>
-              <Ionicons name="time-outline" size={18} color="#FFFFFF" />
+              <Ionicons name="mic" size={18} color={DS.accentText} />
+            </View>
+            <ThemedText style={styles.actionBtnText}>Voice</ThemedText>
+          </Pressable>
+
+          <Pressable
+            style={({ pressed }) => [styles.actionBtn, pressed && styles.pressedFade]}
+            onPress={() => router.push('/screens/meal-history' as any)}>
+            <View style={styles.actionIconWrap}>
+              <Ionicons name="time-outline" size={18} color={DS.accentText} />
             </View>
             <ThemedText style={styles.actionBtnText}>History</ThemedText>
           </Pressable>
@@ -170,8 +265,8 @@ export default function LogHomeScreen() {
                   <ThemedText style={styles.mealSectionCal}>{Math.round(consumed)} of {target} Cal</ThemedText>
                   <Pressable
                     style={({ pressed }) => [styles.addMealBtn, pressed && styles.pressedFade]}
-                    onPress={() => router.push({ pathname: '/screens/trackfood' as any, params: { meal } })}>
-                    <Ionicons name="add" size={18} color="#FFFFFF" />
+                    onPress={() => router.push({ pathname: '/screens/trackfood' as any, params: { meal, date: dateParam } })}>
+                    <Ionicons name="add" size={18} color={DS.accentText} />
                   </Pressable>
                 </View>
               </View>
@@ -209,7 +304,7 @@ export default function LogHomeScreen() {
               ]}
               onPress={() => router.push(link.route as any)}>
               <View style={styles.moreIconWrap}>
-                <Ionicons name={link.icon} size={16} color="#FFFFFF" />
+                <Ionicons name={link.icon} size={16} color={DS.accentText} />
               </View>
               <ThemedText style={styles.moreLabel}>{link.label}</ThemedText>
               <Ionicons name="chevron-forward" size={16} color={DS.textMuted} />
@@ -218,269 +313,297 @@ export default function LogHomeScreen() {
         </View>
 
       </ScrollView>
-
-      {/* Small floating mic button — voice log */}
-      <Pressable
-        style={({ pressed }) => [styles.micFab, { bottom: 60 + insets.bottom + 16 }, pressed && styles.pressedFade]}
-        onPress={() => router.push('/screens/voice-log' as any)}>
-        <Ionicons name="mic" size={20} color="#FFFFFF" />
-      </Pressable>
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F9F9F9',
-  },
-  topHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: Spacing.md,
-    height: 54,
-    borderBottomWidth: 1,
-    borderBottomColor: DS.border,
-    backgroundColor: '#FFFFFF',
-  },
-  iconBtn: {
-    padding: 6,
-  },
-  appTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#000000',
-    letterSpacing: -0.5,
-  },
-  scroll: {
-    paddingHorizontal: Spacing.md,
-    paddingTop: Spacing.md,
-  },
-  dateTitle: {
-    fontSize: 22,
-    fontWeight: '600',
-    color: '#000000',
-    letterSpacing: -0.3,
-    marginBottom: Spacing.md,
-  },
-  calorieBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm + 2,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: DS.border,
-    borderRadius: Radius.md,
-    padding: Spacing.md,
-    marginBottom: Spacing.md,
-  },
-  calorieBannerIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: DS.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  calorieBannerTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#000000',
-    marginBottom: 6,
-  },
-  calorieBannerProgressWrap: {
-    marginRight: Spacing.sm,
-  },
-  calorieBannerBadge: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#F3F3F3',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  bentoGrid: {
-    flexDirection: 'row',
-    gap: Spacing.sm,
-    marginBottom: Spacing.md,
-  },
-  macroCard: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: DS.border,
-    borderRadius: Radius.md,
-    padding: Spacing.md,
-    justifyContent: 'space-between',
-    aspectRatio: 1,
-  },
-  macroLabelCaps: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: DS.textSecond,
-    letterSpacing: 0.5,
-  },
-  macroBigNum: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#000000',
-    marginBottom: Spacing.xs,
-  },
-  macroUnit: {
-    fontSize: 12,
-    fontWeight: '400',
-    color: DS.textSecond,
-  },
-  macroSubTarget: {
-    fontFamily: Fonts.mono,
-    fontSize: 10,
-    color: DS.textSecond,
-    marginTop: Spacing.xs,
-  },
-  quickActionsRow: {
-    flexDirection: 'row',
-    gap: Spacing.sm,
-    marginBottom: Spacing.lg,
-  },
-  actionBtn: {
-    flex: 1,
-    alignItems: 'center',
-    gap: 6,
-  },
-  actionIconWrap: {
-    width: 48,
-    height: 48,
-    borderRadius: Radius.md,
-    backgroundColor: '#000000',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  actionBtnText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#000000',
-  },
-  mealSection: {
-    marginBottom: Spacing.lg,
-  },
-  mealSectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: Spacing.sm,
-  },
-  mealSectionTitle: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: '#000000',
-  },
-  mealSectionRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-  },
-  mealSectionCal: {
-    fontFamily: Fonts.mono,
-    fontSize: 12,
-    color: DS.textSecond,
-  },
-  addMealBtn: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    backgroundColor: '#000000',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  mealItemRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: Spacing.sm + 4,
-  },
-  mealItemName: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#000000',
-    flex: 1,
-    marginRight: Spacing.sm,
-  },
-  mealItemCal: {
-    fontFamily: Fonts.mono,
-    fontSize: 13,
-    color: DS.textSecond,
-  },
-  mealEmptyCard: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: DS.border,
-    borderRadius: Radius.md,
-    paddingVertical: Spacing.lg,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  mealEmptyText: {
-    fontSize: 13,
-    color: DS.textMuted,
-    textAlign: 'center',
-  },
-  moreSectionLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: DS.textMuted,
-    letterSpacing: 0.5,
-    marginBottom: Spacing.sm,
-  },
-  moreCard: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: DS.border,
-    borderRadius: Radius.md,
-    overflow: 'hidden',
-  },
-  moreRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm + 2,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm + 4,
-  },
-  moreRowBorder: {
-    borderBottomWidth: 1,
-    borderBottomColor: DS.border,
-  },
-  moreIconWrap: {
-    width: 32,
-    height: 32,
-    borderRadius: Radius.sm,
-    backgroundColor: '#000000',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  moreLabel: {
-    flex: 1,
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#000000',
-  },
-  pressedFade: {
-    opacity: 0.55,
-  },
-  micFab: {
-    position: 'absolute',
-    right: Spacing.md,
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#000000',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 4,
-  },
-});
+function makeStyles(DS: ReturnType<typeof useDS>) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: DS.bg,
+    },
+    topHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: Spacing.md,
+      height: 54,
+      backgroundColor: DS.bg,
+    },
+    iconBtn: {
+      padding: 6,
+    },
+    appTitle: {
+      fontSize: 20,
+      fontWeight: '700',
+      color: DS.textPrimary,
+      letterSpacing: -0.5,
+    },
+    scroll: {
+      paddingHorizontal: Spacing.md,
+      paddingTop: Spacing.xs,
+    },
+    dateNavRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: Spacing.md,
+      marginBottom: Spacing.md,
+    },
+    dateNavBtn: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: DS.raised,
+    },
+    dateNavBtnDisabled: {
+      opacity: 0.4,
+    },
+    dateTitle: {
+      fontSize: 20,
+      fontWeight: '600',
+      color: DS.textPrimary,
+      letterSpacing: -0.3,
+      minWidth: 150,
+      textAlign: 'center',
+    },
+    calorieBanner: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.sm + 2,
+      backgroundColor: DS.surface,
+      borderRadius: Radius.lg,
+      padding: Spacing.md,
+      marginBottom: Spacing.md,
+    },
+    calorieBannerIcon: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: DS.raised,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    calorieBannerTitle: {
+      fontSize: 15,
+      fontWeight: '700',
+      color: DS.textPrimary,
+      marginBottom: 6,
+    },
+    calorieBannerProgressWrap: {
+      marginRight: Spacing.sm,
+    },
+    calorieBannerBadge: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: DS.raised,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    bentoGrid: {
+      flexDirection: 'row',
+      gap: Spacing.sm,
+      marginBottom: Spacing.sm,
+    },
+    macroCard: {
+      flex: 1,
+      backgroundColor: DS.surface,
+      borderRadius: Radius.lg,
+      padding: Spacing.md,
+      justifyContent: 'space-between',
+      aspectRatio: 1,
+    },
+    macroLabelCaps: {
+      fontSize: 11,
+      fontWeight: '600',
+      color: DS.textSecond,
+      letterSpacing: 0.5,
+    },
+    macroBigNum: {
+      fontSize: 20,
+      fontWeight: '600',
+      color: DS.textPrimary,
+      marginBottom: Spacing.xs,
+    },
+    macroUnit: {
+      fontSize: 12,
+      fontWeight: '400',
+      color: DS.textSecond,
+    },
+    macroSubTarget: {
+      fontFamily: Fonts.mono,
+      fontSize: 10,
+      color: DS.textSecond,
+      marginTop: Spacing.xs,
+    },
+    waterRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      backgroundColor: DS.surface,
+      borderRadius: Radius.full,
+      paddingHorizontal: Spacing.md,
+      height: 40,
+      marginBottom: Spacing.lg,
+    },
+    waterLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+    },
+    waterText: {
+      fontSize: 13,
+      color: DS.textSecond,
+      fontWeight: '500',
+    },
+    waterCount: {
+      fontFamily: Fonts.mono,
+      color: DS.textPrimary,
+      fontWeight: '600',
+    },
+    waterControls: {
+      flexDirection: 'row',
+      gap: 6,
+    },
+    waterBtn: {
+      width: 26,
+      height: 26,
+      borderRadius: 13,
+      backgroundColor: DS.raised,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    quickActionsRow: {
+      flexDirection: 'row',
+      gap: Spacing.sm,
+      marginBottom: Spacing.lg,
+    },
+    actionBtn: {
+      flex: 1,
+      alignItems: 'center',
+      gap: 6,
+    },
+    actionIconWrap: {
+      width: 48,
+      height: 48,
+      borderRadius: Radius.md,
+      backgroundColor: DS.accent,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    actionBtnText: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: DS.textPrimary,
+    },
+    mealSection: {
+      marginBottom: Spacing.lg,
+    },
+    mealSectionHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: Spacing.sm,
+    },
+    mealSectionTitle: {
+      fontSize: 17,
+      fontWeight: '700',
+      color: DS.textPrimary,
+    },
+    mealSectionRight: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.sm,
+    },
+    mealSectionCal: {
+      fontFamily: Fonts.mono,
+      fontSize: 12,
+      color: DS.textSecond,
+    },
+    addMealBtn: {
+      width: 26,
+      height: 26,
+      borderRadius: 13,
+      backgroundColor: DS.accent,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    mealItemRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: Spacing.sm + 4,
+      borderBottomWidth: 1,
+      borderBottomColor: DS.border,
+    },
+    mealItemName: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: DS.textPrimary,
+      flex: 1,
+      marginRight: Spacing.sm,
+    },
+    mealItemCal: {
+      fontFamily: Fonts.mono,
+      fontSize: 13,
+      color: DS.textSecond,
+    },
+    mealEmptyCard: {
+      backgroundColor: DS.surface,
+      borderRadius: Radius.lg,
+      paddingVertical: Spacing.lg,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    mealEmptyText: {
+      fontSize: 13,
+      color: DS.textMuted,
+      textAlign: 'center',
+    },
+    moreSectionLabel: {
+      fontSize: 11,
+      fontWeight: '600',
+      color: DS.textMuted,
+      letterSpacing: 0.5,
+      marginBottom: Spacing.sm,
+    },
+    moreCard: {
+      backgroundColor: DS.surface,
+      borderRadius: Radius.lg,
+      overflow: 'hidden',
+      marginBottom: Spacing.md,
+    },
+    moreRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.sm + 2,
+      paddingHorizontal: Spacing.md,
+      paddingVertical: Spacing.sm + 4,
+    },
+    moreRowBorder: {
+      borderBottomWidth: 1,
+      borderBottomColor: DS.border,
+    },
+    moreIconWrap: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: DS.accent,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    moreLabel: {
+      flex: 1,
+      fontSize: 14,
+      fontWeight: '500',
+      color: DS.textPrimary,
+    },
+    pressedFade: {
+      opacity: 0.55,
+    },
+  });
+}

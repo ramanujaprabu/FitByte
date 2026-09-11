@@ -6,7 +6,7 @@ import { StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
 
 import { ThemedText } from '@/components/themed-text';
-import { DS } from '@/constants/theme';
+import { useDS } from '@/contexts/ThemeContext';
 
 interface AvatarProps {
   uri?: string;
@@ -15,6 +15,7 @@ interface AvatarProps {
 }
 
 export function Avatar({ uri, name, size = 56 }: AvatarProps) {
+  const DS = useDS();
   const initials = name
     .trim()
     .split(/\s+/)
@@ -29,7 +30,7 @@ export function Avatar({ uri, name, size = 56 }: AvatarProps) {
   }
 
   return (
-    <View style={[styles.fallback, dims]}>
+    <View style={[styles.fallback, dims, { backgroundColor: DS.raised }]}>
       <ThemedText style={{ color: DS.textPrimary, fontSize: size * 0.36, fontWeight: '600' }}>
         {initials}
       </ThemedText>
@@ -39,9 +40,6 @@ export function Avatar({ uri, name, size = 56 }: AvatarProps) {
 
 const styles = StyleSheet.create({
   fallback: {
-    backgroundColor: DS.raised,
-    borderWidth: 1,
-    borderColor: DS.border,
     alignItems: 'center',
     justifyContent: 'center',
   },

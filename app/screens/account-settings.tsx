@@ -4,19 +4,22 @@ import { Card } from '@/components/shared/Card';
 import { ScreenHeader } from '@/components/shared/ScreenHeader';
 import { TextField } from '@/components/shared/TextField';
 import { ThemedText } from '@/components/themed-text';
-import { DS, Radius, Spacing, Typography } from '@/constants/theme';
+import { useDS } from '@/contexts/ThemeContext';
+import { Spacing } from '@/constants/theme';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { userService } from '@/services/api/user';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function AccountSettingsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const DS = useDS();
+  const styles = useMemo(() => makeStyles(DS), [DS]);
   const { user, logout, refreshUser } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -113,29 +116,6 @@ export default function AccountSettingsScreen() {
           )}
         </Card>
 
-        <Card>
-          <ThemedText style={styles.sectionLabel}>Linked Accounts</ThemedText>
-          {[
-            { name: 'Apple Health', icon: 'heart-outline', linked: false },
-            { name: 'Google Fit', icon: 'fitness-outline', linked: false },
-          ].map(acc => (
-            <View key={acc.name} style={styles.linkedRow}>
-              <View style={styles.linkedLeft}>
-                <View style={styles.linkedIcon}>
-                  <Ionicons name={acc.icon as any} size={16} color={DS.textSecond} />
-                </View>
-                <ThemedText style={styles.linkedName}>{acc.name}</ThemedText>
-              </View>
-              <Pressable style={[styles.linkedBtn, acc.linked && styles.linkedBtnActive]}
-                onPress={() => router.push('/screens/connected-devices')}>
-                <ThemedText style={[styles.linkedBtnText, acc.linked && styles.linkedBtnTextActive]}>
-                  {acc.linked ? 'Connected' : 'Connect'}
-                </ThemedText>
-              </Pressable>
-            </View>
-          ))}
-        </Card>
-
         {/* Danger Zone */}
         <Card style={styles.dangerCard}>
           <ThemedText style={styles.dangerTitle}>Danger Zone</ThemedText>
@@ -149,21 +129,15 @@ export default function AccountSettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: DS.bg },
-  scroll: { paddingHorizontal: Spacing.md + 4 },
-  sectionLabel: { fontSize: 12, color: DS.textMuted, fontWeight: '600', marginBottom: Spacing.sm + 6, textTransform: 'uppercase', letterSpacing: 0.5 },
-  pwHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  pwSection: { marginTop: Spacing.sm + 6 },
-  linkedRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: Spacing.sm + 2 },
-  linkedLeft: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm + 2 },
-  linkedIcon: { width: 32, height: 32, borderRadius: Radius.sm - 2, backgroundColor: DS.card, borderWidth: 1, borderColor: DS.border, justifyContent: 'center', alignItems: 'center' },
-  linkedName: { fontSize: 14, color: DS.textPrimary, fontWeight: '500' },
-  linkedBtn: { paddingHorizontal: 13, paddingVertical: 6, borderRadius: Radius.full, backgroundColor: DS.raised, borderWidth: 1, borderColor: DS.border },
-  linkedBtnActive: { backgroundColor: DS.accentDim, borderColor: DS.accent },
-  linkedBtnText: { fontSize: 12, fontWeight: '500', color: DS.textSecond },
-  linkedBtnTextActive: { color: DS.accent },
-  dangerCard: { borderColor: DS.statusBad },
-  dangerTitle: { fontSize: 14, fontWeight: '600', color: DS.statusBad, marginBottom: 4 },
-  dangerSubtitle: { fontSize: 12, color: DS.textMuted, marginBottom: Spacing.sm + 6 },
-});
+function makeStyles(DS: ReturnType<typeof useDS>) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: DS.bg },
+    scroll: { paddingHorizontal: Spacing.md + 4 },
+    sectionLabel: { fontSize: 12, color: DS.textMuted, fontWeight: '600', marginBottom: Spacing.sm + 6, textTransform: 'uppercase', letterSpacing: 0.5 },
+    pwHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    pwSection: { marginTop: Spacing.sm + 6 },
+    dangerCard: { backgroundColor: DS.statusBadDim },
+    dangerTitle: { fontSize: 14, fontWeight: '600', color: DS.statusBad, marginBottom: 4 },
+    dangerSubtitle: { fontSize: 12, color: DS.textMuted, marginBottom: Spacing.sm + 6 },
+  });
+}

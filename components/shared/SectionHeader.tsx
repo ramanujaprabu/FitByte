@@ -2,10 +2,10 @@
  * SectionHeader — Consistent row header with title + optional right action.
  * Replaces repeated sectionHeader style patterns across screens.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
-import { DS } from '@/constants/theme';
+import { useDS } from '@/contexts/ThemeContext';
 
 interface SectionHeaderProps {
   title: string;
@@ -15,6 +15,9 @@ interface SectionHeaderProps {
 }
 
 export function SectionHeader({ title, subtitle, rightLabel, rightElement }: SectionHeaderProps) {
+  const DS = useDS();
+  const styles = useMemo(() => makeStyles(DS), [DS]);
+
   return (
     <View style={styles.row}>
       <View>
@@ -33,20 +36,22 @@ export function SectionHeader({ title, subtitle, rightLabel, rightElement }: Sec
   );
 }
 
-const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 16,
-  },
-  subtitle: {
-    marginTop: 3,
-    fontSize: 13,
-    color: DS.textMuted,
-  },
-  rightLabel: {
-    fontSize: 13,
-    color: DS.textMuted,
-  },
-});
+function makeStyles(DS: ReturnType<typeof useDS>) {
+  return StyleSheet.create({
+    row: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+      marginBottom: 16,
+    },
+    subtitle: {
+      marginTop: 3,
+      fontSize: 13,
+      color: DS.textMuted,
+    },
+    rightLabel: {
+      fontSize: 13,
+      color: DS.textMuted,
+    },
+  });
+}

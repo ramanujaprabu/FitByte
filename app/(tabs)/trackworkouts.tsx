@@ -1,18 +1,21 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
-import { DS, Fonts, Radius, Spacing, Typography } from '@/constants/theme';
+import { useDS } from '@/contexts/ThemeContext';
+import { Fonts, Radius, Spacing } from '@/constants/theme';
 import { workoutService } from '@/services/api/workout';
 import type { WorkoutRoutine, WorkoutSession } from '@/types';
 
 export default function WorkoutTrackerScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const DS = useDS();
+  const styles = useMemo(() => makeStyles(DS), [DS]);
 
   const [routines, setRoutines] = useState<WorkoutRoutine[]>([]);
   const [recentSessions, setRecentSessions] = useState<WorkoutSession[]>([]);
@@ -31,18 +34,13 @@ export default function WorkoutTrackerScreen() {
 
   useFocusEffect(load);
 
-  // Use real data only - no mock fallbacks
-  const routinesList = routines.slice(0, 3).map(r => ({ name: r.name, muscles: r.muscles, exercises: r.exercises, id: r.id }));
-
-  const recentList = recentSessions.map(s => ({ title: s.routineName, date: s.timestamp, duration: `${s.durationMins} min`, sets: '—', id: s.id }));
-
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Top Bar */}
       <View style={styles.topHeader}>
         <ThemedText style={styles.appTitle}>FitByte</ThemedText>
         <Pressable style={styles.iconBtn} onPress={() => router.push('/screens/account-settings' as any)}>
-          <Ionicons name="settings-outline" size={22} color="#000000" />
+          <Ionicons name="settings-outline" size={22} color={DS.textPrimary} />
         </Pressable>
       </View>
 
@@ -54,7 +52,7 @@ export default function WorkoutTrackerScreen() {
         <View style={styles.headlineRow}>
           <ThemedText style={styles.pageTitle}>Workouts</ThemedText>
           <Pressable style={styles.startWorkoutBtn} onPress={() => router.push('/screens/log-workout')}>
-            <Ionicons name="add" size={20} color="#FFFFFF" />
+            <Ionicons name="add" size={20} color={DS.accentText} />
             <ThemedText style={styles.startWorkoutBtnText}>Start Workout</ThemedText>
           </Pressable>
         </View>
@@ -67,7 +65,7 @@ export default function WorkoutTrackerScreen() {
               <Pressable
                 key={item.id}
                 style={styles.routineCard}
-                onPress={() => router.push('/screens/log-workout')}>
+                onPress={() => router.push({ pathname: '/screens/workout-detail', params: { id: item.id } })}>
                 <View>
                   <ThemedText style={styles.routineCardTitle}>{item.name}</ThemedText>
                   <ThemedText style={styles.routineCardSub}>{item.muscles}</ThemedText>
@@ -81,7 +79,7 @@ export default function WorkoutTrackerScreen() {
 
             {/* New Routine Dashed Box */}
             <Pressable
-              style={styles.newRoutineDashedBox}
+              style={styles.newRoutineBox}
               onPress={() => router.push('/screens/create-routine')}>
               <Ionicons name="add-circle-outline" size={32} color={DS.textSecond} />
               <ThemedText style={styles.newRoutineText}>New Routine</ThemedText>
@@ -109,7 +107,7 @@ export default function WorkoutTrackerScreen() {
                   onPress={() => router.push('/screens/recent-activities')}>
                   <View style={styles.recentLeft}>
                     <View style={styles.dumbbellCircle}>
-                      <Ionicons name="barbell-outline" size={18} color="#000000" />
+                      <Ionicons name="barbell-outline" size={18} color={DS.textPrimary} />
                     </View>
                     <View>
                       <ThemedText style={styles.recentTitle}>{item.routineName}</ThemedText>
@@ -147,212 +145,203 @@ export default function WorkoutTrackerScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F9F9F9',
-  },
-  topHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: Spacing.md,
-    height: 54,
-    borderBottomWidth: 1,
-    borderBottomColor: DS.border,
-    backgroundColor: '#FFFFFF',
-  },
-  iconBtn: {
-    padding: 6,
-  },
-  appTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#000000',
-    letterSpacing: -0.5,
-  },
-  scroll: {
-    paddingHorizontal: Spacing.md,
-    paddingTop: Spacing.lg,
-  },
-  headlineRow: {
-    marginBottom: Spacing.xl,
-    gap: Spacing.md,
-  },
-  pageTitle: {
-    fontSize: 28,
-    fontWeight: '600',
-    color: '#000000',
-    letterSpacing: -0.5,
-  },
-  startWorkoutBtn: {
-    backgroundColor: '#000000',
-    borderRadius: Radius.md,
-    height: 48,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  startWorkoutBtnText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  section: {
-    marginBottom: Spacing.xl,
-  },
-  sectionHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    justifyContent: 'space-between',
-    marginBottom: Spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: DS.border,
-    paddingBottom: Spacing.xs,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#000000',
-    marginBottom: Spacing.md,
-  },
-  viewAllText: {
-    fontSize: 13,
-    color: DS.textSecond,
-  },
-  bentoGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: Spacing.md,
-  },
-  routineCard: {
-    width: '47.5%',
-    aspectRatio: 1,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: DS.border,
-    borderRadius: Radius.md,
-    padding: Spacing.md,
-    justifyContent: 'space-between',
-  },
-  routineCardTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#000000',
-    marginBottom: 4,
-  },
-  routineCardSub: {
-    fontSize: 12,
-    color: DS.textSecond,
-    lineHeight: 16,
-  },
-  routineCardBottom: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  routineCardCount: {
-    fontFamily: Fonts.mono,
-    fontSize: 12,
-    color: DS.textSecond,
-  },
-  newRoutineDashedBox: {
-    width: '47.5%',
-    aspectRatio: 1,
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: DS.border,
-    borderStyle: 'dashed',
-    borderRadius: Radius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-  },
-  newRoutineText: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: DS.textSecond,
-  },
-  recentList: {
-    backgroundColor: '#F9F9F9',
-  },
-  recentRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: Spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: DS.border,
-  },
-  recentLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.md,
-  },
-  dumbbellCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#F3F3F3',
-    borderWidth: 1,
-    borderColor: DS.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  recentTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#000000',
-    marginBottom: 2,
-  },
-  recentMetaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  recentMetaText: {
-    fontFamily: Fonts.mono,
-    fontSize: 12,
-    color: DS.textSecond,
-  },
-  metaDot: {
-    width: 3,
-    height: 3,
-    borderRadius: 2,
-    backgroundColor: DS.textMuted,
-  },
-  emptyRecentCard: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: DS.border,
-    borderRadius: Radius.md,
-    padding: Spacing.lg,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  emptyRecentTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#000000',
-    marginBottom: 4,
-  },
-  emptyRecentSub: {
-    fontSize: 13,
-    color: DS.textSecond,
-    textAlign: 'center',
-    marginBottom: Spacing.md,
-    lineHeight: 18,
-  },
-  startWorkoutSmallBtn: {
-    backgroundColor: '#000000',
-    paddingHorizontal: Spacing.md,
-    paddingVertical: 10,
-    borderRadius: Radius.md,
-  },
-  startWorkoutSmallBtnText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-});
+function makeStyles(DS: ReturnType<typeof useDS>) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: DS.bg,
+    },
+    topHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: Spacing.md,
+      height: 54,
+      backgroundColor: DS.bg,
+    },
+    iconBtn: {
+      padding: 6,
+    },
+    appTitle: {
+      fontSize: 20,
+      fontWeight: '700',
+      color: DS.textPrimary,
+      letterSpacing: -0.5,
+    },
+    scroll: {
+      paddingHorizontal: Spacing.md,
+      paddingTop: Spacing.lg,
+    },
+    headlineRow: {
+      marginBottom: Spacing.xl,
+      gap: Spacing.md,
+    },
+    pageTitle: {
+      fontSize: 28,
+      fontWeight: '600',
+      color: DS.textPrimary,
+      letterSpacing: -0.5,
+    },
+    startWorkoutBtn: {
+      backgroundColor: DS.accent,
+      borderRadius: Radius.full,
+      height: 52,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+    },
+    startWorkoutBtnText: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: DS.accentText,
+    },
+    section: {
+      marginBottom: Spacing.xl,
+    },
+    sectionHeaderRow: {
+      flexDirection: 'row',
+      alignItems: 'baseline',
+      justifyContent: 'space-between',
+      marginBottom: Spacing.md,
+    },
+    sectionTitle: {
+      fontSize: 20,
+      fontWeight: '600',
+      color: DS.textPrimary,
+      marginBottom: Spacing.md,
+    },
+    viewAllText: {
+      fontSize: 13,
+      color: DS.textSecond,
+    },
+    bentoGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: Spacing.md,
+    },
+    routineCard: {
+      width: '47.5%',
+      aspectRatio: 1,
+      backgroundColor: DS.surface,
+      borderRadius: Radius.lg,
+      padding: Spacing.md,
+      justifyContent: 'space-between',
+    },
+    routineCardTitle: {
+      fontSize: 18,
+      fontWeight: '600',
+      color: DS.textPrimary,
+      marginBottom: 4,
+    },
+    routineCardSub: {
+      fontSize: 12,
+      color: DS.textSecond,
+      lineHeight: 16,
+    },
+    routineCardBottom: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    routineCardCount: {
+      fontFamily: Fonts.mono,
+      fontSize: 12,
+      color: DS.textSecond,
+    },
+    newRoutineBox: {
+      width: '47.5%',
+      aspectRatio: 1,
+      backgroundColor: DS.raised,
+      borderRadius: Radius.lg,
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 6,
+    },
+    newRoutineText: {
+      fontSize: 13,
+      fontWeight: '500',
+      color: DS.textSecond,
+    },
+    recentList: {
+      backgroundColor: DS.surface,
+      borderRadius: Radius.lg,
+      overflow: 'hidden',
+      paddingHorizontal: Spacing.md,
+    },
+    recentRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: Spacing.md,
+      borderBottomWidth: 1,
+      borderBottomColor: DS.border,
+    },
+    recentLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.md,
+    },
+    dumbbellCircle: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: DS.raised,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    recentTitle: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: DS.textPrimary,
+      marginBottom: 2,
+    },
+    recentMetaRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+    },
+    recentMetaText: {
+      fontFamily: Fonts.mono,
+      fontSize: 12,
+      color: DS.textSecond,
+    },
+    metaDot: {
+      width: 3,
+      height: 3,
+      borderRadius: 2,
+      backgroundColor: DS.textMuted,
+    },
+    emptyRecentCard: {
+      backgroundColor: DS.surface,
+      borderRadius: Radius.lg,
+      padding: Spacing.lg,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    emptyRecentTitle: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: DS.textPrimary,
+      marginBottom: 4,
+    },
+    emptyRecentSub: {
+      fontSize: 13,
+      color: DS.textSecond,
+      textAlign: 'center',
+      marginBottom: Spacing.md,
+      lineHeight: 18,
+    },
+    startWorkoutSmallBtn: {
+      backgroundColor: DS.accent,
+      paddingHorizontal: Spacing.md,
+      paddingVertical: 10,
+      borderRadius: Radius.full,
+    },
+    startWorkoutSmallBtnText: {
+      fontSize: 13,
+      fontWeight: '600',
+      color: DS.accentText,
+    },
+  });
+}

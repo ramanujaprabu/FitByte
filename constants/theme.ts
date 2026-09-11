@@ -1,82 +1,161 @@
 /**
  * FitByte Design System — Monochrome Performance (Binary Luxury).
- * High-Contrast Light Minimalist design system.
+ * Grayscale palette with a single black/white binary accent, in a real
+ * light and dark variant. The token *names* and the grayscale identity are
+ * shared between both — only the light/dark luminance direction differs
+ * (dark mode is the inverted binary: white becomes the primary accent).
  */
 
 import { Platform } from 'react-native';
 
-// ─── Grayscale Palette ────────────────────────────────────────────────────────
 export const MONO_FONT = 'JetBrainsMono_400Regular';
 
-export const DS = {
-  // Backgrounds & Surfaces (High-Contrast Light Monochrome)
-  bg:           '#F9F9F9',   // light canvas
-  surface:      '#FFFFFF',   // main cards and headers
-  card:         '#FFFFFF',   // nested containers
-  raised:       '#F3F3F3',   // chips, badges, secondary surface
-  subtle:       '#EEEEEE',   // subtle dividers / active fill
+export interface DesignTokens {
+  bg: string;
+  surface: string;
+  card: string;
+  raised: string;
+  subtle: string;
+  surfaceDim: string;
+
+  border: string;
+  borderMid: string;
+  borderDark: string;
+
+  textPrimary: string;
+  textSecond: string;
+  textMuted: string;
+
+  accent: string;
+  accentPressed: string;
+  accentDim: string;
+  /** Text/icon color to place on top of `accent`. */
+  accentText: string;
+
+  statusGood: string;
+  statusWarn: string;
+  statusBad: string;
+  statusGoodDim: string;
+  statusWarnDim: string;
+  statusBadDim: string;
+
+  hmEmpty: string;
+  hmLow: string;
+  hmMid: string;
+  hmHigh: string;
+
+  ringTrack: string;
+  overlay: string;
+  fontMono: string;
+}
+
+// ─── Light palette (default) ───────────────────────────────────────────────
+export const LightDS: DesignTokens = {
+  bg:           '#F9F9F9',
+  surface:      '#FFFFFF',
+  card:         '#FFFFFF',
+  raised:       '#F3F3F3',
+  subtle:       '#EEEEEE',
   surfaceDim:   '#DADADA',
 
-  // Borders (Strict 1px border logic)
-  border:       '#E5E5E5',   // light structural border
-  borderMid:    '#CFC4C5',   // variant border
-  borderDark:   '#000000',   // primary focus/active border
+  border:       '#E5E5E5',
+  borderMid:    '#CFC4C5',
+  borderDark:   '#000000',
 
-  // Text
-  textPrimary:  '#1A1C1C',   // primary body / headings
-  textSecond:   '#4C4546',   // supporting labels / metadata
-  textMuted:    '#7E7576',   // captions, timestamps, placeholders
+  textPrimary:  '#1A1C1C',
+  textSecond:   '#4C4546',
+  textMuted:    '#7E7576',
 
-  // Primary Accent (Pure Black)
   accent:        '#000000',
   accentPressed: '#2F3131',
   accentDim:     '#E2E2E2',
+  accentText:    '#FFFFFF',
 
-  // Status Colors (Monochrome High Contrast)
   statusGood:    '#1A1C1C',
   statusWarn:    '#4C4546',
   statusBad:     '#BA1A1A',
-
   statusGoodDim: '#EEEEEE',
   statusWarnDim: '#EEEEEE',
   statusBadDim:  '#FFDAD6',
 
-  // Heatmap / calendar intensity
   hmEmpty:      '#F3F3F3',
   hmLow:        '#E2E2E2',
   hmMid:        '#5E5E5E',
   hmHigh:       '#000000',
 
-  // Ring & Track
   ringTrack:    '#F3F3F3',
-
-  // Overlays
   overlay:      'rgba(0,0,0,0.4)',
-
-  // Typography
   fontMono:     'JetBrainsMono_400Regular',
-} as const;
+};
 
-// ─── Colors ───────────────────────────────────────────────────────────────────
-const tintColorLight = DS.accent;
-const tintColorDark  = DS.accent;
+// ─── Dark palette — the inverted binary, same grayscale identity ──────────
+export const DarkDS: DesignTokens = {
+  bg:           '#0B0B0C',
+  surface:      '#161617',
+  card:         '#18181A',
+  raised:       '#212123',
+  subtle:       '#28282A',
+  surfaceDim:   '#333336',
 
+  border:       '#2A2A2D',
+  borderMid:    '#3D3739',
+  borderDark:   '#FFFFFF',
+
+  textPrimary:  '#F2F2F2',
+  textSecond:   '#B3ACAD',
+  textMuted:    '#847C7E',
+
+  accent:        '#FFFFFF',
+  accentPressed: '#D4D4D4',
+  accentDim:     '#2A2A2A',
+  accentText:    '#0B0B0C',
+
+  statusGood:    '#F2F2F2',
+  statusWarn:    '#B3ACAD',
+  statusBad:     '#FF6B61',
+  statusGoodDim: '#242426',
+  statusWarnDim: '#242426',
+  statusBadDim:  '#3A1512',
+
+  hmEmpty:      '#212123',
+  hmLow:        '#3D3739',
+  hmMid:        '#847C7E',
+  hmHigh:       '#FFFFFF',
+
+  ringTrack:    '#242426',
+  overlay:      'rgba(0,0,0,0.65)',
+  fontMono:     'JetBrainsMono_400Regular',
+};
+
+/**
+ * Static, light-mode token export for code that hasn't been converted to
+ * `useDS()` yet (module-scope `StyleSheet.create` calls can't react to the
+ * theme anyway). Prefer `useDS()` from `@/contexts/ThemeContext` in any
+ * component that should respond to the dark/light setting.
+ */
+export const DS = LightDS;
+
+// ─── Colors (react-navigation / expo-router boilerplate) ──────────────────
 export const Colors = {
   light: {
-    text:            DS.textPrimary,
-    background:      DS.bg,
-    tint:            tintColorLight,
-    icon:            DS.textSecond,
-    tabIconDefault:  DS.textSecond,
-    tabIconSelected: tintColorLight,
+    text:            LightDS.textPrimary,
+    background:      LightDS.bg,
+    card:            LightDS.surface,
+    border:          LightDS.border,
+    tint:            LightDS.accent,
+    icon:            LightDS.textSecond,
+    tabIconDefault:  LightDS.textSecond,
+    tabIconSelected: LightDS.accent,
   },
   dark: {
-    text:            DS.textPrimary,
-    background:      DS.bg,
-    tint:            tintColorDark,
-    icon:            DS.textSecond,
-    tabIconDefault:  DS.textSecond,
-    tabIconSelected: tintColorDark,
+    text:            DarkDS.textPrimary,
+    background:      DarkDS.bg,
+    card:            DarkDS.surface,
+    border:          DarkDS.border,
+    tint:            DarkDS.accent,
+    icon:            DarkDS.textSecond,
+    tabIconDefault:  DarkDS.textSecond,
+    tabIconSelected: DarkDS.accent,
   },
 };
 
@@ -103,12 +182,12 @@ export const Spacing = {
   xxl: 48,
 };
 
-// ─── Radius ───────────────────────────────────────────────────────────────────
+// ─── Radius — soft, non-boxy shapes ────────────────────────────────────────
 export const Radius = {
-  sm:   4,
-  md:   8,
-  lg:   16,
-  xl:   24,
+  sm:   10,
+  md:   16,
+  lg:   22,
+  xl:   28,
   full: 999,
 };
 
@@ -137,4 +216,3 @@ export const Fonts = Platform.select({
     mono:    "Geist, JetBrainsMono_400Regular, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
   },
 });
-
