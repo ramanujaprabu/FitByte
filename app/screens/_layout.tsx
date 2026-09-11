@@ -17,8 +17,13 @@ export default function ScreensLayout() {
       <Stack.Screen name="daily-analytics" />
       <Stack.Screen name="workout-detail" />
       <Stack.Screen name="create-routine" />
+      <Stack.Screen name="exercise-picker" options={{ animation: 'slide_from_bottom' }} />
+      <Stack.Screen name="session-detail" />
       <Stack.Screen name="recent-activities" />
-      <Stack.Screen name="log-workout" />
+      {/* Swipe-back is disabled here so an accidental swipe can't discard a
+          logged workout — Cancel/Finish (both with a confirm) are the only
+          way out. */}
+      <Stack.Screen name="log-workout" options={{ gestureEnabled: false }} />
       <Stack.Screen name="edit-profile" />
       <Stack.Screen name="account-settings" />
     </Stack>

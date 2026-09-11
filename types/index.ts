@@ -110,28 +110,61 @@ export interface AIInsight {
 
 export type WorkoutIntensity = 'Low' | 'Medium' | 'High' | 'Extreme';
 export type WorkoutDayLevel = 'empty' | 'low' | 'mid' | 'high';
+export type Equipment = 'Barbell' | 'Dumbbell' | 'Machine' | 'Cable' | 'Bodyweight' | 'Kettlebell' | 'Other';
+export type ExerciseCategory = 'strength' | 'cardio' | 'bodyweight' | 'stretching';
+export type SetType = 'warmup' | 'normal' | 'dropset' | 'failure';
 
+/** One entry in the shared (or a user's custom) exercise library. */
 export interface Exercise {
   id: string;
   name: string;
-  sets?: number;
-  reps?: number;
+  muscleGroup: string;
+  equipment: Equipment;
+  category: ExerciseCategory;
+  isCustom: boolean;
+}
+
+/** A single logged (or in-progress) set within a workout exercise. */
+export interface WorkoutSet {
+  id: string;
+  setIndex: number;
+  weightKg: number;
+  reps: number;
+  setType: SetType;
+  completed: boolean;
+}
+
+/** One exercise's worth of sets, within a routine (targets) or a logged session (actuals). */
+export interface RoutineExercise {
+  id: string;
+  exerciseId: string | null;
+  name: string;
+  /** Denormalized from the exercise library — lets a routine's `muscles` summary be recomputed on edit without re-picking exercises. */
+  muscleGroup: string;
+  targetSets: number;
+  targetReps: number;
+  restSeconds: number;
+}
+
+export interface SessionExercise {
+  id: string;
+  exerciseId: string | null;
+  name: string;
+  sets: WorkoutSet[];
 }
 
 export interface WorkoutRoutine {
   id: string;
   name: string;
   muscles: string;
-  exercises: number;
-  durationMins: number;
-  estimatedCalories: string;
+  exercises: RoutineExercise[];
   lastPerformed: string;
   isFavorite: boolean;
-  exerciseList: string[];
 }
 
 export interface WorkoutSession {
   id: string;
+  routineId: string | null;
   routineName: string;
   durationMins: string;
   caloriesBurned: string;
@@ -141,6 +174,8 @@ export interface WorkoutSession {
   timestamp: string;
   /** Full ISO timestamp — used to bucket sessions by day (e.g. weekly dots). */
   performedAt: string;
+  /** Only populated by `getSessionDetail` — the actual logged exercises/sets. */
+  exercises?: SessionExercise[];
 }
 
 export interface WorkoutStats {
@@ -148,6 +183,15 @@ export interface WorkoutStats {
   weeklyHours: string;
   weeklyCalories: string;
   currentStreak: number;
+}
+
+/** A single exercise's best-ever numbers, for the "new PR" moment on Finish. */
+export interface ExerciseRecord {
+  exerciseId: string;
+  exerciseName: string;
+  heaviestWeightKg: number;
+  bestEstimated1RM: number;
+  bestSetVolumeKg: number;
 }
 
 // ─── Profile ──────────────────────────────────────────────────────────────────

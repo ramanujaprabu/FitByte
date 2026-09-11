@@ -71,7 +71,7 @@ export default function WorkoutTrackerScreen() {
                   <ThemedText style={styles.routineCardSub}>{item.muscles}</ThemedText>
                 </View>
                 <View style={styles.routineCardBottom}>
-                  <ThemedText style={styles.routineCardCount}>{item.exercises} Exercises</ThemedText>
+                  <ThemedText style={styles.routineCardCount}>{item.exercises.length} Exercises</ThemedText>
                   <Ionicons name="arrow-forward-outline" size={16} color={DS.textSecond} />
                 </View>
               </Pressable>
