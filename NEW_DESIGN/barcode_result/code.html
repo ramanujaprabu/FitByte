@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FitByte - Product Result</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed-dim": "#c6c6c6",
+                        "on-tertiary-fixed-variant": "#474747",
+                        "on-surface": "#1a1c1c",
+                        "surface": "#f9f9f9",
+                        "inverse-primary": "#c6c6c6",
+                        "inverse-on-surface": "#f1f1f1",
+                        "tertiary-fixed": "#e2e2e2",
+                        "primary-fixed": "#e2e2e2",
+                        "tertiary": "#000000",
+                        "surface-dim": "#dadada",
+                        "surface-container": "#eeeeee",
+                        "on-tertiary-fixed": "#1b1b1b",
+                        "on-secondary-fixed": "#1b1c1c",
+                        "on-error": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "outline": "#7e7576",
+                        "surface-variant": "#e2e2e2",
+                        "outline-variant": "#cfc4c5",
+                        "on-secondary-fixed-variant": "#464747",
+                        "on-secondary-container": "#646464",
+                        "tertiary-container": "#1b1b1b",
+                        "on-tertiary-container": "#848484",
+                        "error-container": "#ffdad6",
+                        "on-primary-fixed-variant": "#474747",
+                        "primary-container": "#1b1b1b",
+                        "on-error-container": "#93000a",
+                        "error": "#ba1a1a",
+                        "on-primary-fixed": "#1b1b1b",
+                        "on-secondary": "#ffffff",
+                        "background": "#f9f9f9",
+                        "surface-tint": "#5e5e5e",
+                        "surface-container-highest": "#e2e2e2",
+                        "primary": "#000000",
+                        "secondary": "#5e5e5e",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-container": "#e3e2e2",
+                        "surface-container-high": "#e8e8e8",
+                        "primary-fixed-dim": "#c6c6c6",
+                        "on-primary": "#ffffff",
+                        "secondary-fixed": "#e3e2e2",
+                        "secondary-fixed-dim": "#c7c6c6",
+                        "inverse-surface": "#2f3131",
+                        "on-primary-container": "#848484",
+                        "surface-container-low": "#f3f3f3",
+                        "on-surface-variant": "#4c4546",
+                        "on-background": "#1a1c1c",
+                        "surface-bright": "#f9f9f9"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "sm": "8px",
+                        "gutter": "16px",
+                        "lg": "24px",
+                        "md": "16px",
+                        "container-margin": "24px",
+                        "xl": "40px",
+                        "base": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Geist"],
+                        "body-sm": ["Inter"],
+                        "mono-data": ["Geist"],
+                        "headline-lg-mobile": ["Geist"],
+                        "body-lg": ["Inter"],
+                        "label-caps": ["Geist"],
+                        "display-lg": ["Geist"],
+                        "headline-md": ["Geist"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
+                        "mono-data": ["14px", { "lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }],
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.04em", "fontWeight": "700" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+                    }
+                },
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #f9f9f9; color: #1a1c1c; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col pb-24 md:pb-0">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface border-b border-outline-variant flat no shadows transition-colors duration-200">
+<div class="flex justify-between items-center h-16 px-gutter max-w-7xl mx-auto">
+<button aria-label="Menu" class="p-2 text-on-surface-variant hover:bg-surface-container rounded-full transition-colors">
+<span class="material-symbols-outlined text-2xl">menu</span>
+</button>
+<div class="font-headline-md text-headline-md font-bold tracking-tight text-primary">FitByte</div>
+<button aria-label="Notifications" class="p-2 text-on-surface-variant hover:bg-surface-container rounded-full transition-colors">
+<span class="material-symbols-outlined text-2xl">notifications</span>
+</button>
+</div>
+</header>
+<main class="flex-grow pt-24 px-container-margin max-w-3xl mx-auto w-full">
+<!-- Back action -->
+<div class="mb-lg">
+<button class="flex items-center text-on-surface-variant hover:text-primary transition-colors text-sm font-medium">
+<span class="material-symbols-outlined mr-2">arrow_back</span>
+                Back to Scanner
+            </button>
+</div>
+<!-- Product Header Image -->
+<div class="mb-lg rounded-lg overflow-hidden border border-outline-variant h-64 bg-surface-container-lowest">
+<img class="w-full h-full object-cover" data-alt="A clean, minimalist flat lay photograph of a bowl of Nestlé Fitness cereal on a white marble surface. High-key lighting, monochrome aesthetic with subtle shadows to emphasize texture. The styling is editorial and precise, fitting a high-end wellness journal app." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCE02_mxZkJbvzlcxcvrjHbL5aPZcJSNpiUf8lhMBhzZiCseBozl2yidXo4a08N7HVtwfov0VxiAeEe5rBES1_k_ePmtQM14LeLt-1dBExXmY6P9goZV_K2vgcD2XUeLjIIofd0zdWHj9wIbOWOb2sJ0g4IdAeKCxz9aXenF5DVea1Pc-hKgzQzVmQvdJo2fXXMOYfk-MT4CsJr0ItVbYEJcKiMhp7vyyTj9_vN1NZigVRVVwZVOyyu"/>
+</div>
+<!-- Product Title -->
+<div class="mb-lg text-center">
+<h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-primary mb-2">Nestlé Fitness Cereal</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Verified by FitByte</p>
+</div>
+<!-- Meal Selector -->
+<div class="flex justify-center mb-xl space-x-sm">
+<button class="px-4 py-2 border border-primary bg-primary text-on-primary rounded-lg font-mono-data text-mono-data">Breakfast</button>
+<button class="px-4 py-2 border border-outline-variant bg-surface-container-lowest text-on-surface rounded-lg font-mono-data text-mono-data hover:bg-surface-container transition-colors">Lunch</button>
+<button class="px-4 py-2 border border-outline-variant bg-surface-container-lowest text-on-surface rounded-lg font-mono-data text-mono-data hover:bg-surface-container transition-colors">Snack</button>
+</div>
+<!-- Nutrition Grid -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-sm mb-xl">
+<!-- Calories -->
+<div class="border border-outline-variant bg-surface-container-lowest p-lg rounded-lg flex flex-col items-center justify-center col-span-2 md:col-span-1">
+<span class="font-label-caps text-label-caps text-on-surface-variant mb-2 tracking-widest">KCAL</span>
+<span class="font-display-lg text-display-lg text-primary">112</span>
+</div>
+<!-- Macros -->
+<div class="border border-outline-variant bg-surface-container-lowest p-md rounded-lg flex flex-col justify-center">
+<span class="font-label-caps text-label-caps text-on-surface-variant mb-1">PROTEIN</span>
+<span class="font-mono-data text-mono-data text-primary">2.7g</span>
+<div class="w-full h-1 bg-surface-container mt-2 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-1/4"></div>
+</div>
+</div>
+<div class="border border-outline-variant bg-surface-container-lowest p-md rounded-lg flex flex-col justify-center">
+<span class="font-label-caps text-label-caps text-on-surface-variant mb-1">CARBS</span>
+<span class="font-mono-data text-mono-data text-primary">24g</span>
+<div class="w-full h-1 bg-surface-container mt-2 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-3/4"></div>
+</div>
+</div>
+<div class="border border-outline-variant bg-surface-container-lowest p-md rounded-lg flex flex-col justify-center">
+<span class="font-label-caps text-label-caps text-on-surface-variant mb-1">FAT</span>
+<span class="font-mono-data text-mono-data text-primary">0.6g</span>
+<div class="w-full h-1 bg-surface-container mt-2 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[5%]"></div>
+</div>
+</div>
+</div>
+<!-- Serving Size Selector -->
+<div class="border border-outline-variant bg-surface-container-lowest rounded-lg p-lg mb-xl flex justify-between items-center">
+<span class="font-body-lg text-body-lg text-primary font-medium">Serving Size</span>
+<div class="flex items-center space-x-4">
+<button class="p-1 border border-outline-variant rounded-full hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">remove</span>
+</button>
+<span class="font-mono-data text-mono-data text-primary text-lg">30 g</span>
+<button class="p-1 border border-outline-variant rounded-full hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">add</span>
+</button>
+</div>
+</div>
+<!-- Primary Action -->
+<button class="w-full bg-primary text-on-primary font-body-lg text-body-lg py-4 rounded-lg font-semibold hover:opacity-90 transition-opacity mb-xl shadow-[0_2px_0_0_#000]">
+            Add to Breakfast
+        </button>
+</main>
+<!-- BottomNavBar (Visible only on mobile md:hidden, assuming linear task flow allows it based on prompt request) -->
+<nav class="md:hidden fixed bottom-0 w-full z-50 bg-surface border-t border-outline-variant flat no shadows h-20 pb-safe px-4 flex justify-around items-center">
+<!-- Log (Active based on context of adding food) -->
+<button class="flex flex-col items-center justify-center text-primary font-bold hover:opacity-80 scale-95 active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-2xl mb-1" style="font-variation-settings: 'FILL' 1;">add_circle</span>
+<span class="font-label-caps text-label-caps">Log</span>
+</button>
+<button class="flex flex-col items-center justify-center text-secondary hover:opacity-80 scale-95 active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-2xl mb-1">fitness_center</span>
+<span class="font-label-caps text-label-caps">Workouts</span>
+</button>
+<button class="flex flex-col items-center justify-center text-secondary hover:opacity-80 scale-95 active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-2xl mb-1">trending_up</span>
+<span class="font-label-caps text-label-caps">Trends</span>
+</button>
+<button class="flex flex-col items-center justify-center text-secondary hover:opacity-80 scale-95 active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-2xl mb-1">person</span>
+<span class="font-label-caps text-label-caps">Profile</span>
+</button>
+</nav>
+</body></html>

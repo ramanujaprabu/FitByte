@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FitByte - Search Results</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Inter:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed-dim": "#c6c6c6",
+                        "on-tertiary-fixed-variant": "#474747",
+                        "on-surface": "#1a1c1c",
+                        "surface": "#f9f9f9",
+                        "inverse-primary": "#c6c6c6",
+                        "inverse-on-surface": "#f1f1f1",
+                        "tertiary-fixed": "#e2e2e2",
+                        "primary-fixed": "#e2e2e2",
+                        "tertiary": "#000000",
+                        "surface-dim": "#dadada",
+                        "surface-container": "#eeeeee",
+                        "on-tertiary-fixed": "#1b1b1b",
+                        "on-secondary-fixed": "#1b1c1c",
+                        "on-error": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "outline": "#7e7576",
+                        "surface-variant": "#e2e2e2",
+                        "outline-variant": "#cfc4c5",
+                        "on-secondary-fixed-variant": "#464747",
+                        "on-secondary-container": "#646464",
+                        "tertiary-container": "#1b1b1b",
+                        "on-tertiary-container": "#848484",
+                        "error-container": "#ffdad6",
+                        "on-primary-fixed-variant": "#474747",
+                        "primary-container": "#1b1b1b",
+                        "on-error-container": "#93000a",
+                        "error": "#ba1a1a",
+                        "on-primary-fixed": "#1b1b1b",
+                        "on-secondary": "#ffffff",
+                        "background": "#f9f9f9",
+                        "surface-tint": "#5e5e5e",
+                        "surface-container-highest": "#e2e2e2",
+                        "primary": "#000000",
+                        "secondary": "#5e5e5e",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-container": "#e3e2e2",
+                        "surface-container-high": "#e8e8e8",
+                        "primary-fixed-dim": "#c6c6c6",
+                        "on-primary": "#ffffff",
+                        "secondary-fixed": "#e3e2e2",
+                        "secondary-fixed-dim": "#c7c6c6",
+                        "inverse-surface": "#2f3131",
+                        "on-primary-container": "#848484",
+                        "surface-container-low": "#f3f3f3",
+                        "on-surface-variant": "#4c4546",
+                        "on-background": "#1a1c1c",
+                        "surface-bright": "#f9f9f9"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "sm": "8px",
+                        "gutter": "16px",
+                        "lg": "24px",
+                        "md": "16px",
+                        "container-margin": "24px",
+                        "xl": "40px",
+                        "base": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Geist"],
+                        "body-sm": ["Inter"],
+                        "mono-data": ["Geist"],
+                        "headline-lg-mobile": ["Geist"],
+                        "body-lg": ["Inter"],
+                        "label-caps": ["Geist"],
+                        "display-lg": ["Geist"],
+                        "headline-md": ["Geist"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
+                        "mono-data": ["14px", { "lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }],
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.04em", "fontWeight": "700" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #f9f9f9;
+            color: #1a1c1c;
+            -webkit-font-smoothing: antialiased;
+        }
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-background text-primary dark:text-on-background fixed top-0 w-full z-50 border-b border-outline-variant dark:border-outline flat no shadows transition-colors duration-200">
+<div class="flex justify-between items-center h-16 px-gutter max-w-7xl mx-auto">
+<button class="p-2 hover:bg-surface-container dark:hover:bg-tertiary-container rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-primary dark:text-on-background">FitByte</h1>
+<button class="p-2 hover:bg-surface-container dark:hover:bg-tertiary-container rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow pt-[80px] pb-[100px] px-container-margin md:max-w-3xl md:mx-auto w-full">
+<!-- Meal Selector -->
+<div class="flex gap-sm overflow-x-auto pb-sm mb-lg no-scrollbar">
+<button class="flex-shrink-0 px-lg py-sm border border-outline-variant rounded-lg bg-surface text-on-surface hover:bg-surface-container font-body-sm text-body-sm transition-colors">Breakfast</button>
+<button class="flex-shrink-0 px-lg py-sm border border-primary rounded-lg bg-primary text-on-primary font-body-sm text-body-sm shadow-sm transition-colors">Lunch</button>
+<button class="flex-shrink-0 px-lg py-sm border border-outline-variant rounded-lg bg-surface text-on-surface hover:bg-surface-container font-body-sm text-body-sm transition-colors">Dinner</button>
+<button class="flex-shrink-0 px-lg py-sm border border-outline-variant rounded-lg bg-surface text-on-surface hover:bg-surface-container font-body-sm text-body-sm transition-colors">Snacks</button>
+</div>
+<!-- Search Input -->
+<div class="relative mb-xl">
+<div class="absolute inset-y-0 left-0 pl-md flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-on-surface-variant">search</span>
+</div>
+<input class="w-full pl-xl pr-md py-md bg-surface border border-outline-variant rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary font-body-lg text-body-lg text-on-surface placeholder-on-surface-variant transition-colors" placeholder="Search food..." type="text" value="Chi"/>
+<button class="absolute inset-y-0 right-0 pr-md flex items-center hover:opacity-70 transition-opacity">
+<span class="material-symbols-outlined text-on-surface-variant text-sm">close</span>
+</button>
+</div>
+<!-- Search Results List -->
+<div class="bg-surface border border-outline-variant rounded-lg overflow-hidden flex flex-col">
+<!-- Result Item 1 -->
+<div class="flex items-center justify-between p-md border-b border-outline-variant hover:bg-surface-container transition-colors group">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 bg-surface-container-high rounded-full flex items-center justify-center border border-outline-variant">
+<span class="material-symbols-outlined text-on-surface-variant text-sm">restaurant</span>
+</div>
+<div>
+<h3 class="font-body-lg text-body-lg text-on-surface font-medium">Chicken Breast</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">100 g, <span class="font-mono-data text-mono-data">165</span> kcal</p>
+</div>
+</div>
+<button class="w-8 h-8 rounded-full border border-outline-variant flex items-center justify-center text-on-surface hover:bg-primary hover:text-on-primary hover:border-primary transition-all active:scale-95">
+<span class="material-symbols-outlined text-[20px]">add</span>
+</button>
+</div>
+<!-- Result Item 2 -->
+<div class="flex items-center justify-between p-md border-b border-outline-variant hover:bg-surface-container transition-colors group">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 bg-surface-container-high rounded-full flex items-center justify-center border border-outline-variant">
+<span class="material-symbols-outlined text-on-surface-variant text-sm">restaurant</span>
+</div>
+<div>
+<h3 class="font-body-lg text-body-lg text-on-surface font-medium">Chicken Salad</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">1 cup, <span class="font-mono-data text-mono-data">420</span> kcal</p>
+</div>
+</div>
+<button class="w-8 h-8 rounded-full border border-outline-variant flex items-center justify-center text-on-surface hover:bg-primary hover:text-on-primary hover:border-primary transition-all active:scale-95">
+<span class="material-symbols-outlined text-[20px]">add</span>
+</button>
+</div>
+<!-- Result Item 3 -->
+<div class="flex items-center justify-between p-md hover:bg-surface-container transition-colors group">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 bg-surface-container-high rounded-full flex items-center justify-center border border-outline-variant">
+<span class="material-symbols-outlined text-on-surface-variant text-sm">restaurant</span>
+</div>
+<div>
+<h3 class="font-body-lg text-body-lg text-on-surface font-medium">Chicken Thigh</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">100 g, <span class="font-mono-data text-mono-data">209</span> kcal</p>
+</div>
+</div>
+<button class="w-8 h-8 rounded-full border border-outline-variant flex items-center justify-center text-on-surface hover:bg-primary hover:text-on-primary hover:border-primary transition-all active:scale-95">
+<span class="material-symbols-outlined text-[20px]">add</span>
+</button>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="bg-surface dark:bg-background md:hidden fixed bottom-0 w-full z-50 border-t border-outline-variant dark:border-outline flat no shadows flex justify-around items-center h-20 pb-safe px-4">
+<button class="flex flex-col items-center justify-center text-primary dark:text-on-background font-bold hover:opacity-80 scale-95 active:scale-90 transition-transform">
+<span class="material-symbols-outlined" data-icon="add_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;">add_circle</span>
+<span class="font-label-caps text-label-caps mt-1">Log</span>
+</button>
+<button class="flex flex-col items-center justify-center text-secondary dark:text-on-secondary-fixed-variant hover:opacity-80 scale-95 active:scale-90 transition-transform">
+<span class="material-symbols-outlined" data-icon="fitness_center">fitness_center</span>
+<span class="font-label-caps text-label-caps mt-1">Workouts</span>
+</button>
+<button class="flex flex-col items-center justify-center text-secondary dark:text-on-secondary-fixed-variant hover:opacity-80 scale-95 active:scale-90 transition-transform">
+<span class="material-symbols-outlined" data-icon="trending_up">trending_up</span>
+<span class="font-label-caps text-label-caps mt-1">Trends</span>
+</button>
+<button class="flex flex-col items-center justify-center text-secondary dark:text-on-secondary-fixed-variant hover:opacity-80 scale-95 active:scale-90 transition-transform">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-caps text-label-caps mt-1">Profile</span>
+</button>
+</nav>
+<script>
+        // Optional JS for micro-interactions if needed.
+    </script>
+</body></html>

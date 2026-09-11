@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FitByte - Sign In</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-secondary-fixed": "#1b1c1c",
+                      "primary-fixed": "#e2e2e2",
+                      "inverse-surface": "#2f3131",
+                      "primary-fixed-dim": "#c6c6c6",
+                      "surface-bright": "#f9f9f9",
+                      "error": "#ba1a1a",
+                      "surface-variant": "#e2e2e2",
+                      "on-tertiary-container": "#848484",
+                      "on-secondary": "#ffffff",
+                      "outline": "#7e7576",
+                      "on-tertiary": "#ffffff",
+                      "surface-container-highest": "#e2e2e2",
+                      "surface-container-high": "#e8e8e8",
+                      "secondary-fixed-dim": "#c7c6c6",
+                      "on-primary": "#ffffff",
+                      "secondary": "#5e5e5e",
+                      "tertiary-fixed": "#e2e2e2",
+                      "on-primary-fixed-variant": "#474747",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-tint": "#5e5e5e",
+                      "primary-container": "#1b1b1b",
+                      "primary": "#000000",
+                      "tertiary-fixed-dim": "#c6c6c6",
+                      "on-error": "#ffffff",
+                      "on-secondary-container": "#646464",
+                      "tertiary": "#000000",
+                      "on-error-container": "#93000a",
+                      "inverse-on-surface": "#f1f1f1",
+                      "outline-variant": "#cfc4c5",
+                      "inverse-primary": "#c6c6c6",
+                      "error-container": "#ffdad6",
+                      "on-tertiary-fixed-variant": "#474747",
+                      "on-primary-container": "#848484",
+                      "on-secondary-fixed-variant": "#464747",
+                      "surface": "#f9f9f9",
+                      "on-background": "#1a1c1c",
+                      "on-surface-variant": "#4c4546",
+                      "surface-container": "#eeeeee",
+                      "tertiary-container": "#1b1b1b",
+                      "secondary-fixed": "#e3e2e2",
+                      "on-surface": "#1a1c1c",
+                      "surface-dim": "#dadada",
+                      "on-tertiary-fixed": "#1b1b1b",
+                      "secondary-container": "#e3e2e2",
+                      "on-primary-fixed": "#1b1b1b",
+                      "background": "#f9f9f9",
+                      "surface-container-low": "#f3f3f3"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "xs": "4px",
+                      "lg": "24px",
+                      "gutter": "16px",
+                      "md": "16px",
+                      "sm": "8px",
+                      "base": "8px",
+                      "xl": "40px",
+                      "container-margin": "24px"
+              },
+              "fontFamily": {
+                      "headline-md": [
+                              "Geist"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "body-sm": [
+                              "Inter"
+                      ],
+                      "display-lg": [
+                              "Geist"
+                      ],
+                      "label-caps": [
+                              "Geist"
+                      ],
+                      "headline-lg": [
+                              "Geist"
+                      ],
+                      "mono-data": [
+                              "Geist"
+                      ],
+                      "headline-lg-mobile": [
+                              "Geist"
+                      ]
+              },
+              "fontSize": {
+                      "headline-md": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "letterSpacing": "0em",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "letterSpacing": "0em",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "56px",
+                                      "letterSpacing": "-0.04em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "label-caps": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "mono-data": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "600"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Geist:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #f9f9f9;
+        }
+        /* Strict 1px border rule implementation for inputs */
+        input[type="email"], input[type="password"] {
+            border: 1px solid #E5E5E5;
+            border-radius: 8px;
+        }
+        input[type="email"]:focus, input[type="password"]:focus {
+            border-color: #000000;
+            outline: none;
+            box-shadow: none;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col justify-center items-center px-container-margin py-xl selection:bg-primary selection:text-on-primary">
+<main class="w-full max-w-[400px] flex flex-col items-center">
+<!-- Brand / Logo Area -->
+<div class="mb-xl text-center">
+<h1 class="font-display-lg text-display-lg text-primary tracking-tight">FitByte</h1>
+</div>
+<!-- Heading -->
+<div class="w-full mb-lg">
+<h2 class="font-headline-lg text-headline-lg text-primary text-center hidden md:block">Sign In</h2>
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-primary text-center md:hidden">Sign In</h2>
+</div>
+<!-- Form Canvas -->
+<form action="#" class="w-full flex flex-col gap-lg" method="POST">
+<!-- Email Input Group -->
+<div class="flex flex-col gap-sm">
+<label class="font-label-caps text-label-caps text-secondary uppercase tracking-widest" for="email">Email</label>
+<input class="w-full px-md py-3 bg-surface-container-lowest font-body-lg text-body-lg text-on-surface transition-colors placeholder:text-outline-variant" id="email" name="email" placeholder="name@example.com" required="" type="email"/>
+</div>
+<!-- Password Input Group -->
+<div class="flex flex-col gap-sm">
+<div class="flex justify-between items-baseline">
+<label class="font-label-caps text-label-caps text-secondary uppercase tracking-widest" for="password">Password</label>
+<a class="font-body-sm text-body-sm text-secondary hover:text-primary transition-colors" href="#">Forgot Password?</a>
+</div>
+<input class="w-full px-md py-3 bg-surface-container-lowest font-body-lg text-body-lg text-on-surface transition-colors placeholder:text-outline-variant" id="password" name="password" placeholder="••••••••" required="" type="password"/>
+</div>
+<!-- Action Button -->
+<button class="w-full mt-sm py-4 bg-primary text-on-primary rounded-lg font-headline-md text-headline-md hover:bg-inverse-surface transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background" type="submit">
+                Sign In
+            </button>
+</form>
+<!-- Secondary Action / Sign Up Link -->
+<div class="mt-xl text-center">
+<p class="font-body-sm text-body-sm text-secondary">
+                Don't have an account? 
+                <a class="text-primary hover:underline underline-offset-4 decoration-1 decoration-primary font-medium ml-1" href="#">Sign Up</a>
+</p>
+</div>
+</main>
+</body></html>

@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FitByte - Workouts</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "error": "#ba1a1a",
+                      "primary-fixed": "#e2e2e2",
+                      "surface-container-lowest": "#ffffff",
+                      "on-primary-container": "#848484",
+                      "surface-container-high": "#e8e8e8",
+                      "error-container": "#ffdad6",
+                      "surface-tint": "#5e5e5e",
+                      "tertiary-container": "#1b1b1b",
+                      "on-tertiary-fixed-variant": "#474747",
+                      "on-primary": "#ffffff",
+                      "on-tertiary-container": "#848484",
+                      "on-error": "#ffffff",
+                      "primary": "#000000",
+                      "background": "#f9f9f9",
+                      "on-surface-variant": "#4c4546",
+                      "on-secondary-container": "#646464",
+                      "outline": "#7e7576",
+                      "on-primary-fixed": "#1b1b1b",
+                      "inverse-on-surface": "#f1f1f1",
+                      "tertiary-fixed": "#e2e2e2",
+                      "on-error-container": "#93000a",
+                      "primary-fixed-dim": "#c6c6c6",
+                      "surface-container-highest": "#e2e2e2",
+                      "surface-dim": "#dadada",
+                      "inverse-surface": "#2f3131",
+                      "on-tertiary-fixed": "#1b1b1b",
+                      "primary-container": "#1b1b1b",
+                      "secondary-fixed": "#e3e2e2",
+                      "surface-container-low": "#f3f3f3",
+                      "secondary-container": "#e3e2e2",
+                      "outline-variant": "#cfc4c5",
+                      "inverse-primary": "#c6c6c6",
+                      "on-background": "#1a1c1c",
+                      "surface-container": "#eeeeee",
+                      "on-primary-fixed-variant": "#474747",
+                      "on-surface": "#1a1c1c",
+                      "on-secondary": "#ffffff",
+                      "on-tertiary": "#ffffff",
+                      "on-secondary-fixed": "#1b1c1c",
+                      "on-secondary-fixed-variant": "#464747",
+                      "surface-bright": "#f9f9f9",
+                      "tertiary-fixed-dim": "#c6c6c6",
+                      "tertiary": "#000000",
+                      "surface": "#f9f9f9",
+                      "surface-variant": "#e2e2e2",
+                      "secondary": "#5e5e5e",
+                      "secondary-fixed-dim": "#c7c6c6"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "container-margin": "24px",
+                      "xs": "4px",
+                      "lg": "24px",
+                      "base": "8px",
+                      "md": "16px",
+                      "sm": "8px",
+                      "gutter": "16px",
+                      "xl": "40px"
+              },
+              "fontFamily": {
+                      "headline-lg": [
+                              "Geist"
+                      ],
+                      "mono-data": [
+                              "Geist"
+                      ],
+                      "headline-lg-mobile": [
+                              "Geist"
+                      ],
+                      "display-lg": [
+                              "Geist"
+                      ],
+                      "label-caps": [
+                              "Geist"
+                      ],
+                      "body-sm": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Geist"
+                      ]
+              },
+              "fontSize": {
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "mono-data": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "56px",
+                                      "letterSpacing": "-0.04em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "label-caps": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "letterSpacing": "0em",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "letterSpacing": "0em",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-md": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9f9f9;
+            color: #1a1c1c;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1;
+        }
+        .pb-safe {
+            padding-bottom: env(safe-area-inset-bottom, 20px);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background flex flex-col min-h-screen">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-background text-primary dark:text-on-background w-full top-0 sticky border-b border-outline-variant dark:border-outline flat no shadows flex justify-between items-center px-container-margin h-16 w-full z-40">
+<button class="material-symbols-outlined text-[24px] hover:bg-surface-container dark:hover:bg-tertiary-container transition-colors p-2 rounded-full active:opacity-70 transition-opacity">menu</button>
+<span class="font-headline-md text-headline-md font-bold tracking-tighter text-primary dark:text-on-background">FitByte</span>
+<button class="material-symbols-outlined text-[24px] hover:bg-surface-container dark:hover:bg-tertiary-container transition-colors p-2 rounded-full active:opacity-70 transition-opacity">settings</button>
+</header>
+<!-- Main Content -->
+<main class="flex-grow pb-32">
+<div class="max-w-screen-md mx-auto px-container-margin py-xl">
+<!-- Headline & Action -->
+<div class="flex flex-col items-start gap-md mb-xl">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-primary tracking-tight">Workouts</h1>
+<button class="w-full bg-primary text-on-primary py-3 rounded-lg font-headline-md text-body-lg font-semibold flex items-center justify-center gap-2 hover:bg-tertiary-container active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined text-[20px]">add</span>
+                    Start Workout
+                </button>
+</div>
+<!-- Saved Routines Bento Box -->
+<section class="mb-xl">
+<h2 class="font-headline-md text-headline-md text-primary mb-md">Saved Routines</h2>
+<div class="grid grid-cols-2 gap-4">
+<div class="border border-outline-variant rounded-lg p-md bg-surface-container-lowest hover:border-primary cursor-pointer transition-colors flex flex-col justify-between aspect-square">
+<div>
+<h3 class="font-headline-md text-body-lg font-semibold text-primary mb-1">Push</h3>
+<p class="font-body-sm text-body-sm text-on-secondary-container">Chest, Shoulders, Triceps</p>
+</div>
+<div class="flex justify-between items-end">
+<span class="font-mono-data text-mono-data text-secondary">6 Exercises</span>
+<span class="material-symbols-outlined text-secondary">arrow_forward</span>
+</div>
+</div>
+<div class="border border-outline-variant rounded-lg p-md bg-surface-container-lowest hover:border-primary cursor-pointer transition-colors flex flex-col justify-between aspect-square">
+<div>
+<h3 class="font-headline-md text-body-lg font-semibold text-primary mb-1">Pull</h3>
+<p class="font-body-sm text-body-sm text-on-secondary-container">Back, Biceps, Forearms</p>
+</div>
+<div class="flex justify-between items-end">
+<span class="font-mono-data text-mono-data text-secondary">7 Exercises</span>
+<span class="material-symbols-outlined text-secondary">arrow_forward</span>
+</div>
+</div>
+<div class="border border-outline-variant rounded-lg p-md bg-surface-container-lowest hover:border-primary cursor-pointer transition-colors flex flex-col justify-between aspect-square">
+<div>
+<h3 class="font-headline-md text-body-lg font-semibold text-primary mb-1">Legs</h3>
+<p class="font-body-sm text-body-sm text-on-secondary-container">Quads, Hams, Calves</p>
+</div>
+<div class="flex justify-between items-end">
+<span class="font-mono-data text-mono-data text-secondary">5 Exercises</span>
+<span class="material-symbols-outlined text-secondary">arrow_forward</span>
+</div>
+</div>
+<div class="border border-outline-variant border-dashed rounded-lg p-md bg-transparent hover:border-primary hover:bg-surface-container-low cursor-pointer transition-colors flex flex-col items-center justify-center aspect-square text-secondary">
+<span class="material-symbols-outlined text-[32px] mb-2">add_circle</span>
+<span class="font-body-sm text-body-sm font-medium">New Routine</span>
+</div>
+</div>
+</section>
+<!-- Recent Workouts List -->
+<section>
+<div class="flex justify-between items-end mb-md border-b border-outline-variant pb-2">
+<h2 class="font-headline-md text-headline-md text-primary">Recent Workouts</h2>
+<button class="font-body-sm text-body-sm text-secondary hover:text-primary transition-colors">View All</button>
+</div>
+<div class="flex flex-col">
+<!-- Item 1 -->
+<div class="flex items-center justify-between py-md border-b border-outline-variant hover:bg-surface-container-lowest -mx-container-margin px-container-margin cursor-pointer transition-colors">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center border border-outline-variant text-primary">
+<span class="material-symbols-outlined text-[20px]">fitness_center</span>
+</div>
+<div>
+<h4 class="font-body-lg text-body-lg font-semibold text-primary">Push Day</h4>
+<div class="font-mono-data text-mono-data text-on-secondary-container flex gap-2 items-center">
+<span>Yesterday</span>
+<span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+<span>52 min</span>
+<span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+<span>18 sets</span>
+</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-secondary text-[20px]">chevron_right</span>
+</div>
+<!-- Item 2 -->
+<div class="flex items-center justify-between py-md border-b border-outline-variant hover:bg-surface-container-lowest -mx-container-margin px-container-margin cursor-pointer transition-colors">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center border border-outline-variant text-primary">
+<span class="material-symbols-outlined text-[20px]">fitness_center</span>
+</div>
+<div>
+<h4 class="font-body-lg text-body-lg font-semibold text-primary">Pull Day</h4>
+<div class="font-mono-data text-mono-data text-on-secondary-container flex gap-2 items-center">
+<span>Aug 5</span>
+<span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+<span>58 min</span>
+<span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+<span>20 sets</span>
+</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-secondary text-[20px]">chevron_right</span>
+</div>
+<!-- Item 3 -->
+<div class="flex items-center justify-between py-md border-b border-outline-variant hover:bg-surface-container-lowest -mx-container-margin px-container-margin cursor-pointer transition-colors">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center border border-outline-variant text-primary">
+<span class="material-symbols-outlined text-[20px]">fitness_center</span>
+</div>
+<div>
+<h4 class="font-body-lg text-body-lg font-semibold text-primary">Leg Day</h4>
+<div class="font-mono-data text-mono-data text-on-secondary-container flex gap-2 items-center">
+<span>Aug 3</span>
+<span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+<span>61 min</span>
+<span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+<span>22 sets</span>
+</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-secondary text-[20px]">chevron_right</span>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="md:hidden bg-surface dark:bg-background fixed bottom-0 w-full z-50 border-t border-outline-variant dark:border-outline flat no shadows flex justify-around items-center h-20 pb-safe w-full px-base">
+<!-- Log -->
+<a class="flex flex-col items-center justify-center text-secondary dark:text-on-secondary-container hover:bg-surface-container-low dark:hover:bg-tertiary-container active:scale-95 transition-transform duration-150 p-2 rounded-lg flex-1" href="#">
+<span class="material-symbols-outlined mb-1" data-weight="fill">edit_note</span>
+<span class="font-label-caps text-label-caps">Log</span>
+</a>
+<!-- Workouts (Active) -->
+<a class="flex flex-col items-center justify-center text-primary dark:text-on-background font-bold hover:bg-surface-container-low dark:hover:bg-tertiary-container active:scale-95 transition-transform duration-150 p-2 rounded-lg flex-1" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">fitness_center</span>
+<span class="font-label-caps text-label-caps">Workouts</span>
+</a>
+<!-- Trends -->
+<a class="flex flex-col items-center justify-center text-secondary dark:text-on-secondary-container hover:bg-surface-container-low dark:hover:bg-tertiary-container active:scale-95 transition-transform duration-150 p-2 rounded-lg flex-1" href="#">
+<span class="material-symbols-outlined mb-1" data-weight="fill">monitoring</span>
+<span class="font-label-caps text-label-caps">Trends</span>
+</a>
+<!-- Profile -->
+<a class="flex flex-col items-center justify-center text-secondary dark:text-on-secondary-container hover:bg-surface-container-low dark:hover:bg-tertiary-container active:scale-95 transition-transform duration-150 p-2 rounded-lg flex-1" href="#">
+<span class="material-symbols-outlined mb-1" data-weight="fill">person</span>
+<span class="font-label-caps text-label-caps">Profile</span>
+</a>
+</nav>
+</body></html>

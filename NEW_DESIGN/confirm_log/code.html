@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FitByte - Shared Food Confirmation</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed-dim": "#c6c6c6",
+                        "on-tertiary-fixed-variant": "#474747",
+                        "on-surface": "#1a1c1c",
+                        "surface": "#f9f9f9",
+                        "inverse-primary": "#c6c6c6",
+                        "inverse-on-surface": "#f1f1f1",
+                        "tertiary-fixed": "#e2e2e2",
+                        "primary-fixed": "#e2e2e2",
+                        "tertiary": "#000000",
+                        "surface-dim": "#dadada",
+                        "surface-container": "#eeeeee",
+                        "on-tertiary-fixed": "#1b1b1b",
+                        "on-secondary-fixed": "#1b1c1c",
+                        "on-error": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "outline": "#7e7576",
+                        "surface-variant": "#e2e2e2",
+                        "outline-variant": "#cfc4c5",
+                        "on-secondary-fixed-variant": "#464747",
+                        "on-secondary-container": "#646464",
+                        "tertiary-container": "#1b1b1b",
+                        "on-tertiary-container": "#848484",
+                        "error-container": "#ffdad6",
+                        "on-primary-fixed-variant": "#474747",
+                        "primary-container": "#1b1b1b",
+                        "on-error-container": "#93000a",
+                        "error": "#ba1a1a",
+                        "on-primary-fixed": "#1b1b1b",
+                        "on-secondary": "#ffffff",
+                        "background": "#f9f9f9",
+                        "surface-tint": "#5e5e5e",
+                        "surface-container-highest": "#e2e2e2",
+                        "primary": "#000000",
+                        "secondary": "#5e5e5e",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-container": "#e3e2e2",
+                        "surface-container-high": "#e8e8e8",
+                        "primary-fixed-dim": "#c6c6c6",
+                        "on-primary": "#ffffff",
+                        "secondary-fixed": "#e3e2e2",
+                        "secondary-fixed-dim": "#c7c6c6",
+                        "inverse-surface": "#2f3131",
+                        "on-primary-container": "#848484",
+                        "surface-container-low": "#f3f3f3",
+                        "on-surface-variant": "#4c4546",
+                        "on-background": "#1a1c1c",
+                        "surface-bright": "#f9f9f9"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "sm": "8px",
+                        "gutter": "16px",
+                        "lg": "24px",
+                        "md": "16px",
+                        "container-margin": "24px",
+                        "xl": "40px",
+                        "base": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Geist"],
+                        "body-sm": ["Inter"],
+                        "mono-data": ["Geist"],
+                        "headline-lg-mobile": ["Geist"],
+                        "body-lg": ["Inter"],
+                        "label-caps": ["Geist"],
+                        "display-lg": ["Geist"],
+                        "headline-md": ["Geist"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
+                        "mono-data": ["14px", { "lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }],
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.04em", "fontWeight": "700" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: theme('colors.background');
+            color: theme('colors.on-background');
+            /* Mobile safe area padding for bottom nav */
+            padding-bottom: 80px; 
+        }
+        /* Hide scrollbar for cleaner UI */
+        ::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col items-center selection:bg-primary selection:text-on-primary">
+<!-- TopAppBar (Mobile & Web) -->
+<header class="fixed top-0 w-full z-50 bg-surface dark:bg-background border-b border-outline-variant dark:border-outline flat no shadows transition-colors duration-200">
+<div class="flex justify-between items-center h-16 px-gutter max-w-7xl mx-auto w-full">
+<button class="p-2 text-on-surface-variant dark:text-on-secondary-container hover:bg-surface-container dark:hover:bg-tertiary-container rounded-full transition-colors duration-200 flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-primary dark:text-on-background">FitByte</h1>
+<button class="p-2 text-on-surface-variant dark:text-on-secondary-container hover:bg-surface-container dark:hover:bg-tertiary-container rounded-full transition-colors duration-200 flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="w-full max-w-md mx-auto pt-[88px] px-gutter flex-grow flex flex-col gap-lg">
+<!-- Header Section -->
+<section class="flex flex-col gap-sm">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-primary">Confirm Log</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Review your meal details before adding.</p>
+</section>
+<!-- Image Hero -->
+<section class="w-full h-48 rounded-lg border border-[#E5E5E5] overflow-hidden relative group">
+<div class="bg-cover bg-center w-full h-full" data-alt="A beautifully plated fresh chicken salad viewed from top down on a clean white table. High-key lighting, minimalist aesthetic, monochrome tones with vibrant greens from the lettuce and warm grill marks on the sliced chicken breast. Sharp focus, editorial style photography." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA0C4_r3hKxgyKX161X89L3FNtCYPqXsiqrTiiNSZFEro2bihLpeAYPeVEQ3xjbz6LcyFRxu3GdLhyofa1QJW9d4qWOZZolWA_ujTeyVFBVnufJTyt6K87hr3I-62OimIhMVDnslNh1qtyEQbru_0kZKjk7XiQng11BJhNdFNLJFbDhUSCwOHeyzrqDpvSP1vbmYtUXo92QI1GFZGlhhL6qNnvESrsFIpBoQY7bFLN5A5ziLSN_Bo8m')"></div>
+<!-- Subtle overlay for text legibility if needed later -->
+<div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+</section>
+<!-- Bento Grid Summary -->
+<section class="grid grid-cols-2 gap-sm">
+<!-- Meal Context Card -->
+<div class="col-span-2 bg-surface-container-lowest border border-[#E5E5E5] rounded-lg p-md flex justify-between items-center group transition-colors hover:border-primary cursor-pointer">
+<div class="flex flex-col gap-xs">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Meal</span>
+<span class="font-body-lg text-body-lg font-semibold text-primary">Lunch</span>
+</div>
+<button class="w-8 h-8 flex items-center justify-center rounded-full text-secondary hover:bg-surface-container hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]" data-icon="edit">edit</span>
+</button>
+</div>
+<!-- Food Item Card -->
+<div class="col-span-2 bg-surface-container-lowest border border-[#E5E5E5] rounded-lg p-md flex justify-between items-center group transition-colors hover:border-primary cursor-pointer">
+<div class="flex flex-col gap-xs">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Food</span>
+<span class="font-body-lg text-body-lg font-semibold text-primary">Chicken Salad</span>
+<span class="font-body-sm text-body-sm text-secondary">1 serving (350g)</span>
+</div>
+<button class="w-8 h-8 flex items-center justify-center rounded-full text-secondary hover:bg-surface-container hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]" data-icon="edit">edit</span>
+</button>
+</div>
+<!-- Nutrition Highlights -->
+<div class="col-span-2 mt-md">
+<h3 class="font-headline-md text-headline-md text-primary mb-sm">Nutrition</h3>
+<div class="grid grid-cols-4 gap-xs">
+<!-- Calories -->
+<div class="col-span-4 sm:col-span-1 bg-surface-container-lowest border border-[#E5E5E5] rounded-lg p-sm flex flex-row sm:flex-col items-center justify-between sm:justify-center gap-xs">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Calories</span>
+<span class="font-mono-data text-mono-data text-primary text-lg">420</span>
+</div>
+<!-- Protein -->
+<div class="col-span-1 bg-surface-container-lowest border border-[#E5E5E5] rounded-lg p-sm flex flex-col items-center justify-center gap-xs relative overflow-hidden">
+<!-- Tiny visual indicator bar for protein (high) -->
+<div class="absolute bottom-0 left-0 h-1 bg-primary w-full"></div>
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Protein</span>
+<span class="font-mono-data text-mono-data text-primary">35g</span>
+</div>
+<!-- Carbs -->
+<div class="col-span-1 bg-surface-container-lowest border border-[#E5E5E5] rounded-lg p-sm flex flex-col items-center justify-center gap-xs relative overflow-hidden">
+<div class="absolute bottom-0 left-0 h-1 bg-primary w-1/2"></div>
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Carbs</span>
+<span class="font-mono-data text-mono-data text-primary">18g</span>
+</div>
+<!-- Fat -->
+<div class="col-span-1 bg-surface-container-lowest border border-[#E5E5E5] rounded-lg p-sm flex flex-col items-center justify-center gap-xs relative overflow-hidden">
+<div class="absolute bottom-0 left-0 h-1 bg-primary w-[60%]"></div>
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Fat</span>
+<span class="font-mono-data text-mono-data text-primary">21g</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Spacer to push button down if needed on taller screens -->
+<div class="flex-grow"></div>
+<!-- Action Area -->
+<section class="mt-xl pb-lg w-full flex justify-center">
+<button class="w-full bg-primary text-on-primary font-headline-md text-headline-md rounded-lg py-sm px-lg h-12 flex items-center justify-center gap-sm hover:bg-surface-tint transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+<span class="material-symbols-outlined" data-icon="add" style="font-variation-settings: 'FILL' 0;">add</span>
+                Add to Lunch
+            </button>
+</section>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 w-full z-50 bg-surface dark:bg-background border-t border-outline-variant dark:border-outline flat no shadows flex justify-around items-center h-20 pb-safe px-4">
+<!-- Tab 1: Log (Active) -->
+<button class="flex flex-col items-center justify-center text-primary dark:text-on-background font-bold scale-95 active:scale-90 transition-transform hover:opacity-80 w-16 h-full gap-xs">
+<span class="material-symbols-outlined" data-icon="add_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;">add_circle</span>
+<span class="font-label-caps text-label-caps">Log</span>
+</button>
+<!-- Tab 2: Workouts -->
+<button class="flex flex-col items-center justify-center text-secondary dark:text-on-secondary-fixed-variant scale-95 active:scale-90 transition-transform hover:opacity-80 w-16 h-full gap-xs">
+<span class="material-symbols-outlined" data-icon="fitness_center">fitness_center</span>
+<span class="font-label-caps text-label-caps">Workouts</span>
+</button>
+<!-- Tab 3: Trends -->
+<button class="flex flex-col items-center justify-center text-secondary dark:text-on-secondary-fixed-variant scale-95 active:scale-90 transition-transform hover:opacity-80 w-16 h-full gap-xs">
+<span class="material-symbols-outlined" data-icon="trending_up">trending_up</span>
+<span class="font-label-caps text-label-caps">Trends</span>
+</button>
+<!-- Tab 4: Profile -->
+<button class="flex flex-col items-center justify-center text-secondary dark:text-on-secondary-fixed-variant scale-95 active:scale-90 transition-transform hover:opacity-80 w-16 h-full gap-xs">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-caps text-label-caps">Profile</span>
+</button>
+</nav>
+<!-- Desktop Side/Top Nav placeholder to satisfy "responsive pivot" requirement if window scaled up -->
+<nav class="hidden md:flex fixed left-0 top-16 h-full w-64 border-r border-outline-variant flex-col gap-sm py-lg px-md bg-surface z-40">
+<div class="font-label-caps text-label-caps text-on-surface-variant uppercase mb-sm px-sm">Navigation</div>
+<a class="flex items-center gap-md px-sm py-xs rounded bg-surface-container text-primary font-bold" href="#">
+<span class="material-symbols-outlined" data-icon="add_circle" style="font-variation-settings: 'FILL' 1;">add_circle</span>
+<span class="font-body-lg text-body-lg">Log</span>
+</a>
+<a class="flex items-center gap-md px-sm py-xs rounded text-secondary hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="fitness_center">fitness_center</span>
+<span class="font-body-lg text-body-lg">Workouts</span>
+</a>
+<a class="flex items-center gap-md px-sm py-xs rounded text-secondary hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="trending_up">trending_up</span>
+<span class="font-body-lg text-body-lg">Trends</span>
+</a>
+<a class="flex items-center gap-md px-sm py-xs rounded text-secondary hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-body-lg text-body-lg">Profile</span>
+</a>
+</nav>
+</body></html>

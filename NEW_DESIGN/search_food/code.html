@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FitByte - Search Food</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&amp;family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed-dim": "#c6c6c6",
+                        "on-tertiary-fixed-variant": "#474747",
+                        "on-surface": "#1a1c1c",
+                        "surface": "#f9f9f9",
+                        "inverse-primary": "#c6c6c6",
+                        "inverse-on-surface": "#f1f1f1",
+                        "tertiary-fixed": "#e2e2e2",
+                        "primary-fixed": "#e2e2e2",
+                        "tertiary": "#000000",
+                        "surface-dim": "#dadada",
+                        "surface-container": "#eeeeee",
+                        "on-tertiary-fixed": "#1b1b1b",
+                        "on-secondary-fixed": "#1b1c1c",
+                        "on-error": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "outline": "#7e7576",
+                        "surface-variant": "#e2e2e2",
+                        "outline-variant": "#cfc4c5",
+                        "on-secondary-fixed-variant": "#464747",
+                        "on-secondary-container": "#646464",
+                        "tertiary-container": "#1b1b1b",
+                        "on-tertiary-container": "#848484",
+                        "error-container": "#ffdad6",
+                        "on-primary-fixed-variant": "#474747",
+                        "primary-container": "#1b1b1b",
+                        "on-error-container": "#93000a",
+                        "error": "#ba1a1a",
+                        "on-primary-fixed": "#1b1b1b",
+                        "on-secondary": "#ffffff",
+                        "background": "#f9f9f9",
+                        "surface-tint": "#5e5e5e",
+                        "surface-container-highest": "#e2e2e2",
+                        "primary": "#000000",
+                        "secondary": "#5e5e5e",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-container": "#e3e2e2",
+                        "surface-container-high": "#e8e8e8",
+                        "primary-fixed-dim": "#c6c6c6",
+                        "on-primary": "#ffffff",
+                        "secondary-fixed": "#e3e2e2",
+                        "secondary-fixed-dim": "#c7c6c6",
+                        "inverse-surface": "#2f3131",
+                        "on-primary-container": "#848484",
+                        "surface-container-low": "#f3f3f3",
+                        "on-surface-variant": "#4c4546",
+                        "on-background": "#1a1c1c",
+                        "surface-bright": "#f9f9f9"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "sm": "8px",
+                        "gutter": "16px",
+                        "lg": "24px",
+                        "md": "16px",
+                        "container-margin": "24px",
+                        "xl": "40px",
+                        "base": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Geist"],
+                        "body-sm": ["Inter"],
+                        "mono-data": ["Geist"],
+                        "headline-lg-mobile": ["Geist"],
+                        "body-lg": ["Inter"],
+                        "label-caps": ["Geist"],
+                        "display-lg": ["Geist"],
+                        "headline-md": ["Geist"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
+                        "mono-data": ["14px", { "lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }],
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.04em", "fontWeight": "700" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1;
+        }
+        /* Custom scrollbar to hide it but keep functionality */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-lg min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface dark:bg-background border-b border-outline-variant dark:border-outline flat no shadows flex justify-between items-center h-16 px-gutter max-w-7xl mx-auto transition-colors duration-200">
+<button aria-label="Menu" class="text-primary dark:text-on-background hover:bg-surface-container dark:hover:bg-tertiary-container p-2 rounded-full transition-colors duration-200">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-primary dark:text-on-background text-center flex-1">FitByte</h1>
+<button aria-label="Notifications" class="text-primary dark:text-on-background hover:bg-surface-container dark:hover:bg-tertiary-container p-2 rounded-full transition-colors duration-200">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+</header>
+<!-- Main Content -->
+<main class="pt-24 px-container-margin max-w-3xl mx-auto">
+<!-- Meal Selector -->
+<section class="mb-xl overflow-x-auto hide-scrollbar">
+<div class="flex gap-sm w-max">
+<button class="px-md py-sm border border-outline-variant rounded-full font-label-caps text-label-caps text-on-surface hover:bg-surface-container-low transition-colors">
+                    Breakfast
+                </button>
+<button class="px-md py-sm bg-primary text-on-primary rounded-full font-label-caps text-label-caps transition-colors">
+                    Lunch
+                </button>
+<button class="px-md py-sm border border-outline-variant rounded-full font-label-caps text-label-caps text-on-surface hover:bg-surface-container-low transition-colors">
+                    Dinner
+                </button>
+<button class="px-md py-sm border border-outline-variant rounded-full font-label-caps text-label-caps text-on-surface hover:bg-surface-container-low transition-colors">
+                    Snack
+                </button>
+</div>
+</section>
+<!-- Search Input -->
+<section class="mb-xl relative">
+<span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none" data-icon="search">search</span>
+<input aria-label="Search food" class="w-full pl-12 pr-md py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-lg text-on-surface focus:outline-none focus:border-primary focus:ring-0 transition-colors" placeholder="Search foods, meals, or brands..." type="text"/>
+</section>
+<!-- Recent -->
+<section class="mb-xl">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-md">Recent</h2>
+<div class="border border-outline-variant rounded-lg bg-surface-container-lowest overflow-hidden">
+<button class="w-full flex items-center justify-between p-md border-b border-outline-variant hover:bg-surface-container-low transition-colors last:border-b-0 text-left">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 bg-surface-container flex items-center justify-center rounded-DEFAULT">
+<span class="material-symbols-outlined text-secondary" data-icon="restaurant">restaurant</span>
+</div>
+<div>
+<p class="font-body-lg text-on-surface font-medium">Avo Toast</p>
+<p class="font-body-sm text-on-surface-variant">320 kcal • 12g P • 24g C • 18g F</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline-variant" data-icon="add_circle">add_circle</span>
+</button>
+<button class="w-full flex items-center justify-between p-md border-b border-outline-variant hover:bg-surface-container-low transition-colors last:border-b-0 text-left">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 bg-surface-container flex items-center justify-center rounded-DEFAULT">
+<span class="material-symbols-outlined text-secondary" data-icon="restaurant">restaurant</span>
+</div>
+<div>
+<p class="font-body-lg text-on-surface font-medium">Chicken Salad</p>
+<p class="font-body-sm text-on-surface-variant">450 kcal • 35g P • 15g C • 22g F</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline-variant" data-icon="add_circle">add_circle</span>
+</button>
+</div>
+</section>
+<!-- Frequently Logged -->
+<section class="mb-xl">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-md">Frequently Logged</h2>
+<div class="flex flex-wrap gap-sm">
+<button class="px-md py-sm border border-outline-variant bg-surface-container-lowest rounded-DEFAULT font-body-sm text-on-surface hover:bg-surface-container-low transition-colors flex items-center gap-sm">
+<span class="material-symbols-outlined text-secondary text-sm" data-icon="set_meal">set_meal</span>
+                    Chicken Breast
+                </button>
+<button class="px-md py-sm border border-outline-variant bg-surface-container-lowest rounded-DEFAULT font-body-sm text-on-surface hover:bg-surface-container-low transition-colors flex items-center gap-sm">
+<span class="material-symbols-outlined text-secondary text-sm" data-icon="grain">grain</span>
+                    Rice
+                </button>
+<button class="px-md py-sm border border-outline-variant bg-surface-container-lowest rounded-DEFAULT font-body-sm text-on-surface hover:bg-surface-container-low transition-colors flex items-center gap-sm">
+<span class="material-symbols-outlined text-secondary text-sm" data-icon="egg">egg</span>
+                    Eggs
+                </button>
+<button class="px-md py-sm border border-outline-variant bg-surface-container-lowest rounded-DEFAULT font-body-sm text-on-surface hover:bg-surface-container-low transition-colors flex items-center gap-sm">
+<span class="material-symbols-outlined text-secondary text-sm" data-icon="grain">grain</span>
+                    Oats
+                </button>
+<button class="px-md py-sm border border-outline-variant bg-surface-container-lowest rounded-DEFAULT font-body-sm text-on-surface hover:bg-surface-container-low transition-colors flex items-center gap-sm">
+<span class="material-symbols-outlined text-secondary text-sm" data-icon="nutrition">nutrition</span>
+                    Banana
+                </button>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 bg-surface dark:bg-background border-t border-outline-variant dark:border-outline flat no shadows flex justify-around items-center h-20 pb-safe px-4 md:hidden">
+<a class="flex flex-col items-center justify-center text-primary dark:text-on-background font-bold hover:opacity-80 scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined fill" data-icon="add_circle" data-weight="fill">add_circle</span>
+<span class="font-label-caps text-label-caps mt-1">Log</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary dark:text-on-secondary-fixed-variant hover:opacity-80 scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="fitness_center">fitness_center</span>
+<span class="font-label-caps text-label-caps mt-1">Workouts</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary dark:text-on-secondary-fixed-variant hover:opacity-80 scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="trending_up">trending_up</span>
+<span class="font-label-caps text-label-caps mt-1">Trends</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary dark:text-on-secondary-fixed-variant hover:opacity-80 scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-caps text-label-caps mt-1">Profile</span>
+</a>
+</nav>
+</body></html>

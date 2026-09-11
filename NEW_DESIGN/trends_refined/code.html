@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FitByte - Trends</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Inter:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error": "#ba1a1a",
+                        "primary-fixed": "#e2e2e2",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-container": "#848484",
+                        "surface-container-high": "#e8e8e8",
+                        "error-container": "#ffdad6",
+                        "surface-tint": "#5e5e5e",
+                        "tertiary-container": "#1b1b1b",
+                        "on-tertiary-fixed-variant": "#474747",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-container": "#848484",
+                        "on-error": "#ffffff",
+                        "primary": "#000000",
+                        "background": "#f9f9f9",
+                        "on-surface-variant": "#4c4546",
+                        "on-secondary-container": "#646464",
+                        "outline": "#7e7576",
+                        "on-primary-fixed": "#1b1b1b",
+                        "inverse-on-surface": "#f1f1f1",
+                        "tertiary-fixed": "#e2e2e2",
+                        "on-error-container": "#93000a",
+                        "primary-fixed-dim": "#c6c6c6",
+                        "surface-container-highest": "#e2e2e2",
+                        "surface-dim": "#dadada",
+                        "inverse-surface": "#2f3131",
+                        "on-tertiary-fixed": "#1b1b1b",
+                        "primary-container": "#1b1b1b",
+                        "secondary-fixed": "#e3e2e2",
+                        "surface-container-low": "#f3f3f3",
+                        "secondary-container": "#e3e2e2",
+                        "outline-variant": "#cfc4c5",
+                        "inverse-primary": "#c6c6c6",
+                        "on-background": "#1a1c1c",
+                        "surface-container": "#eeeeee",
+                        "on-primary-fixed-variant": "#474747",
+                        "on-surface": "#1a1c1c",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed": "#1b1c1c",
+                        "on-secondary-fixed-variant": "#464747",
+                        "surface-bright": "#f9f9f9",
+                        "tertiary-fixed-dim": "#c6c6c6",
+                        "tertiary": "#000000",
+                        "surface": "#f9f9f9",
+                        "surface-variant": "#e2e2e2",
+                        "secondary": "#5e5e5e",
+                        "secondary-fixed-dim": "#c7c6c6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "container-margin": "24px",
+                        "xs": "4px",
+                        "lg": "24px",
+                        "base": "8px",
+                        "md": "16px",
+                        "sm": "8px",
+                        "gutter": "16px",
+                        "xl": "40px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Geist"],
+                        "mono-data": ["Geist"],
+                        "headline-lg-mobile": ["Geist"],
+                        "display-lg": ["Geist"],
+                        "label-caps": ["Geist"],
+                        "body-sm": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-md": ["Geist"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "mono-data": ["14px", { "lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.04em", "fontWeight": "700" }],
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Strict High-Contrast Minimalism Overrides */
+        body { font-family: 'Inter', sans-serif; }
+        .bento-card {
+            background-color: theme('colors.surface-container-lowest');
+            border: 1px solid theme('colors.surface-variant');
+            border-radius: theme('borderRadius.lg');
+            box-shadow: none; /* Enforce flat design */
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col md:pb-0 pb-safe-bottom antialiased selection:bg-primary selection:text-on-primary">
+<!-- TopAppBar (Web Anchor) -->
+<header class="w-full top-0 sticky bg-surface border-b border-outline-variant flex justify-between items-center px-container-margin h-16 z-50">
+<div class="flex items-center gap-md">
+<button class="md:hidden text-primary hover:bg-surface-container transition-colors p-sm rounded-full active:opacity-70 transition-opacity">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+<span class="font-headline-md text-headline-md font-bold tracking-tighter text-primary">FitByte</span>
+</div>
+<!-- Desktop Navigation Cluster (Hidden on Mobile) -->
+<nav class="hidden md:flex items-center gap-lg">
+<a class="text-secondary hover:bg-surface-container transition-colors px-md py-sm rounded-full font-label-caps text-label-caps active:opacity-70 transition-opacity" href="#">Log</a>
+<a class="text-secondary hover:bg-surface-container transition-colors px-md py-sm rounded-full font-label-caps text-label-caps active:opacity-70 transition-opacity" href="#">Workouts</a>
+<a class="text-primary font-bold hover:bg-surface-container transition-colors px-md py-sm rounded-full font-label-caps text-label-caps active:opacity-70 transition-opacity" href="#">Trends</a>
+<a class="text-secondary hover:bg-surface-container transition-colors px-md py-sm rounded-full font-label-caps text-label-caps active:opacity-70 transition-opacity" href="#">Profile</a>
+</nav>
+<button class="text-primary hover:bg-surface-container transition-colors p-sm rounded-full active:opacity-70 transition-opacity">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</header>
+<!-- Main Canvas -->
+<main class="flex-1 w-full max-w-5xl mx-auto px-container-margin py-xl md:py-24">
+<header class="mb-xl">
+<h1 class="font-display-lg text-display-lg text-primary tracking-tight">Trends</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant mt-sm">Historical analytics across nutrition, training, and body composition.</p>
+</header>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-container-margin">
+<!-- NUTRITION SECTION -->
+<section class="bento-card p-container-margin flex flex-col gap-lg">
+<div class="flex justify-between items-center">
+<h2 class="font-headline-md text-headline-md text-primary">Nutrition</h2>
+<span class="font-mono-data text-mono-data text-secondary">Last 7 Days</span>
+</div>
+<!-- Sub-chart: Calories over time (Bar) -->
+<div class="flex-1 min-h-[160px] flex flex-col justify-end">
+<div class="flex justify-between items-end h-32 mb-sm relative">
+<!-- Target Line -->
+<div class="absolute top-1/3 left-0 w-full border-t border-dashed border-outline z-0"></div>
+<!-- Bars -->
+<div class="w-8 h-[60%] bg-surface-container-high rounded-t-sm relative z-10 hover:bg-primary transition-colors group"><div class="hidden group-hover:block absolute -top-8 left-1/2 -translate-x-1/2 bg-primary text-on-primary font-mono-data text-mono-data px-sm py-xs rounded text-xs">2100</div></div>
+<div class="w-8 h-[75%] bg-surface-container-high rounded-t-sm relative z-10 hover:bg-primary transition-colors group"><div class="hidden group-hover:block absolute -top-8 left-1/2 -translate-x-1/2 bg-primary text-on-primary font-mono-data text-mono-data px-sm py-xs rounded text-xs">2450</div></div>
+<div class="w-8 h-[80%] bg-surface-container-high rounded-t-sm relative z-10 hover:bg-primary transition-colors group"><div class="hidden group-hover:block absolute -top-8 left-1/2 -translate-x-1/2 bg-primary text-on-primary font-mono-data text-mono-data px-sm py-xs rounded text-xs">2600</div></div>
+<div class="w-8 h-[40%] bg-surface-container-high rounded-t-sm relative z-10 hover:bg-primary transition-colors group"><div class="hidden group-hover:block absolute -top-8 left-1/2 -translate-x-1/2 bg-primary text-on-primary font-mono-data text-mono-data px-sm py-xs rounded text-xs">1500</div></div>
+<div class="w-8 h-[65%] bg-primary rounded-t-sm relative z-10 group"><div class="hidden group-hover:block absolute -top-8 left-1/2 -translate-x-1/2 bg-primary text-on-primary font-mono-data text-mono-data px-sm py-xs rounded text-xs">2200</div></div>
+<div class="w-8 h-[70%] bg-surface-container-high rounded-t-sm relative z-10 hover:bg-primary transition-colors group"><div class="hidden group-hover:block absolute -top-8 left-1/2 -translate-x-1/2 bg-primary text-on-primary font-mono-data text-mono-data px-sm py-xs rounded text-xs">2350</div></div>
+<div class="w-8 h-[60%] bg-surface-container-high rounded-t-sm relative z-10 hover:bg-primary transition-colors group"><div class="hidden group-hover:block absolute -top-8 left-1/2 -translate-x-1/2 bg-primary text-on-primary font-mono-data text-mono-data px-sm py-xs rounded text-xs">2150</div></div>
+</div>
+<div class="flex justify-between font-mono-data text-[10px] text-secondary uppercase tracking-widest">
+<span>M</span><span>T</span><span>W</span><span>T</span><span class="text-primary font-bold">F</span><span>S</span><span>S</span>
+</div>
+</div>
+<hr class="border-outline-variant"/>
+<!-- Sub-chart: Protein Consistency -->
+<div>
+<div class="flex justify-between mb-sm font-body-sm text-body-sm">
+<span class="text-secondary">Protein Target Hit</span>
+<span class="font-mono-data text-mono-data">5/7 Days</span>
+</div>
+<div class="w-full h-2 bg-surface-container-high rounded-full overflow-hidden flex">
+<div class="h-full bg-primary w-[71%]"></div>
+</div>
+</div>
+</section>
+<!-- TRAINING SECTION -->
+<section class="bento-card p-container-margin flex flex-col gap-lg">
+<div class="flex justify-between items-center">
+<h2 class="font-headline-md text-headline-md text-primary">Training</h2>
+<span class="font-mono-data text-mono-data text-secondary">4 Weeks</span>
+</div>
+<!-- Sub-chart: Volume (Line) -->
+<div class="flex-1 min-h-[160px] flex flex-col justify-end relative">
+<div class="absolute top-0 left-0 font-mono-data text-mono-data text-secondary text-xs">Total Vol (kg)</div>
+<div class="w-full h-32 relative">
+<!-- Grid lines -->
+<div class="absolute inset-0 flex flex-col justify-between">
+<div class="border-b border-surface-container-high w-full h-0"></div>
+<div class="border-b border-surface-container-high w-full h-0"></div>
+<div class="border-b border-surface-container-high w-full h-0"></div>
+</div>
+<!-- SVG Line Chart (High-Contrast Minimal) -->
+<svg class="w-full h-full absolute inset-0 z-10" preserveaspectratio="none" viewbox="0 0 100 40">
+<path class="stroke-primary stroke-[2px] fill-none" d="M0,30 L25,25 L50,15 L75,20 L100,5"></path>
+<circle class="fill-primary" cx="0" cy="30" r="1.5"></circle>
+<circle class="fill-primary" cx="25" cy="25" r="1.5"></circle>
+<circle class="fill-primary" cx="50" cy="15" r="1.5"></circle>
+<circle class="fill-primary" cx="75" cy="20" r="1.5"></circle>
+<circle class="fill-primary" cx="100" cy="5" r="1.5"></circle>
+</svg>
+</div>
+<div class="flex justify-between font-mono-data text-[10px] text-secondary uppercase tracking-widest mt-sm">
+<span>W1</span><span>W2</span><span>W3</span><span>W4</span>
+</div>
+</div>
+<hr class="border-outline-variant"/>
+<!-- Sub-chart: Frequency -->
+<div class="flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-secondary">Workout Frequency</span>
+<div class="flex gap-xs">
+<!-- Heatmap dots -->
+<div class="w-3 h-3 rounded bg-primary"></div>
+<div class="w-3 h-3 rounded bg-surface-container-high"></div>
+<div class="w-3 h-3 rounded bg-primary"></div>
+<div class="w-3 h-3 rounded bg-primary"></div>
+<div class="w-3 h-3 rounded bg-surface-container-high"></div>
+<div class="w-3 h-3 rounded bg-primary"></div>
+<div class="w-3 h-3 rounded bg-primary"></div>
+</div>
+</div>
+</section>
+<!-- BODY SECTION (Full Width on Desktop) -->
+<section class="bento-card p-container-margin flex flex-col gap-lg md:col-span-2">
+<div class="flex justify-between items-center mb-md">
+<h2 class="font-headline-md text-headline-md text-primary">Body</h2>
+<div class="flex items-center gap-sm">
+<span class="font-headline-md text-headline-md text-primary">76.4 <span class="text-sm text-secondary font-mono-data">kg</span></span>
+<span class="font-mono-data text-mono-data text-surface-tint">-1.2kg this month</span>
+</div>
+</div>
+<!-- Weight Trend Line Chart -->
+<div class="w-full h-48 relative">
+<!-- Y-Axis Labels -->
+<div class="absolute left-0 top-0 h-full flex flex-col justify-between font-mono-data text-[10px] text-secondary pr-sm border-r border-surface-container-high z-20 bg-surface-container-lowest w-8 items-end pb-6">
+<span>78</span>
+<span>77</span>
+<span>76</span>
+</div>
+<!-- Chart Canvas -->
+<div class="ml-10 h-full relative">
+<!-- Grid lines -->
+<div class="absolute inset-0 flex flex-col justify-between pb-6">
+<div class="border-b border-surface-container-high w-full h-0 mt-2"></div>
+<div class="border-b border-surface-container-high w-full h-0"></div>
+<div class="border-b border-surface-container-high w-full h-0 mb-2"></div>
+</div>
+<!-- SVG Line -->
+<svg class="w-full h-[calc(100%-24px)] absolute top-0 left-0 z-10 overflow-visible" preserveaspectratio="none" viewbox="0 0 100 50">
+<!-- Gradient Fill under line -->
+<defs>
+<lineargradient id="weightGrad" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="theme('colors.primary-fixed')" stop-opacity="0.3"></stop>
+<stop offset="100%" stop-color="theme('colors.surface-container-lowest')" stop-opacity="0"></stop>
+</lineargradient>
+</defs>
+<path class="stroke-primary stroke-[1.5px] fill-none" d="M0,10 L15,15 L30,12 L45,25 L60,20 L75,35 L90,30 L100,45"></path>
+<path class="border-none" d="M0,10 L15,15 L30,12 L45,25 L60,20 L75,35 L90,30 L100,45 L100,50 L0,50 Z" fill="url(#weightGrad)"></path>
+<!-- Current data point -->
+<circle class="fill-surface-container-lowest stroke-primary stroke-[2px]" cx="100" cy="45" r="2.5"></circle>
+</svg>
+<!-- X-Axis Labels -->
+<div class="absolute bottom-0 left-0 w-full flex justify-between font-mono-data text-[10px] text-secondary uppercase tracking-widest px-xs">
+<span>Sep</span>
+<span>Oct</span>
+<span>Nov</span>
+<span>Dec</span>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Anchor) -->
+<nav class="md:hidden fixed bottom-0 w-full z-50 bg-surface border-t border-outline-variant flex justify-around items-center h-20 pb-safe px-base">
+<!-- Inactive -->
+<a class="flex flex-col items-center justify-center text-secondary hover:bg-surface-container-low transition-colors rounded-lg w-16 h-14 active:scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="edit_note">edit_note</span>
+<span class="font-label-caps text-label-caps">Log</span>
+</a>
+<!-- Inactive -->
+<a class="flex flex-col items-center justify-center text-secondary hover:bg-surface-container-low transition-colors rounded-lg w-16 h-14 active:scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="fitness_center">fitness_center</span>
+<span class="font-label-caps text-label-caps">Workouts</span>
+</a>
+<!-- Active -->
+<a class="flex flex-col items-center justify-center text-primary font-bold hover:bg-surface-container-low transition-colors rounded-lg w-16 h-14 active:scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="monitoring" style="font-variation-settings: 'FILL' 1;">monitoring</span>
+<span class="font-label-caps text-label-caps">Trends</span>
+</a>
+<!-- Inactive -->
+<a class="flex flex-col items-center justify-center text-secondary hover:bg-surface-container-low transition-colors rounded-lg w-16 h-14 active:scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="person">person</span>
+<span class="font-label-caps text-label-caps">Profile</span>
+</a>
+</nav>
+<!-- Support for safe area inset on modern mobile browsers -->
+<style>
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+        .pb-safe-bottom { padding-bottom: calc(5rem + env(safe-area-inset-bottom)); }
+    </style>
+</body></html>

@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FitByte - Profile</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-secondary-fixed": "#1b1c1c",
+                      "primary-fixed": "#e2e2e2",
+                      "inverse-surface": "#2f3131",
+                      "primary-fixed-dim": "#c6c6c6",
+                      "surface-bright": "#f9f9f9",
+                      "error": "#ba1a1a",
+                      "surface-variant": "#e2e2e2",
+                      "on-tertiary-container": "#848484",
+                      "on-secondary": "#ffffff",
+                      "outline": "#7e7576",
+                      "on-tertiary": "#ffffff",
+                      "surface-container-highest": "#e2e2e2",
+                      "surface-container-high": "#e8e8e8",
+                      "secondary-fixed-dim": "#c7c6c6",
+                      "on-primary": "#ffffff",
+                      "secondary": "#5e5e5e",
+                      "tertiary-fixed": "#e2e2e2",
+                      "on-primary-fixed-variant": "#474747",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-tint": "#5e5e5e",
+                      "primary-container": "#1b1b1b",
+                      "primary": "#000000",
+                      "tertiary-fixed-dim": "#c6c6c6",
+                      "on-error": "#ffffff",
+                      "on-secondary-container": "#646464",
+                      "tertiary": "#000000",
+                      "on-error-container": "#93000a",
+                      "inverse-on-surface": "#f1f1f1",
+                      "outline-variant": "#cfc4c5",
+                      "inverse-primary": "#c6c6c6",
+                      "error-container": "#ffdad6",
+                      "on-tertiary-fixed-variant": "#474747",
+                      "on-primary-container": "#848484",
+                      "on-secondary-fixed-variant": "#464747",
+                      "surface": "#f9f9f9",
+                      "on-background": "#1a1c1c",
+                      "on-surface-variant": "#4c4546",
+                      "surface-container": "#eeeeee",
+                      "tertiary-container": "#1b1b1b",
+                      "secondary-fixed": "#e3e2e2",
+                      "on-surface": "#1a1c1c",
+                      "surface-dim": "#dadada",
+                      "on-tertiary-fixed": "#1b1b1b",
+                      "secondary-container": "#e3e2e2",
+                      "on-primary-fixed": "#1b1b1b",
+                      "background": "#f9f9f9",
+                      "surface-container-low": "#f3f3f3"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "xs": "4px",
+                      "lg": "24px",
+                      "gutter": "16px",
+                      "md": "16px",
+                      "sm": "8px",
+                      "base": "8px",
+                      "xl": "40px",
+                      "container-margin": "24px"
+              },
+              "fontFamily": {
+                      "headline-md": [
+                              "Geist"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "body-sm": [
+                              "Inter"
+                      ],
+                      "display-lg": [
+                              "Geist"
+                      ],
+                      "label-caps": [
+                              "Geist"
+                      ],
+                      "headline-lg": [
+                              "Geist"
+                      ],
+                      "mono-data": [
+                              "Geist"
+                      ],
+                      "headline-lg-mobile": [
+                              "Geist"
+                      ]
+              },
+              "fontSize": {
+                      "headline-md": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "letterSpacing": "0em",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "letterSpacing": "0em",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "56px",
+                                      "letterSpacing": "-0.04em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "label-caps": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "mono-data": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "600"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+</head>
+<body class="bg-background text-on-background antialiased font-body-lg min-h-screen pb-24 md:pb-0">
+<!-- TopAppBar -->
+<header class="docked full-width top-0 border-b border-outline-variant dark:border-outline-variant bg-background dark:bg-background z-50 sticky">
+<div class="flex justify-between items-center w-full px-container-margin py-base max-w-7xl mx-auto h-16">
+<div class="flex items-center gap-md">
+<div class="w-8 h-8 rounded-full overflow-hidden bg-surface-container-highest border border-outline-variant flex-shrink-0">
+<img alt="User profile photo" class="w-full h-full object-cover" data-alt="A minimalist black and white headshot portrait of a fitness enthusiast, high contrast lighting, neutral expression, clean solid light grey background, showcasing modern athletic lifestyle. Focus on sharp facial features and clean aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBK-fBFJnnpAwhVo3OvE__T9GmK5CI_N2_AWC_t-bEWAHxV-obmVqHpZx3uxWKDavm-y6noCftejI7nGfVbRNmh2UoVVQ2a98VkF8x6-JiYD70-P661rXuIdjIEEh_S-G2znwQogy3QJqBq00SWE1d7D93xjUZ6RVQ9vABZeGciUKP70ljTFmWQEUljmFUfyiQvV5CvAKsxcdpNJtY2aD-t_F53FfFyGH-KcgAZ_LVr8QEM1WPv5un3"/>
+</div>
+<h1 class="text-headline-md font-headline-md font-bold tracking-tight text-primary dark:text-primary-fixed">FitByte</h1>
+</div>
+<div class="hidden md:flex gap-lg">
+<a class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed-dim hover:bg-secondary-container dark:hover:bg-tertiary-container transition-colors px-2 py-1 rounded" href="#">
+<span class="text-label-caps font-label-caps">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed-dim hover:bg-secondary-container dark:hover:bg-tertiary-container transition-colors px-2 py-1 rounded" href="#">
+<span class="text-label-caps font-label-caps">Log</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed-dim hover:bg-secondary-container dark:hover:bg-tertiary-container transition-colors px-2 py-1 rounded" href="#">
+<span class="text-label-caps font-label-caps">Trends</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary dark:text-primary-fixed font-bold border-b-2 border-primary dark:border-primary-fixed px-2 py-1" href="#">
+<span class="text-label-caps font-label-caps opacity-80 transition-opacity">Profile</span>
+</a>
+</div>
+<button class="text-primary dark:text-primary-fixed hover:bg-secondary-container dark:hover:bg-tertiary-container transition-colors p-2 rounded-full md:hidden">
+<span aria-hidden="true" class="material-symbols-outlined block" data-icon="settings">settings</span>
+</button>
+</div>
+</header>
+<main class="max-w-2xl mx-auto px-container-margin py-xl w-full">
+<!-- Profile Header -->
+<section class="flex flex-col items-center mb-xl">
+<div class="w-24 h-24 rounded-full overflow-hidden border border-outline-variant mb-md shadow-sm relative group cursor-pointer">
+<img alt="User Profile Image" class="w-full h-full object-cover" data-alt="A minimalist black and white headshot portrait of a fitness enthusiast, high contrast lighting, neutral expression, clean solid light grey background, showcasing modern athletic lifestyle. Focus on sharp facial features and clean aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBDo6BvAtPBVJh0xk5JZyA84i1RSmy7a84oVjn78sBnTPpuEkJ-mFxdpc5vn8Ap4nCTShW1bkFsFd-6gaFe_9Yuw9vwIhtzCNBh1epDk8r2ApjlK9j4O1d2v8Hu67gTiFHVOfLO_VYQUW5hB9KABxFoqnZB9Bco62nGREO92_DehsyzpEtCdXKXguu7x1Sb3j4EwAe54hjeqCdTUtvsPSBvmCuDYUWiDrJ3RGOXKUuY5Uob8FmNmFui"/>
+<div class="absolute inset-0 bg-primary/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-on-primary">edit</span>
+</div>
+</div>
+<h2 class="text-headline-lg font-headline-lg-mobile md:font-headline-lg text-primary tracking-tight">Alex Sterling</h2>
+<p class="text-body-sm font-body-sm text-secondary mt-1">Premium Member</p>
+</section>
+<div class="space-y-xl">
+<!-- Goals Section -->
+<section>
+<h3 class="text-label-caps font-label-caps text-secondary mb-md uppercase tracking-wider">Goals</h3>
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden">
+<a class="flex items-center justify-between p-md border-b border-outline-variant hover:bg-surface-bright transition-colors group" href="#">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-secondary group-hover:text-primary transition-colors">flag</span>
+<span class="text-body-lg font-body-lg text-primary">Daily Calories</span>
+</div>
+<div class="flex items-center gap-sm">
+<span class="text-mono-data font-mono-data text-secondary">2,400 kcal</span>
+<span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+</div>
+</a>
+<a class="flex items-center justify-between p-md hover:bg-surface-bright transition-colors group" href="#">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-secondary group-hover:text-primary transition-colors">pie_chart</span>
+<span class="text-body-lg font-body-lg text-primary">Macro Targets</span>
+</div>
+<div class="flex items-center gap-sm">
+<span class="text-mono-data font-mono-data text-secondary">30/40/30</span>
+<span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+</div>
+</a>
+</div>
+</section>
+<!-- Account Section -->
+<section>
+<h3 class="text-label-caps font-label-caps text-secondary mb-md uppercase tracking-wider">Account</h3>
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden">
+<a class="flex items-center justify-between p-md border-b border-outline-variant hover:bg-surface-bright transition-colors group" href="#">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-secondary group-hover:text-primary transition-colors">mail</span>
+<span class="text-body-lg font-body-lg text-primary">Email</span>
+</div>
+<div class="flex items-center gap-sm">
+<span class="text-body-sm font-body-sm text-secondary truncate max-w-[120px] sm:max-w-none">alex.s@example.com</span>
+<span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+</div>
+</a>
+<a class="flex items-center justify-between p-md border-b border-outline-variant hover:bg-surface-bright transition-colors group" href="#">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-secondary group-hover:text-primary transition-colors">lock</span>
+<span class="text-body-lg font-body-lg text-primary">Password</span>
+</div>
+<div class="flex items-center gap-sm">
+<span class="text-body-sm font-body-sm text-secondary">Updated 2m ago</span>
+<span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+</div>
+</a>
+<a class="flex items-center justify-between p-md hover:bg-surface-bright transition-colors group" href="#">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-secondary group-hover:text-primary transition-colors">star</span>
+<span class="text-body-lg font-body-lg text-primary">Subscription</span>
+</div>
+<div class="flex items-center gap-sm">
+<span class="text-label-caps font-label-caps bg-primary text-on-primary px-2 py-0.5 rounded-sm">PRO</span>
+<span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+</div>
+</a>
+</div>
+</section>
+<!-- Preferences Section -->
+<section>
+<h3 class="text-label-caps font-label-caps text-secondary mb-md uppercase tracking-wider">Preferences</h3>
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden">
+<div class="flex items-center justify-between p-md border-b border-outline-variant">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-secondary">straighten</span>
+<span class="text-body-lg font-body-lg text-primary">Units</span>
+</div>
+<select class="bg-transparent border-none text-body-sm font-body-sm text-secondary focus:ring-0 cursor-pointer p-0 text-right pr-6 appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%237e7576%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-no-repeat bg-right">
+<option>Metric (kg, km)</option>
+<option>Imperial (lbs, mi)</option>
+</select>
+</div>
+<div class="flex items-center justify-between p-md border-b border-outline-variant">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-secondary">notifications</span>
+<span class="text-body-lg font-body-lg text-primary">Notifications</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-surface-container-high peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-on-secondary after:border-outline-variant after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<div class="flex items-center justify-between p-md">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-secondary">dark_mode</span>
+<span class="text-body-lg font-body-lg text-primary">Dark Mode</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-surface-container-high peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-on-secondary after:border-outline-variant after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+</div>
+</section>
+<!-- Legal Section -->
+<section>
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden">
+<a class="flex items-center justify-between p-md border-b border-outline-variant hover:bg-surface-bright transition-colors group" href="#">
+<span class="text-body-lg font-body-lg text-primary">Privacy Policy</span>
+<span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+</a>
+<a class="flex items-center justify-between p-md hover:bg-surface-bright transition-colors group" href="#">
+<span class="text-body-lg font-body-lg text-primary">Terms of Service</span>
+<span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+</a>
+</div>
+</section>
+<!-- Sign Out -->
+<div class="pt-lg pb-xl flex justify-center">
+<button class="text-body-sm font-body-sm text-secondary hover:text-primary transition-colors">
+                    Sign Out
+                </button>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 bg-background dark:bg-background h-16 md:hidden">
+<a class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed-dim pt-2 w-full hover:text-primary dark:hover:text-primary-fixed transition-colors" href="#">
+<span aria-hidden="true" class="material-symbols-outlined mb-1" data-icon="home">home</span>
+<span class="text-label-caps font-label-caps">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed-dim pt-2 w-full hover:text-primary dark:hover:text-primary-fixed transition-colors" href="#">
+<span aria-hidden="true" class="material-symbols-outlined mb-1" data-icon="mic">mic</span>
+<span class="text-label-caps font-label-caps">Log</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed-dim pt-2 w-full hover:text-primary dark:hover:text-primary-fixed transition-colors" href="#">
+<span aria-hidden="true" class="material-symbols-outlined mb-1" data-icon="analytics">analytics</span>
+<span class="text-label-caps font-label-caps">Trends</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary dark:text-primary-fixed font-bold border-t-2 border-primary dark:border-primary-fixed pt-2 w-full scale-95 transition-transform duration-150" href="#">
+<span aria-hidden="true" class="material-symbols-outlined mb-1" data-icon="person">person</span>
+<span class="text-label-caps font-label-caps">Profile</span>
+</a>
+</nav>
+</body></html>

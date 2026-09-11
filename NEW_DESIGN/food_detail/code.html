@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FitByte - Chicken Salad</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Inter:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary-fixed-dim": "#c6c6c6",
+                      "on-tertiary-fixed-variant": "#474747",
+                      "on-surface": "#1a1c1c",
+                      "surface": "#f9f9f9",
+                      "inverse-primary": "#c6c6c6",
+                      "inverse-on-surface": "#f1f1f1",
+                      "tertiary-fixed": "#e2e2e2",
+                      "primary-fixed": "#e2e2e2",
+                      "tertiary": "#000000",
+                      "surface-dim": "#dadada",
+                      "surface-container": "#eeeeee",
+                      "on-tertiary-fixed": "#1b1b1b",
+                      "on-secondary-fixed": "#1b1c1c",
+                      "on-error": "#ffffff",
+                      "on-tertiary": "#ffffff",
+                      "outline": "#7e7576",
+                      "surface-variant": "#e2e2e2",
+                      "outline-variant": "#cfc4c5",
+                      "on-secondary-fixed-variant": "#464747",
+                      "on-secondary-container": "#646464",
+                      "tertiary-container": "#1b1b1b",
+                      "on-tertiary-container": "#848484",
+                      "error-container": "#ffdad6",
+                      "on-primary-fixed-variant": "#474747",
+                      "primary-container": "#1b1b1b",
+                      "on-error-container": "#93000a",
+                      "error": "#ba1a1a",
+                      "on-primary-fixed": "#1b1b1b",
+                      "on-secondary": "#ffffff",
+                      "background": "#f9f9f9",
+                      "surface-tint": "#5e5e5e",
+                      "surface-container-highest": "#e2e2e2",
+                      "primary": "#000000",
+                      "secondary": "#5e5e5e",
+                      "surface-container-lowest": "#ffffff",
+                      "secondary-container": "#e3e2e2",
+                      "surface-container-high": "#e8e8e8",
+                      "primary-fixed-dim": "#c6c6c6",
+                      "on-primary": "#ffffff",
+                      "secondary-fixed": "#e3e2e2",
+                      "secondary-fixed-dim": "#c7c6c6",
+                      "inverse-surface": "#2f3131",
+                      "on-primary-container": "#848484",
+                      "surface-container-low": "#f3f3f3",
+                      "on-surface-variant": "#4c4546",
+                      "on-background": "#1a1c1c",
+                      "surface-bright": "#f9f9f9"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "xs": "4px",
+                      "sm": "8px",
+                      "gutter": "16px",
+                      "lg": "24px",
+                      "md": "16px",
+                      "container-margin": "24px",
+                      "xl": "40px",
+                      "base": "8px"
+              },
+              "fontFamily": {
+                      "headline-lg": [
+                              "Geist"
+                      ],
+                      "body-sm": [
+                              "Inter"
+                      ],
+                      "mono-data": [
+                              "Geist"
+                      ],
+                      "headline-lg-mobile": [
+                              "Geist"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "label-caps": [
+                              "Geist"
+                      ],
+                      "display-lg": [
+                              "Geist"
+                      ],
+                      "headline-md": [
+                              "Geist"
+                      ]
+              },
+              "fontSize": {
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "letterSpacing": "0em",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "mono-data": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "letterSpacing": "0em",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-caps": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "56px",
+                                      "letterSpacing": "-0.04em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-md": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+<style>
+        /* Base styles forcing light mode strictly based on context despite dark class on html */
+        body {
+            background-color: #f9f9f9;
+            color: #1a1c1c;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background antialiased pb-safe">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface dark:bg-background border-b border-outline-variant dark:border-outline flat no shadows transition-colors duration-200">
+<div class="flex justify-between items-center h-16 px-gutter max-w-7xl mx-auto">
+<button class="text-on-surface-variant dark:text-on-secondary-container hover:bg-surface-container dark:hover:bg-tertiary-container rounded-full p-2 transition-colors">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+<span class="font-headline-md text-headline-md font-bold tracking-tight text-primary dark:text-on-background">FitByte</span>
+<button class="text-on-surface-variant dark:text-on-secondary-container hover:bg-surface-container dark:hover:bg-tertiary-container rounded-full p-2 transition-colors">
+<span class="material-symbols-outlined" data-icon="more_horiz">more_horiz</span>
+</button>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="pt-20 pb-32 px-container-margin max-w-2xl mx-auto">
+<!-- Image Header -->
+<div class="w-full aspect-[4/3] rounded-lg border border-outline-variant overflow-hidden mb-lg">
+<img class="object-cover w-full h-full" data-alt="A meticulously styled chicken salad served in a minimalist white ceramic bowl, resting on a clean, light-grey slate surface. The lighting is crisp, bright, and natural, evoking a premium, high-end editorial food photography style typical of modern wellness journals. The scene emphasizes freshness with vibrant greens, grilled chicken textures, and a monochrome aesthetic background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6o2FkL7LnuTXV14e8GeRujd6KgzBYlumt_rPxx6_ziAVvwgf1_IBiuKp0qByTCocb6dp08mOf1BreI7La5b9spHkzDX38ALrwnkzYNoUIEGcDfXpZn-L8zRNCBzKqQSCSyBfyLx7u4SIk7BUFGC4JJpm9KNPR1jKk5olABYwTsKFHxFPlSjoLRqn2GISzs6Zq9AWG_Ld-pJJW8HL8TjbnLTN1RIuWcq3ayeofIFX6yowpVnljaXP8"/>
+</div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg mb-xs">Chicken Salad</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-xl">Trader Joe's • Prepared Meals</p>
+<!-- Meal Selector -->
+<div class="mb-xl">
+<div class="flex space-x-sm overflow-x-auto pb-sm no-scrollbar">
+<button class="px-md py-sm border border-outline-variant rounded-full font-label-caps text-label-caps bg-surface text-on-surface hover:bg-surface-container transition-colors whitespace-nowrap">Breakfast</button>
+<button class="px-md py-sm border border-primary rounded-full font-label-caps text-label-caps bg-primary text-on-primary whitespace-nowrap">Lunch</button>
+<button class="px-md py-sm border border-outline-variant rounded-full font-label-caps text-label-caps bg-surface text-on-surface hover:bg-surface-container transition-colors whitespace-nowrap">Dinner</button>
+<button class="px-md py-sm border border-outline-variant rounded-full font-label-caps text-label-caps bg-surface text-on-surface hover:bg-surface-container transition-colors whitespace-nowrap">Snacks</button>
+</div>
+</div>
+<!-- Serving Size & Quantity -->
+<div class="grid grid-cols-2 gap-md mb-xl">
+<div>
+<label class="block font-label-caps text-label-caps text-on-surface-variant mb-xs">Serving Size</label>
+<div class="relative">
+<select class="w-full appearance-none bg-surface border border-outline-variant rounded-lg px-md py-sm font-body-lg text-body-lg text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary">
+<option>1 cup</option>
+<option>100g</option>
+<option>1 bowl</option>
+</select>
+<span class="material-symbols-outlined absolute right-md top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">expand_more</span>
+</div>
+</div>
+<div>
+<label class="block font-label-caps text-label-caps text-on-surface-variant mb-xs">Quantity</label>
+<input class="w-full bg-surface border border-outline-variant rounded-lg px-md py-sm font-mono-data text-mono-data text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" type="number" value="1"/>
+</div>
+</div>
+<!-- Macro Breakdown (Bento Grid Style) -->
+<div class="mb-xl">
+<h2 class="font-headline-md text-headline-md mb-md">Nutrition Facts</h2>
+<div class="grid grid-cols-2 gap-sm">
+<!-- Calories -->
+<div class="col-span-2 bg-surface-container-low border border-outline-variant rounded-lg p-md flex justify-between items-center">
+<span class="font-body-lg text-body-lg font-medium">Calories</span>
+<span class="font-mono-data text-mono-data text-lg">420 kcal</span>
+</div>
+<!-- Protein -->
+<div class="bg-surface border border-outline-variant rounded-lg p-md">
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-xs">Protein</div>
+<div class="font-mono-data text-mono-data text-lg">35g</div>
+<div class="w-full h-1 bg-surface-container mt-sm rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[70%]"></div>
+</div>
+</div>
+<!-- Carbs -->
+<div class="bg-surface border border-outline-variant rounded-lg p-md">
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-xs">Carbs</div>
+<div class="font-mono-data text-mono-data text-lg">18g</div>
+<div class="w-full h-1 bg-surface-container mt-sm rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[30%]"></div>
+</div>
+</div>
+<!-- Fat -->
+<div class="col-span-2 bg-surface border border-outline-variant rounded-lg p-md">
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-xs">Fat</div>
+<div class="font-mono-data text-mono-data text-lg">21g</div>
+<div class="w-full h-1 bg-surface-container mt-sm rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[45%]"></div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Floating Action Button Area (Bottom Anchor) -->
+<div class="fixed bottom-[80px] w-full max-w-2xl left-1/2 -translate-x-1/2 px-container-margin pb-md z-40 bg-gradient-to-t from-background to-transparent pointer-events-none">
+<button class="w-full pointer-events-auto bg-primary text-on-primary font-body-lg text-body-lg font-medium py-md rounded-lg shadow-sm hover:opacity-90 transition-opacity flex justify-center items-center gap-sm">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+            Add to Lunch
+        </button>
+</div>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 bg-surface dark:bg-background md:hidden border-t border-outline-variant dark:border-outline flat no shadows flex justify-around items-center h-20 pb-safe px-4">
+<a class="flex flex-col items-center justify-center text-primary dark:text-on-background font-bold hover:opacity-80 scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="add_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;">add_circle</span>
+<span class="font-label-caps text-label-caps">Log</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary dark:text-on-secondary-fixed-variant hover:opacity-80 scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="fitness_center">fitness_center</span>
+<span class="font-label-caps text-label-caps">Workouts</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary dark:text-on-secondary-fixed-variant hover:opacity-80 scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="trending_up">trending_up</span>
+<span class="font-label-caps text-label-caps">Trends</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary dark:text-on-secondary-fixed-variant hover:opacity-80 scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="person">person</span>
+<span class="font-label-caps text-label-caps">Profile</span>
+</a>
+</nav>
+<style>
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .pb-safe {
+            padding-bottom: env(safe-area-inset-bottom, 20px);
+        }
+    </style>
+</body></html>

@@ -1,0 +1,196 @@
+## Table `profiles`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `email` | `text` |  Unique |
+| `name` | `text` |  |
+| `avatar_url` | `text` |  Nullable |
+| `goal` | `text` |  |
+| `quote` | `text` |  |
+| `level` | `int4` |  |
+| `streak_days` | `int4` |  |
+| `created_at` | `timestamptz` |  |
+| `updated_at` | `timestamptz` |  |
+
+## Table `body_metrics`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `user_id` | `uuid` |  |
+| `weight` | `float8` |  |
+| `goal_weight` | `float8` |  |
+| `body_fat_percent` | `float8` |  |
+| `bmi` | `float8` |  |
+| `goal_completion_percent` | `float8` |  |
+| `recorded_at` | `timestamptz` |  |
+
+## Table `calorie_targets`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `user_id` | `uuid` |  Unique |
+| `daily` | `int4` |  |
+| `maintenance` | `int4` |  |
+| `current_percent` | `float8` |  |
+| `updated_at` | `timestamptz` |  |
+
+## Table `fitness_goals`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `user_id` | `uuid` |  |
+| `program_name` | `text` |  |
+| `completion_percent` | `float8` |  |
+| `estimated_months` | `int4` |  |
+| `protein_target` | `int4` |  |
+| `carbs_target` | `int4` |  |
+| `fats_target` | `int4` |  |
+| `is_active` | `bool` |  |
+| `created_at` | `timestamptz` |  |
+| `updated_at` | `timestamptz` |  |
+
+## Table `food_entries`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `user_id` | `uuid` |  |
+| `name` | `text` |  |
+| `meal` | `text` |  |
+| `calories` | `int4` |  |
+| `protein` | `int4` |  |
+| `carbs` | `int4` |  |
+| `fats` | `int4` |  |
+| `time` | `text` |  |
+| `image_url` | `text` |  Nullable |
+| `logged_date` | `date` |  |
+
+## Table `nutrition_days`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `user_id` | `uuid` |  |
+| `date` | `date` |  |
+| `level` | `text` |  |
+
+## Table `workout_routines`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `user_id` | `uuid` |  |
+| `name` | `text` |  |
+| `muscles` | `text` |  |
+| `exercises_count` | `int4` |  |
+| `duration_mins` | `int4` |  |
+| `estimated_calories` | `text` |  |
+| `last_performed` | `text` |  Nullable |
+| `is_favorite` | `bool` |  |
+| `exercise_list` | `_text` |  |
+| `created_at` | `timestamptz` |  |
+| `updated_at` | `timestamptz` |  |
+
+## Table `workout_sessions`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `user_id` | `uuid` |  |
+| `routine_name` | `text` |  |
+| `duration_mins` | `text` |  |
+| `calories_burned` | `text` |  |
+| `muscles` | `text` |  |
+| `intensity` | `text` |  |
+| `timestamp` | `timestamptz` |  |
+
+## Table `ai_insights`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `user_id` | `uuid` |  |
+| `type` | `text` |  |
+| `text` | `text` |  |
+| `icon` | `text` |  |
+| `created_at` | `timestamptz` |  |
+
+## RLS Policies
+
+### `profiles`
+
+| Policy | Command | Roles | Action | USING | WITH CHECK |
+|--------|---------|-------|--------|-------|------------|
+| `Users can update their own profile.` | UPDATE | public | PERMISSIVE | `(auth.uid() = id)` | — |
+| `Users can view their own profile.` | SELECT | public | PERMISSIVE | `(auth.uid() = id)` | — |
+
+### `body_metrics`
+
+| Policy | Command | Roles | Action | USING | WITH CHECK |
+|--------|---------|-------|--------|-------|------------|
+| `Users can manage their own body metrics.` | ALL | public | PERMISSIVE | `(auth.uid() = user_id)` | — |
+
+### `calorie_targets`
+
+| Policy | Command | Roles | Action | USING | WITH CHECK |
+|--------|---------|-------|--------|-------|------------|
+| `Users can manage their own calorie targets.` | ALL | public | PERMISSIVE | `(auth.uid() = user_id)` | — |
+
+### `fitness_goals`
+
+| Policy | Command | Roles | Action | USING | WITH CHECK |
+|--------|---------|-------|--------|-------|------------|
+| `Users can manage their own fitness goals.` | ALL | public | PERMISSIVE | `(auth.uid() = user_id)` | — |
+
+### `food_entries`
+
+| Policy | Command | Roles | Action | USING | WITH CHECK |
+|--------|---------|-------|--------|-------|------------|
+| `Users can manage their own food entries.` | ALL | public | PERMISSIVE | `(auth.uid() = user_id)` | — |
+
+### `nutrition_days`
+
+| Policy | Command | Roles | Action | USING | WITH CHECK |
+|--------|---------|-------|--------|-------|------------|
+| `Users can manage their own nutrition heatmap days.` | ALL | public | PERMISSIVE | `(auth.uid() = user_id)` | — |
+
+### `workout_routines`
+
+| Policy | Command | Roles | Action | USING | WITH CHECK |
+|--------|---------|-------|--------|-------|------------|
+| `Users can manage their own workout routines.` | ALL | public | PERMISSIVE | `(auth.uid() = user_id)` | — |
+
+### `workout_sessions`
+
+| Policy | Command | Roles | Action | USING | WITH CHECK |
+|--------|---------|-------|--------|-------|------------|
+| `Users can manage their own workout sessions.` | ALL | public | PERMISSIVE | `(auth.uid() = user_id)` | — |
+
+### `ai_insights`
+
+| Policy | Command | Roles | Action | USING | WITH CHECK |
+|--------|---------|-------|--------|-------|------------|
+| `Users can manage their own AI insights.` | ALL | public | PERMISSIVE | `(auth.uid() = user_id)` | — |
+

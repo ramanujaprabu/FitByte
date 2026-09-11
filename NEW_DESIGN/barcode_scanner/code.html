@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>FitByte - Barcode Scanner</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Inter:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed-dim": "#c6c6c6",
+                    "on-tertiary-fixed-variant": "#474747",
+                    "on-surface": "#1a1c1c",
+                    "surface": "#f9f9f9",
+                    "inverse-primary": "#c6c6c6",
+                    "inverse-on-surface": "#f1f1f1",
+                    "tertiary-fixed": "#e2e2e2",
+                    "primary-fixed": "#e2e2e2",
+                    "tertiary": "#000000",
+                    "surface-dim": "#dadada",
+                    "surface-container": "#eeeeee",
+                    "on-tertiary-fixed": "#1b1b1b",
+                    "on-secondary-fixed": "#1b1c1c",
+                    "on-error": "#ffffff",
+                    "on-tertiary": "#ffffff",
+                    "outline": "#7e7576",
+                    "surface-variant": "#e2e2e2",
+                    "outline-variant": "#cfc4c5",
+                    "on-secondary-fixed-variant": "#464747",
+                    "on-secondary-container": "#646464",
+                    "tertiary-container": "#1b1b1b",
+                    "on-tertiary-container": "#848484",
+                    "error-container": "#ffdad6",
+                    "on-primary-fixed-variant": "#474747",
+                    "primary-container": "#1b1b1b",
+                    "on-error-container": "#93000a",
+                    "error": "#ba1a1a",
+                    "on-primary-fixed": "#1b1b1b",
+                    "on-secondary": "#ffffff",
+                    "background": "#f9f9f9",
+                    "surface-tint": "#5e5e5e",
+                    "surface-container-highest": "#e2e2e2",
+                    "primary": "#000000",
+                    "secondary": "#5e5e5e",
+                    "surface-container-lowest": "#ffffff",
+                    "secondary-container": "#e3e2e2",
+                    "surface-container-high": "#e8e8e8",
+                    "primary-fixed-dim": "#c6c6c6",
+                    "on-primary": "#ffffff",
+                    "secondary-fixed": "#e3e2e2",
+                    "secondary-fixed-dim": "#c7c6c6",
+                    "inverse-surface": "#2f3131",
+                    "on-primary-container": "#848484",
+                    "surface-container-low": "#f3f3f3",
+                    "on-surface-variant": "#4c4546",
+                    "on-background": "#1a1c1c",
+                    "surface-bright": "#f9f9f9"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xs": "4px",
+                    "sm": "8px",
+                    "gutter": "16px",
+                    "lg": "24px",
+                    "md": "16px",
+                    "container-margin": "24px",
+                    "xl": "40px",
+                    "base": "8px"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Geist"],
+                    "body-sm": ["Inter"],
+                    "mono-data": ["Geist"],
+                    "headline-lg-mobile": ["Geist"],
+                    "body-lg": ["Inter"],
+                    "label-caps": ["Geist"],
+                    "display-lg": ["Geist"],
+                    "headline-md": ["Geist"]
+            },
+            "fontSize": {
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}],
+                    "mono-data": ["14px", {"lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "500"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400"}],
+                    "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.04em", "fontWeight": "700"}],
+                    "headline-md": ["20px", {"lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .scanner-line {
+            animation: scan 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+        @keyframes scan {
+            0% { transform: translateY(-100px); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(100px); opacity: 0; }
+        }
+        
+        .camera-bg {
+            background-color: #000;
+            background-image: radial-gradient(circle, #333 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        
+        .scan-bracket {
+            width: 32px;
+            height: 32px;
+            border-color: #fff;
+            position: absolute;
+        }
+        .bracket-tl { top: -2px; left: -2px; border-top-width: 4px; border-left-width: 4px; border-top-left-radius: 8px; }
+        .bracket-tr { top: -2px; right: -2px; border-top-width: 4px; border-right-width: 4px; border-top-right-radius: 8px; }
+        .bracket-bl { bottom: -2px; left: -2px; border-bottom-width: 4px; border-left-width: 4px; border-bottom-left-radius: 8px; }
+        .bracket-br { bottom: -2px; right: -2px; border-bottom-width: 4px; border-right-width: 4px; border-bottom-right-radius: 8px; }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col font-sans select-none overscroll-none">
+<!-- Top Navigation (Web) -->
+<header class="hidden md:flex justify-between items-center h-16 px-gutter max-w-7xl mx-auto fixed top-0 w-full z-50 bg-surface dark:bg-background border-b border-outline-variant dark:border-outline">
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:bg-surface-container p-2 rounded-full transition-colors duration-200">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-primary">FitByte</h1>
+</div>
+<nav class="flex gap-8">
+<a class="font-label-caps text-label-caps text-primary font-bold" href="#">Log</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors" href="#">Workouts</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors" href="#">Trends</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors" href="#">Profile</a>
+</nav>
+<div>
+<button class="text-on-surface-variant hover:bg-surface-container p-2 rounded-full transition-colors duration-200">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+</div>
+</header>
+<!-- Main Scanner Canvas -->
+<main class="flex-grow relative flex flex-col pt-0 md:pt-16 pb-20 overflow-hidden camera-bg">
+<!-- Meal Selector Header Overlay -->
+<div class="absolute top-0 w-full z-20 pt-safe bg-gradient-to-b from-black/80 to-transparent pb-8">
+<div class="flex justify-between items-center px-4 pt-4 pb-2 text-white">
+<button class="p-2 rounded-full hover:bg-white/10 active:bg-white/20 transition">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h2 class="font-headline-md text-headline-md font-semibold tracking-tight">Scan Barcode</h2>
+<button class="p-2 rounded-full hover:bg-white/10 active:bg-white/20 transition">
+<span class="material-symbols-outlined">flash_off</span>
+</button>
+</div>
+<!-- Meal Chips -->
+<div class="flex justify-center gap-2 px-4 mt-2 overflow-x-auto no-scrollbar">
+<button class="px-4 py-1.5 rounded-full border border-white bg-white text-black font-mono-data text-mono-data">Breakfast</button>
+<button class="px-4 py-1.5 rounded-full border border-white/30 text-white hover:border-white/60 font-mono-data text-mono-data transition">Lunch</button>
+<button class="px-4 py-1.5 rounded-full border border-white/30 text-white hover:border-white/60 font-mono-data text-mono-data transition">Dinner</button>
+<button class="px-4 py-1.5 rounded-full border border-white/30 text-white hover:border-white/60 font-mono-data text-mono-data transition">Snack</button>
+</div>
+</div>
+<!-- Scanner Viewport Center -->
+<div class="flex-grow flex flex-col items-center justify-center relative z-10 px-4">
+<p class="text-white font-body-sm text-body-sm mb-8 text-center bg-black/50 px-4 py-2 rounded-full backdrop-blur-sm border border-white/10">
+                Align barcode inside the frame
+            </p>
+<!-- Scanner Frame -->
+<div class="relative w-full max-w-sm aspect-[4/3] rounded-lg border border-white/20 bg-white/5 backdrop-blur-[2px] flex items-center justify-center overflow-hidden shadow-[0_0_0_4000px_rgba(0,0,0,0.6)]">
+<!-- Reticle Brackets -->
+<div class="scan-bracket bracket-tl"></div>
+<div class="scan-bracket bracket-tr"></div>
+<div class="scan-bracket bracket-bl"></div>
+<div class="scan-bracket bracket-br"></div>
+<!-- Animated Scan Line -->
+<div class="absolute w-full h-[2px] bg-white shadow-[0_0_8px_2px_rgba(255,255,255,0.5)] scanner-line"></div>
+<!-- Mock Barcode Silhouette (Subtle) -->
+<div class="w-3/4 h-1/2 flex gap-1 items-center justify-center opacity-10">
+<div class="w-1 h-full bg-white"></div>
+<div class="w-2 h-full bg-white"></div>
+<div class="w-1 h-full bg-white"></div>
+<div class="w-3 h-full bg-white"></div>
+<div class="w-1 h-full bg-white"></div>
+<div class="w-1 h-full bg-white"></div>
+<div class="w-2 h-full bg-white"></div>
+</div>
+</div>
+</div>
+<!-- Bottom Actions Overlay -->
+<div class="absolute bottom-20 md:bottom-8 w-full z-20 bg-gradient-to-t from-black via-black/80 to-transparent pt-12 pb-6 px-gutter flex flex-col gap-4">
+<button class="w-full flex items-center justify-center gap-2 py-4 bg-white text-black rounded-lg font-headline-md text-headline-md font-semibold active:scale-[0.98] transition-transform shadow-lg">
+<span class="material-symbols-outlined text-lg">edit_square</span>
+                Enter barcode manually
+            </button>
+<button class="w-full flex items-center justify-center gap-2 py-4 bg-transparent border border-white/30 text-white rounded-lg font-headline-md text-headline-md font-medium active:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-lg">photo_library</span>
+                Choose from Gallery
+            </button>
+</div>
+</main>
+<!-- BottomNavBar (Mobile) -->
+<nav class="md:hidden fixed bottom-0 w-full z-50 bg-surface dark:bg-background border-t border-outline-variant dark:border-outline flex justify-around items-center h-20 pb-safe px-4">
+<a class="flex flex-col items-center justify-center text-primary font-bold hover:opacity-80 scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="add_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;">add_circle</span>
+<span class="font-label-caps text-label-caps mt-1">Log</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary hover:opacity-80 scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="fitness_center">fitness_center</span>
+<span class="font-label-caps text-label-caps mt-1">Workouts</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary hover:opacity-80 scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="trending_up">trending_up</span>
+<span class="font-label-caps text-label-caps mt-1">Trends</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary hover:opacity-80 scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-caps text-label-caps mt-1">Profile</span>
+</a>
+</nav>
+<script>
+        // Simple micro-interaction for chips
+        document.querySelectorAll('button').forEach(btn => {
+            if(btn.textContent.trim() === 'Breakfast' || btn.textContent.trim() === 'Lunch' || btn.textContent.trim() === 'Dinner' || btn.textContent.trim() === 'Snack') {
+                btn.addEventListener('click', function() {
+                    // Reset all
+                    document.querySelectorAll('button').forEach(b => {
+                        if(b.textContent.trim() === 'Breakfast' || b.textContent.trim() === 'Lunch' || b.textContent.trim() === 'Dinner' || b.textContent.trim() === 'Snack') {
+                            b.className = 'px-4 py-1.5 rounded-full border border-white/30 text-white hover:border-white/60 font-mono-data text-mono-data transition';
+                        }
+                    });
+                    // Set active
+                    this.className = 'px-4 py-1.5 rounded-full border border-white bg-white text-black font-mono-data text-mono-data';
+                });
+            }
+        });
+    </script>
+</body></html>
