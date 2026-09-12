@@ -5,11 +5,8 @@
 
 // ─── User / Auth ──────────────────────────────────────────────────────────────
 
-<<<<<<< HEAD
 export type BiologicalSex = 'male' | 'female';
 
-=======
->>>>>>> 46b69503e3227789042a618d42dcb60179f909f6
 export interface User {
   id: string;
   name: string;
@@ -19,12 +16,9 @@ export interface User {
   quote: string;
   level: number;
   streakDays: number;
-<<<<<<< HEAD
   onboardingCompleted: boolean;
   age: number | null;
   sex: BiologicalSex | null;
-=======
->>>>>>> 46b69503e3227789042a618d42dcb60179f909f6
 }
 
 export interface AuthState {
@@ -38,16 +32,12 @@ export interface AuthState {
 export interface BodyMetrics {
   weight: number;         // kg
   goalWeight: number;     // kg
-<<<<<<< HEAD
   heightCm: number;
-=======
->>>>>>> 46b69503e3227789042a618d42dcb60179f909f6
   bodyFatPercent: number;
   bmi: number;
   goalCompletionPercent: number;
 }
 
-<<<<<<< HEAD
 export type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active';
 export type GoalType = 'lose' | 'maintain' | 'gain';
 
@@ -55,8 +45,6 @@ export interface MealSplit {
   [meal: string]: number; // percent of daily calories, 0-100, summing to 100
 }
 
-=======
->>>>>>> 46b69503e3227789042a618d42dcb60179f909f6
 export interface CalorieTarget {
   daily: number;
   maintenance: number;
@@ -88,11 +76,8 @@ export interface FoodEntry {
   carbs: number;
   fats: number;
   time: string;
-<<<<<<< HEAD
   /** Full ISO timestamp this was logged for — used to bucket entries by day. */
   loggedAt: string;
-=======
->>>>>>> 46b69503e3227789042a618d42dcb60179f909f6
   imageUrl: string;
 }
 
@@ -107,16 +92,6 @@ export interface DailyNutrition {
   nutritionScore: number;
 }
 
-<<<<<<< HEAD
-=======
-export type ConsistencyLevel = 'empty' | 'low' | 'mid' | 'high';
-
-export interface NutritionDay {
-  date: number;           // day of month
-  level: ConsistencyLevel;
-}
-
->>>>>>> 46b69503e3227789042a618d42dcb60179f909f6
 export interface AIInsight {
   id: string;
   type: 'positive' | 'warning' | 'critical';
@@ -124,7 +99,6 @@ export interface AIInsight {
   icon: string;
 }
 
-<<<<<<< HEAD
 // ─── Analytics (Trends tab) ────────────────────────────────────────────────
 
 export interface PeriodBucket {
@@ -233,50 +207,25 @@ export interface SessionExercise {
   exerciseId: string | null;
   name: string;
   sets: WorkoutSet[];
-=======
-// ─── Workout ──────────────────────────────────────────────────────────────────
-
-export type WorkoutIntensity = 'Low' | 'Medium' | 'High' | 'Extreme';
-export type WorkoutDayLevel = 'empty' | 'low' | 'mid' | 'high';
-
-export interface Exercise {
-  id: string;
-  name: string;
-  sets?: number;
-  reps?: number;
->>>>>>> 46b69503e3227789042a618d42dcb60179f909f6
 }
 
 export interface WorkoutRoutine {
   id: string;
   name: string;
   muscles: string;
-<<<<<<< HEAD
   exercises: RoutineExercise[];
   lastPerformed: string;
   isFavorite: boolean;
-=======
-  exercises: number;
-  durationMins: number;
-  estimatedCalories: string;
-  lastPerformed: string;
-  isFavorite: boolean;
-  exerciseList: string[];
->>>>>>> 46b69503e3227789042a618d42dcb60179f909f6
 }
 
 export interface WorkoutSession {
   id: string;
-<<<<<<< HEAD
   routineId: string | null;
-=======
->>>>>>> 46b69503e3227789042a618d42dcb60179f909f6
   routineName: string;
   durationMins: string;
   caloriesBurned: string;
   muscles: string;
   intensity: WorkoutIntensity;
-<<<<<<< HEAD
   /** Human-readable display string, e.g. "Monday, 6:42 PM". */
   timestamp: string;
   /** Full ISO timestamp — used to bucket sessions by day (e.g. weekly dots). */
@@ -292,16 +241,6 @@ export interface ExerciseRecord {
   heaviestWeightKg: number;
   bestEstimated1RM: number;
   bestSetVolumeKg: number;
-=======
-  timestamp: string;
-}
-
-export interface WorkoutStats {
-  weeklyWorkouts: number;
-  weeklyHours: string;
-  weeklyCalories: string;
-  currentStreak: number;
->>>>>>> 46b69503e3227789042a618d42dcb60179f909f6
 }
 
 // ─── Profile ──────────────────────────────────────────────────────────────────
@@ -323,13 +262,10 @@ export interface FitnessGoal {
   completionPercent: number;
   estimatedMonths: number;
   macroTargets: MacroTarget;
-<<<<<<< HEAD
   goalType: GoalType | null;
   activityLevel: ActivityLevel | null;
   includesSnacks: boolean;
   mealSplit: MealSplit;
-=======
->>>>>>> 46b69503e3227789042a618d42dcb60179f909f6
 }
 
 export interface ProfileData {

@@ -4,7 +4,6 @@ import { Card } from '@/components/shared/Card';
 import { MonoText } from '@/components/shared/MonoText';
 import { ScreenHeader } from '@/components/shared/ScreenHeader';
 import { ThemedText } from '@/components/themed-text';
-<<<<<<< HEAD
 import { useDS } from '@/contexts/ThemeContext';
 import { nutritionService } from '@/services/api/nutrition';
 import type { FoodEntry } from '@/types';
@@ -22,33 +21,10 @@ function dayLabel(daysAgo: number, date: Date): string {
   if (daysAgo === 1) return `Yesterday, ${date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`;
   return date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 }
-=======
-import { DS } from '@/constants/theme';
-import { MOCK_FOOD_LOG } from '@/data/nutrition';
-import { Image } from 'expo-image';
-import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
-const FILTERS = ['All', 'Breakfast', 'Lunch', 'Dinner', 'Snacks'];
-
-const ALL_ENTRIES = [
-  { date: 'Today, May 16', entries: MOCK_FOOD_LOG },
-  {
-    date: 'Yesterday, May 15',
-    entries: [
-      { id: 'h1', name: 'Oatmeal Bowl', meal: 'Breakfast' as const, calories: 310, protein: 9, carbs: 52, fats: 6, time: '7:45 AM', imageUrl: 'https://images.unsplash.com/photo-1517673132405-a56a62b18caf?q=80&w=600' },
-      { id: 'h2', name: 'Grilled Salmon', meal: 'Dinner' as const, calories: 480, protein: 46, carbs: 8, fats: 28, time: '7:00 PM', imageUrl: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?q=80&w=600' },
-    ],
-  },
-];
->>>>>>> 46b69503e3227789042a618d42dcb60179f909f6
 
 export default function MealHistoryScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-<<<<<<< HEAD
   const DS = useDS();
   const styles = useMemo(() => makeStyles(DS), [DS]);
   const [activeFilter, setActiveFilter] = useState('All');
@@ -71,9 +47,6 @@ export default function MealHistoryScreen() {
       })
       .finally(() => setLoading(false));
   }, []);
-=======
-  const [activeFilter, setActiveFilter] = useState('All');
->>>>>>> 46b69503e3227789042a618d42dcb60179f909f6
 
   return (
     <View style={styles.container}>
@@ -94,7 +67,6 @@ export default function MealHistoryScreen() {
           ))}
         </ScrollView>
 
-<<<<<<< HEAD
         {loading && (
           <View style={{ paddingVertical: 40, alignItems: 'center' }}>
             <ActivityIndicator color={DS.accent} />
@@ -108,9 +80,6 @@ export default function MealHistoryScreen() {
         )}
 
         {groups.map(group => {
-=======
-        {ALL_ENTRIES.map(group => {
->>>>>>> 46b69503e3227789042a618d42dcb60179f909f6
           const filtered = activeFilter === 'All'
             ? group.entries
             : group.entries.filter(e => e.meal === activeFilter);
@@ -159,7 +128,6 @@ export default function MealHistoryScreen() {
   );
 }
 
-<<<<<<< HEAD
 function makeStyles(DS: ReturnType<typeof useDS>) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: DS.bg },
@@ -186,29 +154,3 @@ function makeStyles(DS: ReturnType<typeof useDS>) {
     foodTime: { fontSize: 10, color: DS.textMuted },
   });
 }
-=======
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: DS.bg },
-  scroll: { paddingHorizontal: 20 },
-  filters: { gap: 8, paddingBottom: 16 },
-  filterChip: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 999, backgroundColor: DS.surface, borderWidth: 1, borderColor: DS.border },
-  filterActive: { backgroundColor: DS.accent, borderColor: DS.accent },
-  filterText: { fontSize: 13, fontWeight: '500', color: DS.textSecond },
-  filterTextActive: { color: '#fff', fontWeight: '600' },
-  groupHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
-  groupDate: { fontSize: 13, fontWeight: '600', color: DS.textSecond },
-  groupCalBadge: { flexDirection: 'row', alignItems: 'baseline' },
-  groupCal: { fontSize: 14 },
-  groupCalUnit: { fontSize: 11, color: DS.textMuted },
-  foodRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12 },
-  foodDivider: { borderBottomWidth: 1, borderBottomColor: DS.border },
-  foodImg: { width: 52, height: 52, borderRadius: 10, marginRight: 12, backgroundColor: DS.card },
-  foodInfo: { flex: 1 },
-  foodName: { fontWeight: '600', fontSize: 14, color: DS.textPrimary },
-  foodMacros: { marginTop: 3, fontSize: 11, color: DS.textMuted },
-  foodRight: { alignItems: 'flex-end', gap: 2 },
-  foodCal: { fontSize: 17 },
-  foodCalLabel: { fontSize: 10, color: DS.textMuted },
-  foodTime: { fontSize: 10, color: DS.textMuted },
-});
->>>>>>> 46b69503e3227789042a618d42dcb60179f909f6
